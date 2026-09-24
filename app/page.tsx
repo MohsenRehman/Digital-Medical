@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import Navbar from "./components/Navbar";
 import ParticleBackground from "./components/ParticleBackground";
 import Hero from "./components/Hero";
@@ -13,13 +14,15 @@ import HowItWorks from "./components/HowItWorks";
 import WhyDigitalMedical from "./components/WhyDigitalMedical";
 import PatientTestimonials from "./components/PatientTestimonials";
 import DoctorSchedule from "./components/DoctorSchedule";
-import HealthArticles from "./components/HealthArticles";
+
 import CtaBanner from "./components/CtaBanner";
 import Footer from "./components/Footer";
-import AppointmentModal from "./components/AppointmentModal";
+import BookingModal from "./components/booking/BookingModal";
 import ScrollToTop from "./components/ScrollToTop";
+import { ALL_CLINICS_DATA } from "@/lib/clinicsData";
 
 export default function HomePage() {
+  const router = useRouter();
   const [isAppointmentOpen, setIsAppointmentOpen] = useState(false);
   const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null);
   const [searchFilter, setSearchFilter] = useState({
@@ -44,9 +47,14 @@ export default function HomePage() {
   };
 
   const handleSelectSpecialty = (specialtyName: string) => {
-    setSearchFilter((prev) => ({ ...prev, specialty: specialtyName }));
-    const el = document.getElementById("doctors");
-    el?.scrollIntoView({ behavior: "smooth" });
+    const matched =
+      ALL_CLINICS_DATA.find(
+        (c) =>
+          c.departmentName.toLowerCase().includes(specialtyName.toLowerCase()) ||
+          c.type.toLowerCase().includes(specialtyName.toLowerCase()) ||
+          c.name.toLowerCase().includes(specialtyName.toLowerCase())
+      ) || ALL_CLINICS_DATA[0];
+    router.push(`/clinics/${matched.slug}`);
   };
 
   const handleBookScheduleSlot = (item: any) => {
@@ -96,8 +104,6 @@ export default function HomePage() {
       {/* 12. Section 9: Patient Testimonials & Marquee Strip (Technique #06, #10) */}
       <PatientTestimonials />
 
-      {/* 13. Section 10: Health Articles (Technique #07, #16) */}
-      <HealthArticles />
 
       {/* 14. CTA Banner: Take Charge of Your Health Today! */}
       <CtaBanner onOpenBooking={() => handleOpenAppointment()} />
@@ -105,8 +111,8 @@ export default function HomePage() {
       {/* 15. Footer with Fluid Watermark Typography (Technique #27) */}
       <Footer />
 
-      {/* Interactive Booking Modal */}
-      <AppointmentModal
+      {/* Interactive Booking Modal (oladoc multi-step flow) */}
+      <BookingModal
         isOpen={isAppointmentOpen}
         onClose={() => setIsAppointmentOpen(false)}
         doctor={selectedDoctor}

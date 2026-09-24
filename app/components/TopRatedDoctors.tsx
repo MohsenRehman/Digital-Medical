@@ -193,10 +193,14 @@ export default function TopRatedDoctors({ onSelectDoctor, searchFilter }: TopRat
               {filteredDoctors.map((doc, idx) => (
                 <article
                   key={`${doc.id}-${idx}`}
-                  className="uiverse-card flex-shrink-0 p-5 flex flex-col justify-between group overflow-hidden cursor-pointer"
+                  className="uiverse-card flex-shrink-0 p-0 flex flex-col justify-between group/card overflow-hidden cursor-pointer"
                 >
-                  {/* Top: 4K HD Doctor Studio Portrait */}
-                  <div className="relative w-full aspect-square rounded-[10px] overflow-hidden bg-slate-100 dark:bg-slate-800 shadow-sm transition-all duration-500">
+                  {/* Top: Floating Doctor Portrait with Seamless Dissolve & Aura Glow */}
+                  <div className="relative w-full aspect-[4/3.8] overflow-hidden">
+                    {/* Ambient Glow Aura */}
+                    <div className="absolute inset-0 bg-gradient-to-b from-sky-400/15 via-sky-500/5 to-transparent pointer-events-none group-hover/card:from-sky-400/25 transition-colors duration-500" />
+
+                    {/* Floating Doctor Image */}
                     <Image
                       src={doc.image}
                       alt={doc.name}
@@ -204,18 +208,21 @@ export default function TopRatedDoctors({ onSelectDoctor, searchFilter }: TopRat
                       sizes="270px"
                       priority={idx < 4}
                       quality={95}
-                      className="object-cover object-top transition-transform duration-500 group-hover:scale-108"
+                      className="object-cover object-top transition-all duration-700 ease-out group-hover/card:scale-110 group-hover/card:-translate-y-2.5"
                     />
-                    
-                    {/* Top verified badge */}
-                    <div className="absolute top-2.5 right-2.5 bg-white/95 dark:bg-slate-900/90 backdrop-blur-md px-2.5 py-1 rounded-full flex items-center gap-1 shadow-sm text-[11px] font-bold text-slate-800 dark:text-slate-100">
+
+                    {/* Seamless bottom fade: removes hard image border completely, blending into card */}
+                    <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-white via-white/80 to-transparent dark:from-[#0d1726] dark:via-[#0d1726]/80 pointer-events-none z-10" />
+
+                    {/* Floating verified badge */}
+                    <div className="absolute top-3 right-3 z-20 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md px-2.5 py-1 rounded-full flex items-center gap-1 shadow-md text-[11px] font-bold text-slate-800 dark:text-slate-100">
                       <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
                       <span>Verified</span>
                     </div>
                   </div>
 
                   {/* Bottom: Doctor Details & Rating */}
-                  <div className="pt-4 pb-1 text-center flex-1 flex flex-col justify-between">
+                  <div className="px-5 pt-2 pb-5 text-center flex-1 flex flex-col justify-between">
                     <div>
                       {/* Doctor Name */}
                       <h3 className="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white tracking-tight truncate">

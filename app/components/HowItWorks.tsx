@@ -2,47 +2,67 @@
 
 import React, { useState } from "react";
 import {
-  UserSearch,
-  CalendarDays,
-  CalendarCheck2,
-  Video,
+  ScanSearch,
+  CalendarRange,
+  BadgeCheck,
+  MonitorPlay,
   ArrowRight,
-  Sparkles,
-  CheckCircle2
+  CheckCircle2,
 } from "lucide-react";
+import { BorderBeam } from "@/registry/magicui/border-beam";
 
 const STEPS = [
   {
     step: 1,
-    title: "Step 1: Search Doctors",
-    shortTitle: "Search Doctors",
-    desc: "Search by condition, doctor specialty, rating, location, or clinic hospital.",
-    icon: UserSearch,
-    color: "from-sky-500 to-blue-600",
+    title: "Search Doctors",
+    desc: "Find doctors by specialty, condition, rating, location or clinic — instantly filtered for you.",
+    icon: ScanSearch,
+    gradient: "from-sky-500 to-blue-600",
+    glow: "shadow-sky-500/50",
+    ring: "ring-sky-400/30",
+    border: "border-sky-500 dark:border-sky-400",
+    iconBg: "bg-gradient-to-br from-sky-500 to-blue-600",
+    beamColor: "#38bdf8",
+    label: "Smart Search",
   },
   {
     step: 2,
-    title: "Step 2: Select Date",
-    shortTitle: "Select Date",
-    desc: "Choose an available calendar day and time slot that fits your schedule.",
-    icon: CalendarDays,
-    color: "from-teal-500 to-emerald-600",
+    title: "Select Date & Time",
+    desc: "Pick an available calendar slot that perfectly fits your daily schedule in seconds.",
+    icon: CalendarRange,
+    gradient: "from-teal-500 to-emerald-600",
+    glow: "shadow-teal-500/50",
+    ring: "ring-teal-400/30",
+    border: "border-teal-500 dark:border-teal-400",
+    iconBg: "bg-gradient-to-br from-teal-500 to-emerald-600",
+    beamColor: "#14b8a6",
+    label: "Easy Scheduling",
   },
   {
     step: 3,
-    title: "Step 3: Book Appointment",
-    shortTitle: "Book Appointment",
-    desc: "Verify patient details and confirm your visit with instant real-time confirmation.",
-    icon: CalendarCheck2,
-    color: "from-indigo-500 to-sky-600",
+    title: "Confirm Booking",
+    desc: "Verify your details and receive instant real-time confirmation with a digital receipt.",
+    icon: BadgeCheck,
+    gradient: "from-indigo-500 to-purple-600",
+    glow: "shadow-indigo-500/50",
+    ring: "ring-indigo-400/30",
+    border: "border-indigo-500 dark:border-indigo-400",
+    iconBg: "bg-gradient-to-br from-indigo-500 to-purple-600",
+    beamColor: "#6366f1",
+    label: "Instant Confirm",
   },
   {
     step: 4,
-    title: "Step 4: Video Consult / Visit",
-    shortTitle: "Video Consult / Visit",
-    desc: "Attend your high-definition telehealth call or visit the certified clinic in person.",
-    icon: Video,
-    color: "from-emerald-500 to-teal-600",
+    title: "Consult or Visit",
+    desc: "Join your HD telehealth video call or walk into the certified clinic — your choice.",
+    icon: MonitorPlay,
+    gradient: "from-emerald-500 to-teal-600",
+    glow: "shadow-emerald-500/50",
+    ring: "ring-emerald-400/30",
+    border: "border-emerald-500 dark:border-emerald-400",
+    iconBg: "bg-gradient-to-br from-emerald-500 to-teal-600",
+    beamColor: "#10b981",
+    label: "Telehealth Ready",
   },
 ];
 
@@ -56,13 +76,9 @@ export default function HowItWorks({ onStartBooking }: HowItWorksProps) {
   return (
     <section id="how-it-works" className="py-16 sm:py-24 relative z-10 bg-slate-50/50 dark:bg-[#070e1b]/40">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
+
         {/* Header */}
         <div className="text-center max-w-2xl mx-auto mb-14">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-sky-100 dark:bg-sky-950/60 text-sky-700 dark:text-sky-300 text-xs font-semibold mb-3 border border-sky-200 dark:border-sky-800">
-            <Sparkles className="w-3.5 h-3.5 text-sky-500" />
-            <span>SIMPLE & FAST PROCESS</span>
-          </div>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
             How It Works
           </h2>
@@ -71,7 +87,7 @@ export default function HowItWorks({ onStartBooking }: HowItWorksProps) {
           </p>
         </div>
 
-        {/* 4 Connected Steps */}
+        {/* 4 Step Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 relative">
           {STEPS.map((item, idx) => {
             const IconComponent = item.icon;
@@ -81,34 +97,61 @@ export default function HowItWorks({ onStartBooking }: HowItWorksProps) {
               <div
                 key={item.step}
                 onClick={() => setActiveStep(item.step)}
-                className={`glass-panel rounded-2xl p-6 relative cursor-pointer border transition-all duration-300 flex flex-col justify-between group ${
-                  isActive
-                    ? "border-sky-500 dark:border-sky-400 shadow-xl -translate-y-2 ring-2 ring-sky-400/20"
-                    : "border-slate-200/80 dark:border-slate-800/80 hover:-translate-y-1 hover:shadow-lg"
-                }`}
+                className={`
+                  relative overflow-hidden rounded-2xl p-6 cursor-pointer border
+                  bg-white dark:bg-slate-900
+                  transition-all duration-300 flex flex-col gap-4 group
+                  ${isActive
+                    ? `${item.border} shadow-2xl -translate-y-2 ring-2 ${item.ring}`
+                    : "border-slate-200 dark:border-slate-800 hover:-translate-y-1.5 hover:shadow-xl shadow-sm"}
+                `}
               >
-                {/* Step Pill Header */}
-                <div className="flex items-center justify-between mb-5">
-                  <div className="w-9 h-9 rounded-xl bg-sky-50 dark:bg-sky-950/50 flex items-center justify-center font-extrabold text-sm text-sky-600 dark:text-sky-400 border border-sky-100 dark:border-sky-900">
+                {/* Step number + connector arrow */}
+                <div className="flex items-center justify-between">
+                  <span className={`
+                    w-8 h-8 rounded-xl flex items-center justify-center
+                    text-xs font-black text-white
+                    bg-gradient-to-br ${item.gradient}
+                    shadow-md ${item.glow}
+                  `}>
                     {item.step}
-                  </div>
+                  </span>
+
+                  {/* Connector arrow — only between cards on desktop */}
                   {idx < STEPS.length - 1 && (
-                    <div className="hidden lg:flex items-center text-slate-300 dark:text-slate-700">
-                      <ArrowRight className="w-4 h-4 text-sky-400/60 dark:text-sky-400/60" />
-                    </div>
+                    <ArrowRight className="hidden lg:block w-4 h-4 text-slate-300 dark:text-slate-700 group-hover:text-sky-400 transition-colors duration-300" />
                   )}
                 </div>
 
-                {/* Step Icon with Pop-in & Pulse */}
-                <div className="mb-4">
-                  <div className="w-14 h-14 rounded-2xl bg-sky-50 dark:bg-sky-950/50 text-sky-600 dark:text-sky-400 flex items-center justify-center transition-transform duration-300 group-hover:scale-110 border border-sky-100 dark:border-sky-900">
-                    <IconComponent className="w-7 h-7" />
+                {/* Glowing Icon */}
+                <div className="relative w-fit">
+                  {/* Glow halo */}
+                  <div className={`
+                    absolute inset-0 rounded-2xl blur-xl opacity-40 group-hover:opacity-70
+                    transition-opacity duration-300
+                    bg-gradient-to-br ${item.gradient}
+                  `} />
+                  {/* Icon circle */}
+                  <div className={`
+                    relative w-16 h-16 rounded-2xl flex items-center justify-center
+                    ${item.iconBg}
+                    shadow-lg ${item.glow}
+                    transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3
+                  `}>
+                    <IconComponent className="w-8 h-8 text-white drop-shadow" />
                   </div>
                 </div>
 
                 {/* Title & Description */}
-                <div>
-                  <h3 className="text-base font-bold text-slate-900 dark:text-white group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">
+                <div className="flex-1">
+                  <span className={`
+                    text-[10px] font-bold uppercase tracking-widest
+                    bg-gradient-to-r ${item.gradient}
+                    bg-clip-text text-transparent
+                  `}>
+                    {item.label}
+                  </span>
+                  <h3 className="mt-1 text-base font-bold text-slate-900 dark:text-white group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors leading-snug">
                     {item.title}
                   </h3>
                   <p className="mt-2 text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
@@ -116,23 +159,32 @@ export default function HowItWorks({ onStartBooking }: HowItWorksProps) {
                   </p>
                 </div>
 
-                {/* Interactive Status */}
-                <div className="mt-5 pt-3 border-t border-slate-200/50 dark:border-slate-800/50 flex items-center justify-between text-xs font-semibold">
-                  <span className="text-sky-600 dark:text-sky-400 flex items-center gap-1">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
-                    {isActive ? "Selected Step" : "Click to view"}
+                {/* Footer status */}
+                <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center gap-1.5 text-xs font-semibold">
+                  <CheckCircle2 className={`w-3.5 h-3.5 ${isActive ? "text-emerald-500" : "text-slate-300 dark:text-slate-600"}`} />
+                  <span className={isActive ? "text-emerald-500" : "text-slate-400 dark:text-slate-500"}>
+                    {isActive ? "Active Step" : "Click to explore"}
                   </span>
                 </div>
+
+                {/* BorderBeam — unique colour per step, same style as Medical Specialties */}
+                <BorderBeam
+                  duration={8}
+                  size={100}
+                  colorFrom="transparent"
+                  colorVia={item.beamColor}
+                  colorTo="transparent"
+                />
               </div>
             );
           })}
         </div>
 
-        {/* Action Prompt */}
+        {/* CTA */}
         <div className="mt-12 text-center">
           <button
             onClick={onStartBooking}
-            className="px-8 py-3.5 rounded-full font-bold text-sm text-white bg-gradient-to-r from-sky-500 to-sky-700 shadow-lg shadow-sky-600/30 btn-glow inline-flex items-center gap-2 group cursor-pointer"
+            className="px-8 py-3.5 rounded-full font-bold text-sm text-white bg-gradient-to-r from-sky-500 to-sky-700 shadow-lg shadow-sky-600/30 btn-glow inline-flex items-center gap-2 group cursor-pointer transition-all duration-200 hover:shadow-sky-500/40 hover:scale-105"
           >
             <span>START YOUR BOOKING NOW</span>
             <ArrowRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-1" />

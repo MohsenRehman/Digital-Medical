@@ -102,27 +102,27 @@ export default function Hero({ onOpenAppointment }: HeroProps) {
             </p>
 
             {/* Action Buttons */}
-            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 pt-2">
+            <div className="flex items-center justify-center lg:justify-start gap-2 sm:gap-4 pt-2 w-full max-w-md sm:max-w-none mx-auto lg:mx-0">
               <button
                 onClick={onOpenAppointment}
-                className="px-8 py-3.5 rounded-full font-bold text-xs uppercase tracking-wider text-white btn-mockup-blue flex items-center gap-2 group cursor-pointer"
+                className="flex-1 sm:flex-initial px-3 sm:px-8 py-3.5 rounded-full font-bold text-[10.5px] sm:text-xs uppercase tracking-wider text-white btn-mockup-blue flex items-center justify-center gap-1.5 sm:gap-2 group cursor-pointer shadow-md shadow-sky-600/20 active:scale-[0.98] transition-all whitespace-nowrap"
               >
                 <span>DISCOVER MORE</span>
-                <ArrowRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-1" />
+                <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 transition-transform duration-200 group-hover:translate-x-1 flex-shrink-0" />
               </button>
 
               <a
                 href="#specialties"
-                className="px-8 py-3.5 rounded-full font-bold text-xs uppercase tracking-wider text-white btn-mockup-secondary flex items-center gap-2 group cursor-pointer"
+                className="flex-1 sm:flex-initial px-3 sm:px-8 py-3.5 rounded-full font-bold text-[10.5px] sm:text-xs uppercase tracking-wider text-white btn-mockup-secondary flex items-center justify-center gap-1.5 sm:gap-2 group cursor-pointer active:scale-[0.98] transition-all whitespace-nowrap"
               >
                 <span>SEE ALL SERVICES</span>
-                <ArrowRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-1" />
+                <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 transition-transform duration-200 group-hover:translate-x-1 flex-shrink-0" />
               </a>
 
-              {/* Interactive Status Refresh Tool */}
+              {/* Interactive Status Refresh Tool (Desktop & Tablet) */}
               <button
                 onClick={handleRefreshClick}
-                className="p-3.5 rounded-full border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-800/80 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors text-slate-600 dark:text-slate-300 shadow-sm"
+                className="hidden sm:inline-flex p-3.5 rounded-full border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-800/80 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors text-slate-600 dark:text-slate-300 shadow-sm flex-shrink-0 active:scale-95"
                 title="Refresh Availability"
                 aria-label="Refresh doctors availability"
               >

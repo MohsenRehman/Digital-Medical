@@ -2,6 +2,19 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── BorderBeam animation ───────────────────────────── */
+@property --beam-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes border-beam-spin {
+  from { --beam-angle: 0deg; }
+  to   { --beam-angle: 360deg; }
+}
+/* ─────────────────────────────────────────────────────── */
+
 :root {
   --bg: #F0F4FF;
   --bg-gradient: linear-gradient(135deg, #EFF6FF 0%, #F0FDF4 100%);
@@ -18,6 +31,16 @@
   --particle-color: #0284c7;
   --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
   --glass-border: rgba(255, 255, 255, 0.35);
+
+  /* Island Mobile Nav Variables */
+  --color-shockingly-green: #0284c7;
+  --color-light-green: #38bdf8;
+  --color-just-black: #ffffff;
+  --color-surface-white: #0f172a;
+  --color-surface75: #334155;
+  --color-surface50: #64748b;
+  --color-surface25: #e2e8f0;
+  --color-grey-dark: rgba(255, 255, 255, 0.95);
 }
 
 .dark {
@@ -36,6 +59,16 @@
   --particle-color: #38bdf8;
   --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
   --glass-border: rgba(255, 255, 255, 0.14);
+
+  /* Island Mobile Nav Variables */
+  --color-shockingly-green: #0ae448;
+  --color-light-green: #abff84;
+  --color-just-black: #0e100f;
+  --color-surface-white: #fffce1;
+  --color-surface75: #bbbaa6;
+  --color-surface50: #7c7c6f;
+  --color-surface25: #2a2e2c;
+  --color-grey-dark: rgba(14, 16, 15, 0.95);
 }
 
 
@@ -82,35 +115,45 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* ==========================================================================
-   From Uiverse.io by mymiamo (Enhanced, Theme-Aware, Spacious & Senior UX)
+   Desktop Navigation Dock (Only active on 1024px+ screens)
    ========================================================================== */
-.menu {
-  position: relative;
-  width: 100%;
-  max-width: 860px;
-  backdrop-filter: blur(14px) saturate(180%) contrast(140%);
-  -webkit-backdrop-filter: blur(14px) saturate(180%) contrast(140%);
-  background: rgba(255, 255, 255, 0.85);
-  border: 1px solid var(--glass-border);
-  box-shadow:
-    0 10px 30px rgba(2, 132, 199, 0.08),
-    0 2px 8px rgba(0, 0, 0, 0.04);
-  padding: 6px 12px;
-  border-radius: 99rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-evenly;
-  gap: 8px;
-  z-index: 50;
-  transition: all 0.3s ease;
+@media (min-width: 1024px) {
+  .menu {
+    position: relative;
+    width: 100%;
+    max-width: 860px;
+    backdrop-filter: blur(14px) saturate(180%) contrast(140%);
+    -webkit-backdrop-filter: blur(14px) saturate(180%) contrast(140%);
+    background: rgba(255, 255, 255, 0.85);
+    border: 1px solid var(--glass-border);
+    box-shadow:
+      0 10px 30px rgba(2, 132, 199, 0.08),
+      0 2px 8px rgba(0, 0, 0, 0.04);
+    padding: 6px 12px;
+    border-radius: 99rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+    gap: 8px;
+    z-index: 50;
+    transition: all 0.3s ease;
+  }
+
+  .dark .menu {
+    background: rgba(13, 27, 42, 0.88);
+    border: 1px solid rgba(56, 189, 248, 0.22);
+    box-shadow:
+      0 10px 30px rgba(0, 0, 0, 0.5),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
 }
 
-.dark .menu {
-  background: rgba(13, 27, 42, 0.88);
-  border: 1px solid rgba(56, 189, 248, 0.22);
-  box-shadow:
-    0 10px 30px rgba(0, 0, 0, 0.5),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+/* Strictly hide desktop menu on mobile and tablet (< 1024px) */
+@media (max-width: 1023px) {
+  .menu,
+  .desktop-nav-dock {
+    display: none !important;
+  }
 }
 
 .menu::after {
@@ -228,83 +271,24 @@ h1, h2, h3, h4, h5, h6 {
   transform: scale(0.96);
 }
 
-/* Tablet refinement for 768px-1023px */
-@media (min-width: 768px) and (max-width: 1023px) {
+/* Compact refinement for 1024px-1279px (Laptops / Small Desktops) */
+@media (min-width: 1024px) and (max-width: 1279px) {
   .menu {
-    max-width: 100%;
+    max-width: 520px;
     padding: 5px 8px;
     gap: 4px;
   }
   .menu a {
-    padding: 7px 10px;
+    padding: 6px 10px;
     gap: 5px;
+    font-size: 0.8rem;
   }
   .menu a svg {
-    width: 1.05rem;
-    height: 1.05rem;
-  }
-  .menu a span {
-    font-size: 0.78rem;
+    width: 1rem;
+    height: 1rem;
   }
 }
 
-/* Floating Bottom Dock for Mobile Screens */
-.menu-floating-bottom {
-  position: fixed;
-  left: 50%;
-  bottom: 14px;
-  bottom: calc(14px + env(safe-area-inset-bottom));
-  transform: translateX(-50%);
-  width: calc(100% - 24px);
-  max-width: 480px;
-  z-index: 999;
-  background: rgba(255, 255, 255, 0.94);
-  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.25), 0 4px 14px rgba(2, 132, 199, 0.2);
-  padding: 8px;
-  gap: 6px;
-  display: flex;
-  justify-content: space-evenly;
-  animation: floatUpDock 0.4s var(--ease-spring);
-}
-
-.dark .menu-floating-bottom {
-  background: rgba(11, 20, 38, 0.94);
-  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6), 0 4px 14px rgba(56, 189, 248, 0.2);
-}
-
-.menu-floating-bottom a {
-  flex: 1 1 0;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  padding: 7px 4px;
-  border-radius: 999rem;
-}
-
-.menu-floating-bottom a svg {
-  width: 1.3rem;
-  height: 1.3rem;
-}
-
-.menu-floating-bottom a span {
-  font-size: 0.72rem;
-  font-weight: 600;
-  line-height: 1;
-}
-
-@keyframes floatUpDock {
-  0% {
-    opacity: 0;
-    transform: translate(-50%, 20px);
-  }
-  100% {
-    opacity: 1;
-    transform: translate(-50%, 0);
-  }
-}
 
 /* Matching Circular Glass Buttons for Header Actions */
 .glass-action-btn {
@@ -505,39 +489,31 @@ h1, h2, h3, h4, h5, h6 {
   scrollbar-width: none;
 }
 
-/* From Uiverse.io by absoluteSTrange adapted for Top-Rated Doctors */
+/* Top-Rated Doctors — Pure Borderless Floating Card */
 .uiverse-card {
   width: 270px;
   min-height: 390px;
   background: white;
-  border-radius: 14px;
-  box-shadow: inset 0 -3em 3em rgba(0, 0, 0, 0.08),
-              0 0 0 2px rgb(190, 190, 190),
-              0.3em 0.3em 1em rgba(0, 0, 0, 0.25);
-  transition: border-radius 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275),
-              transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275),
-              box-shadow 0.35s ease;
+  border-radius: 20px;
+  border: none;
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.07), 0 4px 12px -2px rgba(0, 0, 0, 0.03);
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+              box-shadow 0.4s ease;
 }
 
 .uiverse-card:hover {
-  border-radius: 26px;
-  transform: translateY(-4px);
-  box-shadow: inset 0 -3em 3em rgba(0, 0, 0, 0.06),
-              0 0 0 2px rgb(2, 132, 199),
-              0.4em 0.5em 1.4em rgba(2, 132, 199, 0.35);
+  transform: translateY(-8px);
+  box-shadow: 0 24px 45px -12px rgba(2, 132, 199, 0.2), 0 8px 20px -4px rgba(0, 0, 0, 0.06);
 }
 
 .dark .uiverse-card {
   background: #0d1726;
-  box-shadow: inset 0 -3em 3em rgba(0, 0, 0, 0.5),
-              0 0 0 2px rgba(255, 255, 255, 0.14),
-              0.3em 0.3em 1em rgba(0, 0, 0, 0.55);
+  border: none;
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.45), 0 4px 12px -2px rgba(0, 0, 0, 0.3);
 }
 
 .dark .uiverse-card:hover {
-  box-shadow: inset 0 -3em 3em rgba(0, 0, 0, 0.35),
-              0 0 0 2px rgb(56, 189, 248),
-              0.4em 0.5em 1.4em rgba(56, 189, 248, 0.35);
+  box-shadow: 0 24px 45px -12px rgba(56, 189, 248, 0.22), 0 8px 20px -4px rgba(0, 0, 0, 0.4);
 }
 
 /* Mockup Pill Buttons */
@@ -642,3 +618,103 @@ h1, h2, h3, h4, h5, h6 {
 .star-fill-clip {
   transition: width 0.8s ease-in-out;
 }
+
+/* ── Dynamic Island Mobile Menu System ── */
+.menu-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  pointer-events: auto;
+}
+
+.menu-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(14, 16, 15, 0.65);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  cursor: pointer;
+}
+
+.dark .menu-backdrop {
+  background: rgba(10, 14, 12, 0.85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.menu-panel {
+  border: 1.5px solid var(--color-surface25);
+  position: fixed;
+  top: 4.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--color-grey-dark);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-radius: 20px;
+  padding: 0.4rem;
+  width: min(92vw, 440px);
+  z-index: 1010;
+  box-shadow: 0 24px 50px -10px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+
+.menu-link-wrapper + .menu-link-wrapper {
+  border-top: 1px solid var(--color-surface25);
+}
+
+.menu-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 1rem;
+  text-decoration: none;
+  color: var(--color-surface75);
+  font-weight: 500;
+  font-size: 0.95rem;
+  line-height: 1;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.menu-link-wrapper:first-child .menu-link {
+  border-radius: 14px 14px 0 0;
+}
+
+.menu-link-wrapper:last-child .menu-link {
+  border-radius: 0 0 14px 14px;
+}
+
+.menu-link-wrapper:only-child .menu-link {
+  border-radius: 14px;
+}
+
+.menu-link:hover,
+.menu-link.active {
+  color: var(--color-shockingly-green);
+  background: rgba(10, 228, 72, 0.06);
+}
+
+:not(.dark) .menu-link:hover,
+:not(.dark) .menu-link.active {
+  background: rgba(2, 132, 199, 0.07);
+}
+
+.menu-link:focus-visible {
+  outline: 2px solid var(--color-shockingly-green);
+  outline-offset: -2px;
+  border-radius: 10px;
+}
+
+.link-num {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Courier New", monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.05em;
+  color: var(--color-surface50);
+  transition: color 0.18s ease, transform 0.18s ease;
+}
+
+.menu-link:hover .link-num,
+.menu-link.active .link-num {
+  color: var(--color-shockingly-green);
+  transform: translateX(2px);
+}
+

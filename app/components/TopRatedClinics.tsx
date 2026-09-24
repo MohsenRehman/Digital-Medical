@@ -2,6 +2,8 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
+import { motion } from "framer-motion";
 import {
   Building,
   Star,
@@ -14,6 +16,7 @@ import {
   Sparkles,
   ArrowRight
 } from "lucide-react";
+import { BorderBeam } from "@/registry/magicui/border-beam";
 
 export interface Clinic {
   id: string;
@@ -76,7 +79,7 @@ interface TopRatedClinicsProps {
 }
 
 export default function TopRatedClinics({ onOpenBooking }: TopRatedClinicsProps) {
-  const [expandedClinicId, setExpandedClinicId] = useState<string | null>("clinic-1");
+  const [expandedClinicId, setExpandedClinicId] = useState<string | null>(null);
 
   const toggleExpand = (id: string) => {
     setExpandedClinicId(expandedClinicId === id ? null : id);
@@ -87,36 +90,53 @@ export default function TopRatedClinics({ onOpenBooking }: TopRatedClinicsProps)
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Section Header */}
-        <div className="text-center max-w-2xl mx-auto mb-12">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-sky-100 dark:bg-sky-950/60 text-sky-700 dark:text-sky-300 text-xs font-semibold mb-3 border border-sky-200 dark:border-sky-800">
-            <Building className="w-3.5 h-3.5" />
-            <span>ACCREDITED FACILITIES</span>
-          </div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-50px" }}
+          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+          className="text-center max-w-2xl mx-auto mb-12"
+        >
           <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
             Top-Rated Clinics
           </h2>
           <p className="mt-2 text-sm sm:text-base text-slate-500 dark:text-slate-400">
             Browse our verified healthcare centers equipped with 24/7 diagnostics, emergency triage, and certified pharmacies.
           </p>
-        </div>
+          <Link
+            href="/clinics"
+            className="inline-flex items-center gap-1 mt-4 text-xs sm:text-sm font-semibold text-sky-600 dark:text-sky-400 hover:underline"
+          >
+            <span>Explore All Verified Clinics & Departments</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+        </motion.div>
 
         {/* Clinics Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 items-start">
-          {CLINICS_DATA.map((clinic) => {
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 items-stretch">
+          {CLINICS_DATA.map((clinic, idx) => {
             const isExpanded = expandedClinicId === clinic.id;
 
             return (
-              <div
+              <motion.div
                 key={clinic.id}
-                className="glass-panel rounded-2xl overflow-hidden border border-slate-200/80 dark:border-slate-800/80 shadow-md hover:shadow-2xl transition-all duration-300 hover:-translate-y-1.5 group flex flex-col justify-between"
+                initial={{ opacity: 0, y: 26 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-40px" }}
+                transition={{
+                  duration: 0.65,
+                  delay: idx * 0.14,
+                  ease: [0.22, 1, 0.36, 1],
+                }}
+                className="relative h-full glass-panel rounded-2xl overflow-hidden border border-slate-200/80 dark:border-slate-800/80 shadow-md hover:shadow-2xl transition-all duration-300 hover:-translate-y-1.5 group flex flex-col"
               >
                 {/* Clinic Image with Hover Zoom */}
-                <div className="relative w-full aspect-[16/10] zoom-container bg-slate-200 dark:bg-slate-800">
+                <div className="relative w-full aspect-[16/10] zoom-container bg-slate-200 dark:bg-slate-800 overflow-hidden">
                   <Image
                     src={clinic.image}
                     alt={clinic.name}
                     fill
-                    className="object-cover"
+                    className="object-cover transition-transform duration-700 ease-out group-hover:scale-108"
                   />
                   <div className="absolute top-3 right-3 bg-amber-500/90 text-white text-xs font-bold px-2.5 py-1 rounded-full backdrop-blur-sm shadow-sm flex items-center gap-1">
                     <Star className="w-3.5 h-3.5 fill-white text-white" />
@@ -161,7 +181,7 @@ export default function TopRatedClinics({ onOpenBooking }: TopRatedClinicsProps)
                       </div>
                     </div>
 
-                    {/* Accordion Expand / Collapse Details (Technique #17 & #04 from PDF) */}
+                    {/* Accordion Expand / Collapse Details */}
                     <div
                       className={`accordion-wrapper transition-all duration-400 ease-in-out ${
                         isExpanded ? "max-h-[350px] opacity-100 mt-4" : "max-h-0 opacity-0 overflow-hidden"
@@ -201,21 +221,21 @@ export default function TopRatedClinics({ onOpenBooking }: TopRatedClinicsProps)
                     </div>
                   </div>
 
-                  {/* Actions: View Details Accordion Toggle & Quick Appointment */}
+                  {/* Actions */}
                   <div className="mt-5 pt-3 flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => toggleExpand(clinic.id)}
+                    <Link
+                      href={`/clinics/${
+                        clinic.id === "clinic-1"
+                          ? "cardiology-center"
+                          : clinic.id === "clinic-2"
+                          ? "pediatrics-center"
+                          : "neurology-hospital"
+                      }`}
                       className="flex-1 py-2.5 px-4 rounded-full font-bold text-xs bg-sky-600 hover:bg-sky-700 dark:bg-sky-600 dark:hover:bg-sky-500 text-white shadow-md shadow-sky-600/20 btn-glow flex items-center justify-center gap-1.5 transition-all cursor-pointer"
                     >
                       <span>VIEW DETAILS</span>
-                      {/* Chevron Rotate Toggle from PDF (Technique #04) */}
-                      <ChevronDown
-                        className={`w-3.5 h-3.5 transition-transform duration-300 ${
-                          isExpanded ? "rotate-180" : "rotate-0"
-                        }`}
-                      />
-                    </button>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </Link>
 
                     <button
                       type="button"
@@ -227,7 +247,25 @@ export default function TopRatedClinics({ onOpenBooking }: TopRatedClinicsProps)
                     </button>
                   </div>
                 </div>
-              </div>
+
+                {/* ── Dual Border Beam — matches Featured Clinical Departments ── */}
+                <BorderBeam
+                  duration={6}
+                  size={400}
+                  colorFrom="transparent"
+                  colorVia="#f43f5e"
+                  colorTo="transparent"
+                />
+                <BorderBeam
+                  duration={6}
+                  delay={3}
+                  size={400}
+                  borderWidth={2}
+                  colorFrom="transparent"
+                  colorVia="#38bdf8"
+                  colorTo="transparent"
+                />
+              </motion.div>
             );
           })}
         </div>

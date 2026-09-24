@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next";
 import { Plus_Jakarta_Sans, Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "./context/ThemeContext";
+import { PatientAuthProvider } from "./context/PatientAuthContext";
+import { ClinicAuthProvider } from "./context/ClinicAuthContext";
 
 const jakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -137,7 +139,11 @@ export default function RootLayout({
         />
       </head>
       <body className="antialiased min-h-screen relative selection:bg-sky-500 selection:text-white font-body">
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider>
+          <PatientAuthProvider>
+            <ClinicAuthProvider>{children}</ClinicAuthProvider>
+          </PatientAuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

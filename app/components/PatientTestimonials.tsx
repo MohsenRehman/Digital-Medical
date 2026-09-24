@@ -2,7 +2,8 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
-import { Star, ChevronLeft, ChevronRight, Quote, MessageSquareHeart, Sparkles } from "lucide-react";
+import { Star, ChevronLeft, ChevronRight, Quote, MessageSquareHeart } from "lucide-react";
+import { BorderBeam } from "@/registry/magicui/border-beam";
 
 interface Testimonial {
   id: string;
@@ -70,10 +71,6 @@ export default function PatientTestimonials() {
         
         {/* Header */}
         <div className="text-center max-w-2xl mx-auto mb-12">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-sky-100 dark:bg-sky-950/60 text-sky-700 dark:text-sky-300 text-xs font-semibold mb-3 border border-sky-200 dark:border-sky-800">
-            <MessageSquareHeart className="w-3.5 h-3.5 text-rose-500" />
-            <span>COMMUNITY FEEDBACK</span>
-          </div>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
             Patient Testimonials
           </h2>
@@ -103,10 +100,12 @@ export default function PatientTestimonials() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
-            {TESTIMONIALS.slice(0, 3).map((item, idx) => (
+            {TESTIMONIALS.slice(0, 3).map((item, idx) => {
+              const beamColors = ["#f43f5e", "#38bdf8", "#8b5cf6"];
+              return (
               <div
                 key={item.id}
-                className="glass-panel p-6 sm:p-8 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 shadow-md hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 flex flex-col justify-between group"
+                className="relative overflow-hidden glass-panel p-6 sm:p-8 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 shadow-md hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 flex flex-col justify-between group"
               >
                 <div>
                   {/* Top Quote & Rating */}
@@ -142,8 +141,17 @@ export default function PatientTestimonials() {
                     <p className="text-xs text-slate-500 dark:text-slate-400">{item.location}</p>
                   </div>
                 </div>
+
+                {/* BorderBeam — unique colour per card */}
+                <BorderBeam
+                  duration={8}
+                  size={100}
+                  colorFrom="transparent"
+                  colorVia={beamColors[idx]}
+                  colorTo="transparent"
+                />
               </div>
-            ))}
+            )})}
           </div>
 
           {/* Carousel Pagination Dots */}
