@@ -718,3 +718,18 @@ h1, h2, h3, h4, h5, h6 {
   transform: translateX(2px);
 }
 
+/* ── Modern Dashboard Clean Scrollbar (Invisible, Smooth Wheel Scroll) ── */
+.custom-scrollbar::-webkit-scrollbar,
+.no-scrollbar::-webkit-scrollbar {
+  display: none !important;
+  width: 0px !important;
+  height: 0px !important;
+  background: transparent !important;
+}
+
+.custom-scrollbar,
+.no-scrollbar {
+  -ms-overflow-style: none !important; /* IE and Edge */
+  scrollbar-width: none !important; /* Firefox */
+}
+
