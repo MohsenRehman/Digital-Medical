@@ -21,6 +21,20 @@ interface PatientAuthContextType {
   loginWithPassword: (phone: string, password: string) => { success: boolean; error?: string };
   logout: () => void;
   toggleWhatsAppReminder: (appointmentId: string) => void;
+  addFamilyMember?: (member: {
+    relation: AppointmentRelation;
+    name: string;
+    age?: number;
+    gender?: GenderType;
+  }) => void;
+  removeFamilyMember?: (memberId: string) => void;
+  cancelAppointment?: (appointmentId: string) => void;
+  updateProfile?: (data: {
+    name?: string;
+    gender?: GenderType;
+    age?: number;
+    password?: string;
+  }) => void;
 }
 
 const PatientAuthContext = createContext<PatientAuthContextType | undefined>(undefined);
@@ -240,6 +254,62 @@ export function PatientAuthProvider({ children }: { children: React.ReactNode })
     }
   };
 
+  // 7. Add Family Member
+  const addFamilyMember = (member: {
+    relation: AppointmentRelation;
+    name: string;
+    age?: number;
+    gender?: GenderType;
+  }) => {
+    const newMember: FamilyMemberRecord = {
+      id: `fam_${Date.now()}`,
+      relation: member.relation,
+      name: member.name,
+      age: member.age,
+      gender: member.gender,
+      addedAt: new Date().toISOString(),
+    };
+    const updated = [...familyMembers, newMember];
+    saveFamily(updated);
+  };
+
+  // 8. Remove Family Member
+  const removeFamilyMember = (memberId: string) => {
+    const updated = familyMembers.filter((m) => m.id !== memberId);
+    saveFamily(updated);
+  };
+
+  // 9. Cancel Appointment
+  const cancelAppointment = (appointmentId: string) => {
+    const updated = appointments.map((apt) =>
+      apt.id === appointmentId ? { ...apt, status: "cancelled" as const } : apt
+    );
+    saveAppointments(updated);
+    if (activeAppointment && activeAppointment.id === appointmentId) {
+      const updatedActive = { ...activeAppointment, status: "cancelled" as const };
+      setActiveAppointment(updatedActive);
+      localStorage.setItem(STORAGE_KEYS.LATEST_BOOKING, JSON.stringify(updatedActive));
+    }
+  };
+
+  // 10. Update Patient Profile
+  const updateProfile = (data: {
+    name?: string;
+    gender?: GenderType;
+    age?: number;
+    password?: string;
+  }) => {
+    if (!patientUser) return;
+    const updatedUser: PatientUser = {
+      ...patientUser,
+      name: data.name ?? patientUser.name,
+      gender: data.gender ?? patientUser.gender,
+      age: data.age ?? patientUser.age,
+      password: data.password ?? patientUser.password,
+    };
+    saveUser(updatedUser);
+  };
+
   return (
     <PatientAuthContext.Provider
       value={{
@@ -254,6 +324,10 @@ export function PatientAuthProvider({ children }: { children: React.ReactNode })
         loginWithPassword,
         logout,
         toggleWhatsAppReminder,
+        addFamilyMember,
+        removeFamilyMember,
+        cancelAppointment,
+        updateProfile,
       }}
     >
       {children}
