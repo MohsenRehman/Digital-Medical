@@ -1,12 +1,14 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Search, Bell, Sun, Moon, User } from "lucide-react";
 import { useSearch } from "./SearchContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "next-themes";
 
 export default function DashboardHeader() {
+  const router = useRouter();
   const { searchTerm, setSearchTerm } = useSearch();
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const { theme, setTheme } = useTheme();
@@ -92,7 +94,15 @@ export default function DashboardHeader() {
               </div>
               <div className="p-2 border-t border-gray-100 dark:border-gray-700">
                 <button 
-                  className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors font-medium"
+                  onClick={() => {
+                    try {
+                      localStorage.removeItem("dm_admin_session");
+                    } catch (e) {
+                      console.error(e);
+                    }
+                    router.push("/");
+                  }}
+                  className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors font-medium cursor-pointer"
                 >
                   Log Out
                 </button>
