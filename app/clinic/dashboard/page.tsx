@@ -1,37 +1,380 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
-  Building2,
-  Users,
-  CalendarDays,
-  Pill,
-  CreditCard,
-  CheckCircle2,
-  Clock,
-  LogOut,
-  Stethoscope,
-  Activity,
   HeartPulse,
-  TrendingUp,
-  AlertTriangle,
-  Receipt,
-  Plus,
-  Search,
-  ChevronRight,
+  Clock,
   ShieldCheck,
+  CheckCircle2,
+  AlertTriangle,
+  Sparkles,
+  ArrowRight,
+  LogOut,
+  X,
 } from "lucide-react";
 import { useClinicAuth } from "@/app/context/ClinicAuthContext";
 import { usePatientAuth } from "@/app/context/PatientAuthContext";
+import { DashboardNavModule } from "./types";
+import {
+  INITIAL_DOCTORS,
+  INITIAL_PATIENTS,
+  INITIAL_APPOINTMENTS,
+  INITIAL_QUEUE,
+  INITIAL_STAFF,
+  INITIAL_MEDICINES,
+  INITIAL_LAB_ORDERS,
+  INITIAL_INVOICES,
+  INITIAL_INVENTORY,
+  INITIAL_ACTIVITY_LOGS,
+  INITIAL_TICKETS,
+} from "./data/mockData";
+import { ClinicSidebar } from "./components/ClinicSidebar";
+import { ClinicTopbar } from "./components/ClinicTopbar";
+import { ToastContainer, ToastMessage } from "./components/Toast";
+import {
+  QuickRegisterPatientModal,
+  NewAppointmentModal,
+  GenerateTokenModal,
+  AddDoctorModal,
+  CreateInvoiceModal,
+} from "./components/QuickActionModals";
+
+// Modules
+import { OverviewModule } from "./components/modules/OverviewModule";
+import { AppointmentsModule } from "./components/modules/AppointmentsModule";
+import { LiveQueueModule } from "./components/modules/LiveQueueModule";
+import { PatientsModule } from "./components/modules/PatientsModule";
+import { DoctorsModule } from "./components/modules/DoctorsModule";
+import { StaffModule } from "./components/modules/StaffModule";
+import { ClinicalModule } from "./components/modules/ClinicalModule";
+import { PharmacyModule } from "./components/modules/PharmacyModule";
+import { LaboratoryModule } from "./components/modules/LaboratoryModule";
+import { BillingModule } from "./components/modules/BillingModule";
+import { InventoryModule } from "./components/modules/InventoryModule";
+import { ReportsModule } from "./components/modules/ReportsModule";
+import { SubscriptionModule } from "./components/modules/SubscriptionModule";
+import { SettingsModule } from "./components/modules/SettingsModule";
+import { NotificationsSupportModule } from "./components/modules/NotificationsSupportModule";
 
 export default function ClinicDashboardPage() {
   const router = useRouter();
-  const { application, clinicUser, clinicLogout, isLoaded } = useClinicAuth();
-  const { appointments } = usePatientAuth();
+  const { application, clinicUser, clinicLogout, simulateAdminApproval, isLoaded } = useClinicAuth();
+  const { appointments: patientContextAppointments } = usePatientAuth();
 
-  const [activeTab, setActiveTab] = useState<"appointments" | "doctors" | "pharmacy" | "billing">("appointments");
+  // Navigation State
+  const [activeModule, setActiveModule] = useState<DashboardNavModule>("overview");
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // Clinic Core Data State
+  const [patients, setPatients] = useState(INITIAL_PATIENTS);
+  const [doctors, setDoctors] = useState(INITIAL_DOCTORS);
+  const [appointments, setAppointments] = useState(INITIAL_APPOINTMENTS);
+  const [queue, setQueue] = useState(INITIAL_QUEUE);
+  const [staff, setStaff] = useState(INITIAL_STAFF);
+  const [medicines, setMedicines] = useState(INITIAL_MEDICINES);
+  const [labOrders, setLabOrders] = useState(INITIAL_LAB_ORDERS);
+  const [invoices, setInvoices] = useState(INITIAL_INVOICES);
+  const [inventory, setInventory] = useState(INITIAL_INVENTORY);
+  const [activityLogs, setActivityLogs] = useState(INITIAL_ACTIVITY_LOGS);
+  const [supportTickets, setSupportTickets] = useState(INITIAL_TICKETS);
+  const [toasts, setToasts] = useState<ToastMessage[]>([]);
+
+  // Sync real patient bookings from landing page if any exist
+  useEffect(() => {
+    if (patientContextAppointments && patientContextAppointments.length > 0) {
+      setAppointments((prev) => {
+        const liveConverted = patientContextAppointments.map((pa) => ({
+          id: pa.id,
+          bookingRef: pa.bookingRef,
+          patientId: pa.patientUserId || `pat-${pa.id}`,
+          patientName: pa.patientName,
+          patientPhone: pa.patientPhone,
+          doctorId: pa.doctorId,
+          doctorName: pa.doctorName,
+          department: pa.doctorSpecialty || "General Medicine",
+          date: pa.date,
+          timeSlot: pa.timeSlot,
+          type: "Online Booking" as const,
+          status: pa.status === "confirmed" ? ("scheduled" as const) : ("completed" as const),
+          paymentStatus: (pa.paymentMethod === "online_paid" ? "Paid" : "Pending") as "Paid" | "Pending",
+          fee: pa.consultationFee || 2000,
+          room: "Room 101",
+        }));
+
+        // Merge without duplicates by bookingRef
+        const existingRefs = new Set(prev.map((a) => a.bookingRef));
+        const newOnes = liveConverted.filter((a) => !existingRefs.has(a.bookingRef));
+        return [...newOnes, ...prev];
+      });
+    }
+  }, [patientContextAppointments]);
+
+  // Modal Open States
+  const [isQuickPatientOpen, setIsQuickPatientOpen] = useState(false);
+  const [isNewAppointmentOpen, setIsNewAppointmentOpen] = useState(false);
+  const [isGenerateTokenOpen, setIsGenerateTokenOpen] = useState(false);
+  const [isAddDoctorOpen, setIsAddDoctorOpen] = useState(false);
+  const [isCreateInvoiceOpen, setIsCreateInvoiceOpen] = useState(false);
+
+  // Toast Helper
+  const addToast = (type: ToastMessage["type"], title: string, description?: string) => {
+    const id = `toast-${Date.now()}-${Math.random()}`;
+    setToasts((prev) => [...prev, { id, type, title, description }]);
+  };
+
+  const removeToast = (id: string) => {
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+  };
+
+  const addActivityLog = (user: string, role: string, action: string, details: string, module: string) => {
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    setActivityLogs((prev) => [
+      {
+        id: `log-${Date.now()}`,
+        timestamp: timeStr,
+        user,
+        role,
+        action,
+        details,
+        module,
+        type: "info",
+      },
+      ...prev,
+    ]);
+  };
+
+  // ----------------------------------------------------
+  // ACTION HANDLERS
+  // ----------------------------------------------------
+
+  // 1. Quick Register Patient
+  const handleRegisterPatient = (newPatient: typeof patients[0]) => {
+    setPatients((prev) => [newPatient, ...prev]);
+    addActivityLog("Reception Desk", "Staff", "Patient Registered", `${newPatient.name} registered (${newPatient.mrn})`, "Patients");
+    addToast("success", "Patient Registered", `${newPatient.name} added to permanent directory.`);
+  };
+
+  // 2. New Appointment
+  const handleBookAppointment = (newApt: typeof appointments[0], autoGenerateToken: boolean) => {
+    setAppointments((prev) => [newApt, ...prev]);
+
+    if (autoGenerateToken) {
+      const nextTokenNo = Math.floor(18 + Math.random() * 5);
+      const newQueueItem: typeof queue[0] = {
+        id: `q-${Date.now()}`,
+        tokenNo: nextTokenNo,
+        patientId: newApt.patientId,
+        patientName: newApt.patientName,
+        doctorId: newApt.doctorId,
+        doctorName: newApt.doctorName,
+        room: newApt.room || "Room 101",
+        department: newApt.department,
+        checkInTime: "Just now",
+        estimatedWaitMins: 15,
+        status: "waiting",
+        priority: "Normal",
+      };
+      setQueue((prev) => [...prev, newQueueItem]);
+      addToast("success", "Appointment & Token Created", `Token #${nextTokenNo} generated for ${newApt.patientName}`);
+    } else {
+      addToast("success", "Appointment Confirmed", `Booking ${newApt.bookingRef} saved for ${newApt.patientName}`);
+    }
+
+    addActivityLog("Appointments Desk", "Staff", "Appointment Booked", `${newApt.patientName} scheduled with ${newApt.doctorName}`, "Appointments");
+  };
+
+  // 3. Issue Direct OPD Token
+  const handleGenerateToken = (token: typeof queue[0]) => {
+    setQueue((prev) => [...prev, token]);
+    addActivityLog("Front Desk", "Receptionist", "Token Generated", `Token #${token.tokenNo} issued for ${token.patientName} to ${token.room}`, "Live Queue");
+    addToast("warning", `Token #${token.tokenNo} Issued`, `Assigned to ${token.doctorName} (${token.room})`);
+  };
+
+  // 4. Call Token in Queue
+  const handleCallToken = (id: string) => {
+    setQueue((prev) =>
+      prev.map((item) => (item.id === id ? { ...item, status: "called" } : item))
+    );
+    const target = queue.find((q) => q.id === id);
+    if (target) {
+      addToast("info", `Now Calling Token #${target.tokenNo}`, `Please proceed to ${target.room}`);
+      addActivityLog("Queue Display", "System", "Token Called", `Token #${target.tokenNo} called for ${target.patientName}`, "Live Queue");
+    }
+  };
+
+  // 5. Start Consultation
+  const handleStartConsultation = (id: string) => {
+    setQueue((prev) =>
+      prev.map((item) =>
+        item.id === id ? { ...item, status: "in-consultation" } : item
+      )
+    );
+    const target = queue.find((q) => q.id === id);
+    if (target) {
+      addToast("success", "Consultation Started", `${target.patientName} is now in consultation.`);
+    }
+  };
+
+  // 6. Complete Token
+  const handleCompleteToken = (id: string) => {
+    setQueue((prev) =>
+      prev.map((item) => (item.id === id ? { ...item, status: "completed" } : item))
+    );
+    addToast("success", "Consultation Completed", "Prescription auto-synced with pharmacy.");
+    addActivityLog("Clinical Desk", "Doctor", "Consultation Finished", "Prescription written and finalized", "Clinical");
+  };
+
+  // 7. No-show Token
+  const handleMarkNoShow = (id: string) => {
+    setQueue((prev) =>
+      prev.map((item) => (item.id === id ? { ...item, status: "no-show" } : item))
+    );
+    addToast("warning", "Patient Marked No-Show", "Token moved out of active queue.");
+  };
+
+  // 8. Recall Token Audio
+  const handleRecallToken = (tokenNo: number, patientName: string) => {
+    addToast("info", `Audio Announcement: Token #${tokenNo}`, `Paging ${patientName} to consultation room.`);
+  };
+
+  // 9. Add Doctor
+  const handleAddDoctor = (doc: typeof doctors[0]) => {
+    setDoctors((prev) => [...prev, doc]);
+    addToast("success", "Specialist Added", `${doc.name} assigned to ${doc.room}.`);
+    addActivityLog("Clinic Admin", "Admin", "Doctor Added", `${doc.name} added to roster`, "Doctors");
+  };
+
+  // 10. Create Billing Invoice
+  const handleCreateInvoice = (inv: typeof invoices[0]) => {
+    setInvoices((prev) => [inv, ...prev]);
+    addToast("success", "Invoice Recorded", `${inv.invoiceNo} for PKR ${inv.totalAmount.toLocaleString()} recorded.`);
+    addActivityLog("Cashier Desk", "Cashier", "Invoice Created", `${inv.invoiceNo} issued for ${inv.patientName}`, "Billing");
+  };
+
+  // 11. Dispense Medicine
+  const handleDispenseMedicine = (medId: string, qty: number, patientName: string) => {
+    setMedicines((prev) =>
+      prev.map((m) => {
+        if (m.id === medId) {
+          const newQty = Math.max(0, m.quantity - qty);
+          return {
+            ...m,
+            quantity: newQty,
+            stockStatus: newQty === 0 ? "out_of_stock" : newQty <= m.reorderLevel ? "low_stock" : "in_stock",
+          };
+        }
+        return m;
+      })
+    );
+
+    const targetMed = medicines.find((m) => m.id === medId);
+    if (targetMed) {
+      const inv: typeof invoices[0] = {
+        id: `inv-${Date.now()}`,
+        invoiceNo: `INV-24-${Math.floor(1000 + Math.random() * 9000)}`,
+        patientId: `pat-${Date.now()}`,
+        patientName,
+        service: "Pharmacy Bill",
+        date: "Today, Just now",
+        totalAmount: qty * targetMed.salePrice,
+        paidAmount: qty * targetMed.salePrice,
+        balanceAmount: 0,
+        paymentMethod: "Cash",
+        status: "Paid",
+      };
+      setInvoices((prev) => [inv, ...prev]);
+      addToast("success", "Medicine Dispensed", `${qty} ${targetMed.unit} of ${targetMed.name} dispensed to ${patientName}.`);
+      addActivityLog("Pharmacy POS", "Pharmacist", "Medicine Dispensed", `${qty}x ${targetMed.name} dispensed (${inv.invoiceNo})`, "Pharmacy");
+    }
+  };
+
+  // 12. Check-in Appointment
+  const handleCheckInAppointment = (id: string) => {
+    const nextTokenNo = Math.floor(18 + Math.random() * 5);
+    setAppointments((prev) =>
+      prev.map((a) => (a.id === id ? { ...a, status: "arrived", tokenNo: nextTokenNo } : a))
+    );
+
+    const target = appointments.find((a) => a.id === id);
+    if (target) {
+      const newQueueItem: typeof queue[0] = {
+        id: `q-${Date.now()}`,
+        tokenNo: nextTokenNo,
+        patientId: target.patientId,
+        patientName: target.patientName,
+        doctorId: target.doctorId,
+        doctorName: target.doctorName,
+        room: target.room || "Room 101",
+        department: target.department,
+        checkInTime: "Just now",
+        estimatedWaitMins: 10,
+        status: "waiting",
+        priority: "Normal",
+      };
+      setQueue((prev) => [...prev, newQueueItem]);
+      addToast("success", "Check-in Complete", `Token #${nextTokenNo} issued for ${target.patientName}`);
+      addActivityLog("Reception", "Staff", "Check-in", `${target.patientName} checked in. Token #${nextTokenNo} active`, "Appointments");
+    }
+  };
+
+  // 13. Cancel Appointment
+  const handleCancelAppointment = (id: string) => {
+    setAppointments((prev) =>
+      prev.map((a) => (a.id === id ? { ...a, status: "cancelled" } : a))
+    );
+    addToast("warning", "Appointment Cancelled", "Slot reopened in doctor calendar.");
+  };
+
+  // 14. Complete Appointment
+  const handleCompleteAppointment = (id: string) => {
+    setAppointments((prev) =>
+      prev.map((a) => (a.id === id ? { ...a, status: "completed" } : a))
+    );
+    addToast("success", "Appointment Completed", "Visit marked as completed.");
+  };
+
+  // 15. Inventory Adjustment
+  const handleStockAdjustment = (id: string, delta: number) => {
+    setInventory((prev) =>
+      prev.map((item) => {
+        if (item.id === id) {
+          const newQty = Math.max(0, item.quantity + delta);
+          return {
+            ...item,
+            quantity: newQty,
+            status: newQty <= item.reorderLevel ? (newQty <= 5 ? "Critical" : "Low Stock") : "In Stock",
+            lastRestocked: delta > 0 ? "Today" : item.lastRestocked,
+          };
+        }
+        return item;
+      })
+    );
+    addToast("info", "Inventory Updated", `Stock adjusted by ${delta > 0 ? `+${delta}` : delta}`);
+  };
+
+  const handleLogout = () => {
+    clinicLogout();
+    router.push("/");
+  };
+
+  // Determine Clinic Identity (from application, clinicUser, or fallback demo)
+  const activeClinicName =
+    application?.clinicName || clinicUser?.clinicName || "Al-Hakeem Medical Complex & Specialty Center";
+  const activePlan = application?.plan || clinicUser?.plan || "pro";
+  const activeAdminName =
+    application?.ownerFullName || clinicUser?.ownerFullName || "Dr. Tariq Mahmood";
+  const activeCity = application?.city || "Lahore";
+  const activeAddress = application?.physicalAddress || "Plot 14-B, Main Boulevard, Gulberg III";
+  const activePhone = application?.mobileNumber || "+92 42 35871928";
+  const activeEmail = application?.email || "admin@alhakeemclinic.pk";
+  const activeMonthlyAmount = application?.totalMonthlyAmount || 8999;
+
+  // Is application awaiting verification?
+  const isPendingVerification = application && application.status === "pending_admin_verification";
 
   if (!isLoaded) {
     return (
@@ -41,468 +384,366 @@ export default function ClinicDashboardPage() {
     );
   }
 
-  // If application is not approved yet, redirect to status screen
-  if (!application || application.status !== "approved") {
-    return (
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col items-center justify-center p-4 text-center">
-        <div className="w-16 h-16 rounded-2xl bg-amber-50 dark:bg-amber-950/60 text-amber-500 flex items-center justify-center mb-4">
-          <Clock className="w-8 h-8" />
-        </div>
-        <h1 className="text-xl font-bold text-slate-900 dark:text-white">Account Under Verification</h1>
-        <p className="text-xs text-slate-500 max-w-sm mt-1 mb-6">
-          Your clinic application is currently being verified by the admin team.
-        </p>
-        <Link
-          href="/clinic/status"
-          className="px-6 py-3 rounded-full bg-sky-600 text-white font-bold text-xs uppercase tracking-wider hover:bg-sky-500 transition-all shadow-md"
-        >
-          Check Application Status
-        </Link>
-      </div>
-    );
-  }
-
-  const handleLogout = () => {
-    clinicLogout();
-    router.push("/");
-  };
-
-  const isPharmacyActive = application.pharmacyIncluded;
-
-  // Mock doctors list for this clinic
-  const clinicDoctors = [
-    {
-      id: "doc-1",
-      name: application.ownerFullName || "Dr. Tariq Mahmood",
-      speciality: application.speciality || "Chief Physician",
-      room: "Room 101",
-      shifts: "09:00 AM - 02:00 PM",
-      status: "Available",
-    },
-    {
-      id: "doc-2",
-      name: "Dr. Ayesha Malik",
-      speciality: "Consultant Pediatrician",
-      room: "Room 104",
-      shifts: "02:00 PM - 08:00 PM",
-      status: "In Consultation",
-    },
-    {
-      id: "doc-3",
-      name: "Dr. Hamza Siddiqui",
-      speciality: "Cardiologist",
-      room: "Room 202",
-      shifts: "05:00 PM - 09:00 PM",
-      status: "Off Duty",
-    },
-  ];
-
-  // Pharmacy mock inventory
-  const pharmacyStock = [
-    { name: "Augmentin 625mg (GlaxoSmithKline)", stock: "142 Packs", expiry: "Dec 2027", alert: "normal" },
-    { name: "Panadol Extra Paracetamol 500mg", stock: "480 Strips", expiry: "Aug 2028", alert: "normal" },
-    { name: "Softin 10mg Loratadine", stock: "18 Packs", expiry: "Nov 2026", alert: "low_stock" },
-    { name: "Lipiget 20mg Atorvastatin", stock: "65 Packs", expiry: "Oct 2026", alert: "expiring_soon" },
-  ];
-
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white">
-      {/* Top Clinic Nav */}
-      <header className="sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
-          {/* Logo & Clinic Name */}
-          <div className="flex items-center gap-3">
-            <Link href="/" className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-sky-600 to-teal-400 text-white flex items-center justify-center shadow-sm">
-                <HeartPulse className="w-5 h-5" />
-              </div>
-            </Link>
-            <div className="h-6 w-[1px] bg-slate-200 dark:bg-slate-700" />
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="font-extrabold text-sm sm:text-base text-slate-900 dark:text-white truncate max-w-[200px] sm:max-w-xs">
-                  {application.clinicName}
-                </span>
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
-                  <ShieldCheck className="w-3 h-3" />
-                  Verified
-                </span>
-              </div>
-              <span className="text-[11px] text-slate-500 dark:text-slate-400">
-                {application.city} • Plan: <strong className="uppercase">{application.plan}</strong>
-              </span>
-            </div>
-          </div>
-
-          {/* Quick Actions */}
-          <div className="flex items-center gap-3">
-            <Link
-              href="/"
-              className="text-xs font-semibold text-slate-500 hover:text-slate-800 dark:hover:text-white hidden md:inline"
-            >
-              Public Website
-            </Link>
-
-            <button
-              onClick={handleLogout}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-300 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 border border-slate-200 dark:border-slate-700 transition-colors cursor-pointer"
-            >
-              <LogOut className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Logout</span>
-            </button>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Container */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
-        {/* KPI Strip */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
-          <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
-            <div className="flex items-center justify-between text-slate-400">
-              <span className="text-xs font-bold uppercase tracking-wider">Active Doctors</span>
-              <Stethoscope className="w-4 h-4 text-sky-500" />
-            </div>
-            <div className="text-2xl font-black text-slate-900 dark:text-white mt-2">
-              {clinicDoctors.length}
-            </div>
-            <span className="text-[11px] text-emerald-600 font-semibold mt-0.5 block">
-              All slots active today
+    <div className="min-h-screen bg-slate-50/70 dark:bg-slate-950 text-slate-900 dark:text-white flex flex-col font-sans selection:bg-sky-500 selection:text-white">
+      {/* Pending Approval Helper Banner if applicable */}
+      {isPendingVerification && (
+        <div className="bg-amber-500 text-slate-950 px-4 py-2 text-xs font-bold flex items-center justify-between z-50 sticky top-0 shadow-md">
+          <div className="flex items-center gap-2">
+            <AlertTriangle className="w-4 h-4 shrink-0" />
+            <span>
+              Clinic application is currently <strong>Pending Admin Verification</strong>.
             </span>
           </div>
-
-          <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
-            <div className="flex items-center justify-between text-slate-400">
-              <span className="text-xs font-bold uppercase tracking-wider">Today's Visits</span>
-              <CalendarDays className="w-4 h-4 text-teal-500" />
-            </div>
-            <div className="text-2xl font-black text-slate-900 dark:text-white mt-2">
-              {appointments.length > 0 ? appointments.length : 8}
-            </div>
-            <span className="text-[11px] text-sky-600 font-semibold mt-0.5 block">
-              3 In Queue • 5 Scheduled
-            </span>
-          </div>
-
-          <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
-            <div className="flex items-center justify-between text-slate-400">
-              <span className="text-xs font-bold uppercase tracking-wider">Monthly Patients</span>
-              <Users className="w-4 h-4 text-purple-500" />
-            </div>
-            <div className="text-2xl font-black text-slate-900 dark:text-white mt-2">324</div>
-            <span className="text-[11px] text-emerald-600 font-semibold mt-0.5 block flex items-center gap-1">
-              <TrendingUp className="w-3 h-3" /> +18% this month
-            </span>
-          </div>
-
-          <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
-            <div className="flex items-center justify-between text-slate-400">
-              <span className="text-xs font-bold uppercase tracking-wider">Pharmacy Status</span>
-              <Pill className="w-4 h-4 text-emerald-500" />
-            </div>
-            <div className="text-lg font-black text-slate-900 dark:text-white mt-2">
-              {isPharmacyActive ? "Active POS" : "Not Enabled"}
-            </div>
-            <span className="text-[11px] text-slate-500 font-semibold mt-0.5 block">
-              {isPharmacyActive ? "Synced with doctors" : "Available to add"}
-            </span>
-          </div>
-        </div>
-
-        {/* Tab Navigation */}
-        <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-2 overflow-x-auto">
           <button
-            onClick={() => setActiveTab("appointments")}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-              activeTab === "appointments"
-                ? "bg-sky-600 text-white shadow-sm"
-                : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
-            }`}
+            onClick={() => {
+              simulateAdminApproval();
+              addToast("success", "Clinic Verified & Approved", "You now have full administrator access.");
+            }}
+            className="px-3 py-1 rounded-lg bg-slate-950 text-white text-[11px] font-black uppercase tracking-wider hover:bg-slate-800 transition-colors cursor-pointer"
           >
-            <CalendarDays className="w-4 h-4" />
-            <span>Patient Appointments Queue</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab("doctors")}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-              activeTab === "doctors"
-                ? "bg-sky-600 text-white shadow-sm"
-                : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
-            }`}
-          >
-            <Stethoscope className="w-4 h-4" />
-            <span>Doctors & Timings</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab("pharmacy")}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-              activeTab === "pharmacy"
-                ? "bg-teal-600 text-white shadow-sm"
-                : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
-            }`}
-          >
-            <Pill className="w-4 h-4" />
-            <span>Pharmacy POS Suite {isPharmacyActive && "• Live"}</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab("billing")}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-              activeTab === "billing"
-                ? "bg-sky-600 text-white shadow-sm"
-                : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
-            }`}
-          >
-            <CreditCard className="w-4 h-4" />
-            <span>Subscription & Plan</span>
+            Simulate Super-Admin Approval
           </button>
         </div>
+      )}
 
-        {/* Tab 1: Appointments Queue */}
-        {activeTab === "appointments" && (
-          <div className="rounded-3xl p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div>
-                <h3 className="font-extrabold text-base text-slate-900 dark:text-white">
-                  Today's Patient Queue
-                </h3>
-                <p className="text-xs text-slate-500">Real-time appointments booked through Digital Medical network.</p>
-              </div>
+      {/* Main Layout Container */}
+      <div className="flex-1 flex">
+        {/* Left Sidebar */}
+        <div className="hidden md:block">
+          <ClinicSidebar
+            activeModule={activeModule}
+            setActiveModule={setActiveModule}
+            clinicName={activeClinicName}
+            plan={activePlan}
+            adminName={activeAdminName}
+            isCollapsed={isSidebarCollapsed}
+            setIsCollapsed={setIsSidebarCollapsed}
+            waitingCount={queue.filter((q) => q.status === "waiting" || q.status === "called").length}
+            appointmentsCount={appointments.filter((a) => a.status === "scheduled").length}
+            unreadNotifications={3}
+            onLogout={handleLogout}
+          />
+        </div>
 
-              <div className="flex items-center gap-2">
-                <div className="relative">
-                  <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                  <input
-                    type="text"
-                    placeholder="Search patient name..."
-                    className="pl-8 pr-3 py-1.5 rounded-lg text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="divide-y divide-slate-100 dark:divide-slate-800">
-              {appointments.length > 0 ? (
-                appointments.map((apt) => (
-                  <div key={apt.id} className="py-3.5 flex items-center justify-between gap-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-sky-50 dark:bg-sky-950 text-sky-600 dark:text-sky-400 flex items-center justify-center font-bold text-xs">
-                        {apt.patientName.charAt(0)}
-                      </div>
-                      <div>
-                        <div className="font-bold text-sm text-slate-900 dark:text-white">
-                          {apt.patientName}
-                        </div>
-                        <div className="text-[11px] text-slate-500">
-                          {apt.date} • {apt.timeSlot} • For {apt.bookedByRelation}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-3 text-xs">
-                      <span className="font-mono font-bold text-slate-700 dark:text-slate-300">
-                        Rs. {apt.consultationFee}
-                      </span>
-                      <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400">
-                        {apt.status}
-                      </span>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="py-8 text-center text-xs text-slate-400">
-                  No active patient appointments in queue right now. New online bookings will show up here automatically.
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Tab 2: Doctors & Timings */}
-        {activeTab === "doctors" && (
-          <div className="rounded-3xl p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="font-extrabold text-base text-slate-900 dark:text-white">
-                  Clinic Specialists & Roaster
-                </h3>
-                <p className="text-xs text-slate-500">Consultation rooms and shift schedules.</p>
-              </div>
-              <button className="px-3.5 py-2 rounded-xl bg-sky-600 text-white font-bold text-xs flex items-center gap-1.5 shadow-sm">
-                <Plus className="w-3.5 h-3.5" />
-                <span>Add Doctor</span>
-              </button>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
-              {clinicDoctors.map((doc) => (
-                <div
-                  key={doc.id}
-                  className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700 space-y-3"
+        {/* Mobile Sidebar Overlay */}
+        {isMobileMenuOpen && (
+          <div className="fixed inset-0 z-50 flex md:hidden">
+            <div
+              className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm"
+              onClick={() => setIsMobileMenuOpen(false)}
+            />
+            <div className="relative z-10 w-72 h-full bg-white dark:bg-slate-900 shadow-2xl flex flex-col">
+              <div className="p-4 flex items-center justify-between border-b border-slate-100 dark:border-slate-800">
+                <span className="font-black text-sm text-slate-900 dark:text-white">Menu</span>
+                <button
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="p-1 rounded-lg text-slate-400"
                 >
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <h4 className="font-bold text-sm text-slate-900 dark:text-white">{doc.name}</h4>
-                      <span className="text-[11px] text-sky-600 dark:text-sky-400 font-medium">
-                        {doc.speciality}
-                      </span>
-                    </div>
-                    <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
-                      {doc.room}
-                    </span>
-                  </div>
-
-                  <div className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-                    <Clock className="w-3.5 h-3.5 text-slate-400" />
-                    <span>{doc.shifts}</span>
-                  </div>
-
-                  <div className="pt-2 border-t border-slate-200/60 dark:border-slate-700/60 flex items-center justify-between text-xs">
-                    <span className="text-emerald-600 font-semibold">{doc.status}</span>
-                    <button className="text-sky-600 hover:underline font-bold text-[11px]">
-                      Edit Timings
-                    </button>
-                  </div>
-                </div>
-              ))}
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <div className="flex-1 overflow-y-auto">
+                <ClinicSidebar
+                  activeModule={activeModule}
+                  setActiveModule={(mod) => {
+                    setActiveModule(mod);
+                    setIsMobileMenuOpen(false);
+                  }}
+                  clinicName={activeClinicName}
+                  plan={activePlan}
+                  adminName={activeAdminName}
+                  isCollapsed={false}
+                  setIsCollapsed={() => {}}
+                  waitingCount={queue.filter((q) => q.status === "waiting").length}
+                  appointmentsCount={appointments.filter((a) => a.status === "scheduled").length}
+                  unreadNotifications={3}
+                  onLogout={handleLogout}
+                />
+              </div>
             </div>
           </div>
         )}
 
-        {/* Tab 3: Pharmacy POS Suite */}
-        {activeTab === "pharmacy" && (
-          <div className="rounded-3xl p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-6">
-            {isPharmacyActive ? (
-              <>
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                  <div>
-                    <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-[10px] font-bold bg-teal-50 dark:bg-teal-950/60 text-teal-600 dark:text-teal-400 border border-teal-200 dark:border-teal-800 uppercase tracking-wider mb-1">
-                      <CheckCircle2 className="w-3 h-3" />
-                      Live Pharmacy POS Enabled
-                    </div>
-                    <h3 className="font-extrabold text-base text-slate-900 dark:text-white">
-                      Pharmacy Stock & Prescription Sync
-                    </h3>
-                  </div>
+        {/* Right Content Workspace */}
+        <div
+          className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ${
+            isSidebarCollapsed ? "md:ml-20" : "md:ml-72"
+          }`}
+        >
+          {/* Topbar */}
+          <ClinicTopbar
+            activeModule={activeModule}
+            clinicName={activeClinicName}
+            onOpenQuickPatient={() => setIsQuickPatientOpen(true)}
+            onOpenNewAppointment={() => setIsNewAppointmentOpen(true)}
+            onOpenGenerateToken={() => setIsGenerateTokenOpen(true)}
+            onOpenAddDoctor={() => setIsAddDoctorOpen(true)}
+            onOpenCreateInvoice={() => setIsCreateInvoiceOpen(true)}
+            onToggleMobileMenu={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            unreadCount={3}
+            onOpenNotifications={() => setActiveModule("notifications")}
+          />
 
-                  <button className="px-4 py-2 rounded-xl bg-teal-600 text-white font-bold text-xs flex items-center gap-1.5 shadow-sm">
-                    <Plus className="w-3.5 h-3.5" />
-                    <span>New Sale / Dispense</span>
-                  </button>
-                </div>
-
-                {/* Stock Table */}
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs">
-                    <thead>
-                      <tr className="border-b border-slate-200 dark:border-slate-700 text-slate-400 font-bold uppercase tracking-wider text-[10px]">
-                        <th className="py-2.5">Medicine Name</th>
-                        <th className="py-2.5">In Stock</th>
-                        <th className="py-2.5">Expiry Date</th>
-                        <th className="py-2.5">Status</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                      {pharmacyStock.map((item, idx) => (
-                        <tr key={idx} className="hover:bg-slate-50 dark:hover:bg-slate-800/40">
-                          <td className="py-3 font-bold text-slate-800 dark:text-slate-200">
-                            {item.name}
-                          </td>
-                          <td className="py-3 font-semibold text-slate-600 dark:text-slate-300">
-                            {item.stock}
-                          </td>
-                          <td className="py-3 font-mono text-slate-500">{item.expiry}</td>
-                          <td className="py-3">
-                            {item.alert === "normal" && (
-                              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-400">
-                                In Stock
-                              </span>
-                            )}
-                            {item.alert === "low_stock" && (
-                              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-600 dark:bg-amber-950/50 dark:text-amber-400">
-                                Low Stock
-                              </span>
-                            )}
-                            {item.alert === "expiring_soon" && (
-                              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-600 dark:bg-rose-950/50 dark:text-rose-400">
-                                Expiry Alert
-                              </span>
-                            )}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </>
-            ) : (
-              <div className="p-8 text-center max-w-md mx-auto space-y-4">
-                <div className="w-14 h-14 rounded-2xl bg-teal-50 dark:bg-teal-950 text-teal-500 flex items-center justify-center mx-auto">
-                  <Pill className="w-7 h-7" />
-                </div>
-                <div>
-                  <h3 className="font-extrabold text-lg text-slate-900 dark:text-white">
-                    Pharmacy Suite Not Active
-                  </h3>
-                  <p className="text-xs text-slate-500 mt-1">
-                    You opted out of the pharmacy module during registration. You can activate it anytime for Rs. 3,500/month.
-                  </p>
-                </div>
-                <button className="px-6 py-3 rounded-full bg-teal-600 hover:bg-teal-500 text-white font-bold text-xs uppercase tracking-wider shadow-lg shadow-teal-600/25 transition-all">
-                  Upgrade & Add Pharmacy Module
-                </button>
-              </div>
+          {/* Main Content Workspace */}
+          <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto space-y-6">
+            {activeModule === "overview" && (
+              <OverviewModule
+                patients={patients}
+                appointments={appointments}
+                queue={queue}
+                doctors={doctors}
+                medicines={medicines}
+                labOrders={labOrders}
+                invoices={invoices}
+                activityLogs={activityLogs}
+                onNavigate={setActiveModule}
+                onCallNextQueue={handleCallToken}
+                onCheckInAppointment={handleCheckInAppointment}
+                onOpenNewAppointment={() => setIsNewAppointmentOpen(true)}
+                onOpenQuickPatient={() => setIsQuickPatientOpen(true)}
+                onOpenGenerateToken={() => setIsGenerateTokenOpen(true)}
+                onOpenCreateInvoice={() => setIsCreateInvoiceOpen(true)}
+              />
             )}
-          </div>
-        )}
 
-        {/* Tab 4: Subscription & Billing */}
-        {activeTab === "billing" && (
-          <div className="rounded-3xl p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-4">
-            <h3 className="font-extrabold text-base text-slate-900 dark:text-white">
-              Subscription & Invoices
-            </h3>
+            {activeModule === "appointments" && (
+              <AppointmentsModule
+                appointments={appointments}
+                doctors={doctors}
+                patients={patients}
+                onOpenNewAppointment={() => setIsNewAppointmentOpen(true)}
+                onCheckIn={handleCheckInAppointment}
+                onCancelAppointment={handleCancelAppointment}
+                onCompleteAppointment={handleCompleteAppointment}
+                onRescheduleAppointment={(id, time) => {
+                  setAppointments((prev) =>
+                    prev.map((a) => (a.id === id ? { ...a, timeSlot: time } : a))
+                  );
+                  addToast("info", "Appointment Rescheduled", `New time slot: ${time}`);
+                }}
+              />
+            )}
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
-              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700">
-                <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">
-                  Current Plan
-                </span>
-                <span className="text-lg font-extrabold text-slate-900 dark:text-white uppercase mt-1 block">
-                  {application.plan} Plan
-                </span>
-                <span className="text-xs text-sky-600 font-semibold mt-0.5 block">
-                  Rs. {application.totalMonthlyAmount.toLocaleString()} / mo
-                </span>
-              </div>
+            {activeModule === "queue" && (
+              <LiveQueueModule
+                queue={queue}
+                doctors={doctors}
+                onOpenGenerateToken={() => setIsGenerateTokenOpen(true)}
+                onCallToken={handleCallToken}
+                onStartConsultation={handleStartConsultation}
+                onCompleteToken={handleCompleteToken}
+                onMarkNoShow={handleMarkNoShow}
+                onRecallToken={handleRecallToken}
+              />
+            )}
 
-              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700">
-                <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">
-                  Payment Status
-                </span>
-                <span className="text-lg font-extrabold text-emerald-600 mt-1 block">
-                  Verified & Active
-                </span>
-                <span className="text-xs text-slate-500 mt-0.5 block font-mono">
-                  Ref: {application.paymentProof.transactionId}
-                </span>
-              </div>
+            {activeModule === "patients" && (
+              <PatientsModule
+                patients={patients}
+                appointments={appointments}
+                invoices={invoices}
+                onOpenQuickRegister={() => setIsQuickPatientOpen(true)}
+                onBookAppointmentForPatient={(patientId) => {
+                  setIsNewAppointmentOpen(true);
+                }}
+              />
+            )}
 
-              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700 flex flex-col justify-between">
-                <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">
-                  Invoice Receipt
-                </span>
-                <button className="mt-2 inline-flex items-center gap-1.5 text-xs font-bold text-sky-600 hover:text-sky-700">
-                  <Receipt className="w-3.5 h-3.5" />
-                  <span>Download Activation Receipt</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-      </main>
+            {activeModule === "doctors" && (
+              <DoctorsModule
+                doctors={doctors}
+                onOpenAddDoctor={() => setIsAddDoctorOpen(true)}
+                onUpdateDoctorStatus={(id, status) => {
+                  setDoctors((prev) =>
+                    prev.map((d) => (d.id === id ? { ...d, status } : d))
+                  );
+                  addToast("info", "Doctor Status Updated", `Status changed to ${status}`);
+                }}
+              />
+            )}
+
+            {activeModule === "staff" && (
+              <StaffModule
+                staff={staff}
+                onAddStaff={(newMember) => {
+                  setStaff((prev) => [...prev, newMember]);
+                  addToast("success", "Staff Account Created", `${newMember.name} added as ${newMember.role}`);
+                  addActivityLog("Staff Desk", "Admin", "Staff Added", `${newMember.name} (${newMember.role}) joined`, "Staff");
+                }}
+              />
+            )}
+
+            {activeModule === "clinical" && (
+              <ClinicalModule
+                doctors={doctors}
+                appointments={appointments}
+                labOrders={labOrders}
+              />
+            )}
+
+            {activeModule === "pharmacy" && (
+              <PharmacyModule
+                medicines={medicines}
+                patients={patients}
+                onAddMedicine={(newMed) => {
+                  setMedicines((prev) => [newMed, ...prev]);
+                  addToast("success", "Medicine Saved", `${newMed.name} added to catalog.`);
+                  addActivityLog("Pharmacy", "Pharmacist", "Medicine Added", `${newMed.name} added to catalog`, "Pharmacy");
+                }}
+                onDispense={handleDispenseMedicine}
+              />
+            )}
+
+            {activeModule === "laboratory" && (
+              <LaboratoryModule
+                labOrders={labOrders}
+                patients={patients}
+                onUpdateSampleStatus={(id, status) => {
+                  setLabOrders((prev) =>
+                    prev.map((o) => (o.id === id ? { ...o, sampleStatus: status } : o))
+                  );
+                  addToast("info", "Sample Status Updated", `Sample status: ${status}`);
+                }}
+                onUpdateResultStatus={(id, status) => {
+                  setLabOrders((prev) =>
+                    prev.map((o) => (o.id === id ? { ...o, resultStatus: status } : o))
+                  );
+                  addToast("success", "Report Verified", "Pathology report signed and delivered.");
+                  addActivityLog("Diagnostic Lab", "Lab Tech", "Report Verified", `Lab report verified and delivered`, "Laboratory");
+                }}
+                onOrderLabTest={(newOrder) => {
+                  setLabOrders((prev) => [newOrder, ...prev]);
+                  addToast("success", "Lab Investigation Ordered", `${newOrder.testName} ordered for ${newOrder.patientName}`);
+                  addActivityLog("Clinical Desk", "Doctor", "Investigation Ordered", `${newOrder.testName} ordered`, "Laboratory");
+                }}
+              />
+            )}
+
+            {activeModule === "billing" && (
+              <BillingModule
+                invoices={invoices}
+                patients={patients}
+                onOpenCreateInvoice={() => setIsCreateInvoiceOpen(true)}
+                onPayInvoice={(id) => {
+                  setInvoices((prev) =>
+                    prev.map((inv) =>
+                      inv.id === id
+                        ? { ...inv, paidAmount: inv.totalAmount, balanceAmount: 0, status: "Paid" }
+                        : inv
+                    )
+                  );
+                  addToast("success", "Payment Collected", "Invoice settled and receipt printed.");
+                  addActivityLog("Cashier Desk", "Cashier", "Payment Collected", `Invoice settled`, "Billing");
+                }}
+              />
+            )}
+
+            {activeModule === "inventory" && (
+              <InventoryModule
+                inventory={inventory}
+                onStockAdjustment={handleStockAdjustment}
+                onAddItem={(newItem) => {
+                  setInventory((prev) => [newItem, ...prev]);
+                  addToast("success", "Supply Item Added", `${newItem.name} added to inventory.`);
+                  addActivityLog("Inventory", "Staff", "Item Added", `${newItem.name} added`, "Inventory");
+                }}
+              />
+            )}
+
+            {activeModule === "reports" && (
+              <ReportsModule invoices={invoices} doctors={doctors} />
+            )}
+
+            {activeModule === "subscription" && (
+              <SubscriptionModule
+                plan={activePlan}
+                totalMonthlyAmount={activeMonthlyAmount}
+                clinicName={activeClinicName}
+                registeredPatientsCount={patients.length}
+              />
+            )}
+
+            {activeModule === "settings" && (
+              <SettingsModule
+                clinicName={activeClinicName}
+                city={activeCity}
+                address={activeAddress}
+                phone={activePhone}
+                email={activeEmail}
+                onSaveSettings={(msg) => addToast("success", "Settings Saved", msg)}
+              />
+            )}
+
+            {(activeModule === "notifications" ||
+              activeModule === "support" ||
+              activeModule === "activity") && (
+              <NotificationsSupportModule
+                initialTab={activeModule}
+                activityLogs={activityLogs}
+                supportTickets={supportTickets}
+                onSubmitTicket={(subject, category, message) => {
+                  const newTkt: typeof supportTickets[0] = {
+                    id: `tkt-${Date.now()}`,
+                    ticketNo: `TKT-${Math.floor(8400 + Math.random() * 100)}`,
+                    subject,
+                    category,
+                    priority: "Medium",
+                    status: "Open",
+                    createdAt: "Just now",
+                    lastReply: "Ticket dispatched to Super-Admin team. Response SLA: 4 hours.",
+                  };
+                  setSupportTickets((prev) => [newTkt, ...prev]);
+                  addToast("success", "Support Ticket Submitted", `Ticket Ref: ${newTkt.ticketNo}`);
+                  addActivityLog("Clinic Admin", "Admin", "Ticket Submitted", `${subject} (${newTkt.ticketNo})`, "Support");
+                }}
+                onClearNotifications={() => {
+                  addToast("info", "Notifications Cleared", "All alerts marked as read.");
+                }}
+              />
+            )}
+          </main>
+        </div>
+      </div>
+
+      {/* Floating Interactive Toast Notifications */}
+      <ToastContainer toasts={toasts} onDismiss={removeToast} />
+
+      {/* Quick Action Modals */}
+      <QuickRegisterPatientModal
+        isOpen={isQuickPatientOpen}
+        onClose={() => setIsQuickPatientOpen(false)}
+        onRegister={handleRegisterPatient}
+      />
+
+      <NewAppointmentModal
+        isOpen={isNewAppointmentOpen}
+        onClose={() => setIsNewAppointmentOpen(false)}
+        patients={patients}
+        doctors={doctors}
+        onBook={handleBookAppointment}
+      />
+
+      <GenerateTokenModal
+        isOpen={isGenerateTokenOpen}
+        onClose={() => setIsGenerateTokenOpen(false)}
+        patients={patients}
+        doctors={doctors}
+        onGenerate={handleGenerateToken}
+      />
+
+      <AddDoctorModal
+        isOpen={isAddDoctorOpen}
+        onClose={() => setIsAddDoctorOpen(false)}
+        onAddDoctor={handleAddDoctor}
+      />
+
+      <CreateInvoiceModal
+        isOpen={isCreateInvoiceOpen}
+        onClose={() => setIsCreateInvoiceOpen(false)}
+        patients={patients}
+        onCreateInvoice={handleCreateInvoice}
+      />
     </div>
   );
 }

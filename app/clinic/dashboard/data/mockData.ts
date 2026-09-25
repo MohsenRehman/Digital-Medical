@@ -625,7 +625,7 @@ export const INITIAL_LAB_ORDERS: DashboardLabOrder[] = [
     category: "Pathology",
     orderDate: "Today, 11:15 AM",
     sampleStatus: "Collected",
-    resultStatus: "Processing",
+    resultStatus: "Pending",
     fee: 450,
     assignedTechnician: "Saad Farooq",
   },
