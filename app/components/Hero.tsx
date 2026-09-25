@@ -30,7 +30,7 @@ export default function Hero({ onOpenAppointment }: HeroProps) {
       {/* Decorative background curved lines and soft ambient glow */}
       <div className="absolute inset-0 pointer-events-none -z-10 overflow-hidden select-none opacity-40 dark:opacity-20">
         <svg
-          className="w-full h-full min-w-[800px]"
+          className="w-full h-full object-cover"
           viewBox="0 0 1200 600"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
@@ -102,10 +102,10 @@ export default function Hero({ onOpenAppointment }: HeroProps) {
             </p>
 
             {/* Action Buttons */}
-            <div className="flex items-center justify-center lg:justify-start gap-2 sm:gap-4 pt-2 w-full max-w-md sm:max-w-none mx-auto lg:mx-0">
+            <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-2.5 sm:gap-4 pt-2 w-full max-w-md sm:max-w-none mx-auto lg:mx-0">
               <button
                 onClick={onOpenAppointment}
-                className="flex-1 sm:flex-initial px-3 sm:px-8 py-3.5 rounded-full font-bold text-[10.5px] sm:text-xs uppercase tracking-wider text-white btn-mockup-blue flex items-center justify-center gap-1.5 sm:gap-2 group cursor-pointer shadow-md shadow-sky-600/20 active:scale-[0.98] transition-all whitespace-nowrap"
+                className="w-full sm:w-auto px-6 sm:px-8 py-3.5 rounded-full font-bold text-[11px] sm:text-xs uppercase tracking-wider text-white btn-mockup-blue flex items-center justify-center gap-2 group cursor-pointer shadow-md shadow-sky-600/20 active:scale-[0.98] transition-all whitespace-nowrap"
               >
                 <span>DISCOVER MORE</span>
                 <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 transition-transform duration-200 group-hover:translate-x-1 flex-shrink-0" />
@@ -113,7 +113,7 @@ export default function Hero({ onOpenAppointment }: HeroProps) {
 
               <a
                 href="#specialties"
-                className="flex-1 sm:flex-initial px-3 sm:px-8 py-3.5 rounded-full font-bold text-[10.5px] sm:text-xs uppercase tracking-wider text-white btn-mockup-secondary flex items-center justify-center gap-1.5 sm:gap-2 group cursor-pointer active:scale-[0.98] transition-all whitespace-nowrap"
+                className="w-full sm:w-auto px-6 sm:px-8 py-3.5 rounded-full font-bold text-[11px] sm:text-xs uppercase tracking-wider text-white btn-mockup-secondary flex items-center justify-center gap-2 group cursor-pointer active:scale-[0.98] transition-all whitespace-nowrap"
               >
                 <span>SEE ALL SERVICES</span>
                 <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 transition-transform duration-200 group-hover:translate-x-1 flex-shrink-0" />
@@ -131,54 +131,54 @@ export default function Hero({ onOpenAppointment }: HeroProps) {
             </div>
 
             {/* Quick Trust Indicators with MagicUI NumberTicker */}
-            <div className="pt-6 border-t border-slate-200/80 dark:border-slate-800/80 grid grid-cols-3 gap-4 max-w-lg mx-auto lg:mx-0">
+            <div className="pt-6 border-t border-slate-200/80 dark:border-slate-800/80 grid grid-cols-3 gap-2 sm:gap-4 max-w-lg mx-auto lg:mx-0">
               {/* Stat 1: 500+ */}
-              <div className="flex flex-col">
-                <div className="flex items-center gap-1 text-[#0284c7] dark:text-[#38bdf8] font-black text-2xl sm:text-3xl">
+              <div className="flex flex-col text-center sm:text-left">
+                <div className="flex items-center justify-center sm:justify-start gap-0.5 sm:gap-1 text-[#0284c7] dark:text-[#38bdf8] font-black text-xl sm:text-2xl lg:text-3xl">
                   <NumberTicker
                     value={500}
                     startValue={100}
                     className="font-black text-[#0284c7] dark:text-[#38bdf8] tracking-tight"
                   />
-                  <span className="text-lg font-bold">+</span>
+                  <span className="text-base sm:text-lg font-bold">+</span>
                 </div>
-                <span className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">
+                <span className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5 leading-tight">
                   Verified Doctors
                 </span>
               </div>
 
               {/* Stat 2: 98.4% */}
-              <div className="flex flex-col border-x border-slate-200 dark:border-slate-800 px-3">
-                <div className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-black text-2xl sm:text-3xl">
+              <div className="flex flex-col text-center sm:text-left border-x border-slate-200 dark:border-slate-800 px-1 sm:px-3">
+                <div className="flex items-center justify-center sm:justify-start gap-0.5 sm:gap-1 text-emerald-600 dark:text-emerald-400 font-black text-xl sm:text-2xl lg:text-3xl">
                   <NumberTicker
                     value={98.4}
                     startValue={80}
                     decimalPlaces={1}
                     className="font-black text-emerald-600 dark:text-emerald-400 tracking-tight"
                   />
-                  <span className="text-lg font-bold">%</span>
+                  <span className="text-base sm:text-lg font-bold">%</span>
                 </div>
-                <span className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">
+                <span className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5 leading-tight">
                   Recovery Rate
                 </span>
               </div>
 
               {/* Stat 3: 24/7 */}
-              <div className="flex flex-col">
-                <div className="flex items-center gap-0.5 text-[#0284c7] dark:text-[#38bdf8] font-black text-2xl sm:text-3xl">
+              <div className="flex flex-col text-center sm:text-left">
+                <div className="flex items-center justify-center sm:justify-start gap-0.5 text-[#0284c7] dark:text-[#38bdf8] font-black text-xl sm:text-2xl lg:text-3xl">
                   <NumberTicker
                     value={24}
                     startValue={0}
                     className="font-black text-[#0284c7] dark:text-[#38bdf8] tracking-tight"
                   />
-                  <span className="text-xl font-bold opacity-75">/</span>
+                  <span className="text-base sm:text-xl font-bold opacity-75">/</span>
                   <NumberTicker
                     value={7}
                     startValue={0}
                     className="font-black text-[#0284c7] dark:text-[#38bdf8] tracking-tight"
                   />
                 </div>
-                <span className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">
+                <span className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5 leading-tight">
                   Emergency Desk
                 </span>
               </div>

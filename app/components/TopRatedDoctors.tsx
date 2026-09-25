@@ -268,8 +268,8 @@ export default function TopRatedDoctors({ onSelectDoctor, searchFilter }: TopRat
             </Marquee>
 
             {/* Magic UI Left & Right Side Gradient Fades */}
-            <div className="pointer-events-none absolute inset-y-0 left-0 w-36 sm:w-56 bg-gradient-to-r from-[var(--bg)] to-transparent z-20" />
-            <div className="pointer-events-none absolute inset-y-0 right-0 w-36 sm:w-56 bg-gradient-to-l from-[var(--bg)] to-transparent z-20" />
+            <div className="pointer-events-none absolute inset-y-0 left-0 w-8 sm:w-36 lg:w-56 bg-gradient-to-r from-[var(--bg)] to-transparent z-20" />
+            <div className="pointer-events-none absolute inset-y-0 right-0 w-8 sm:w-36 lg:w-56 bg-gradient-to-l from-[var(--bg)] to-transparent z-20" />
           </div>
         )}
       </div>

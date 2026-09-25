@@ -86,7 +86,7 @@ export default function DoctorSchedule({ onBookScheduleSlot }: DoctorSchedulePro
           </div>
 
           {/* Days Switcher */}
-          <div className="flex items-center gap-1.5 p-1.5 rounded-full glass-panel self-start md:self-auto overflow-x-auto">
+          <div className="flex items-center gap-1.5 p-1.5 rounded-full glass-panel self-start md:self-auto max-w-full overflow-x-auto no-scrollbar">
             {days.map((day) => (
               <button
                 key={day}
@@ -110,11 +110,11 @@ export default function DoctorSchedule({ onBookScheduleSlot }: DoctorSchedulePro
               <div
                 key={item.id}
                 style={{ animationDelay: `${index * 0.12}s` }}
-                className="p-5 sm:p-6 transition-all duration-200 hover:bg-sky-50/60 dark:hover:bg-slate-800/60 flex flex-col md:flex-row md:items-center justify-between gap-4 group cursor-pointer"
+                className="p-4 sm:p-6 transition-all duration-200 hover:bg-sky-50/60 dark:hover:bg-slate-800/60 flex flex-col md:flex-row md:items-center justify-between gap-4 group cursor-pointer"
                 onClick={() => onBookScheduleSlot(item)}
               >
                 {/* Left: Time & Badge */}
-                <div className="flex items-center gap-4 min-w-[200px]">
+                <div className="flex items-center gap-4 w-full md:w-auto md:min-w-[200px]">
                   <div className="p-3 rounded-2xl bg-sky-100 dark:bg-slate-800 text-sky-600 dark:text-sky-400 font-bold group-hover:scale-105 transition-transform">
                     <Clock className="w-5 h-5" />
                   </div>

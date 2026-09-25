@@ -72,9 +72,11 @@
 }
 
 
-/* Master Smooth Scrolling */
+/* Master Smooth Scrolling & Mobile Viewport Overflow Protection */
 html {
   scroll-behavior: smooth;
+  max-width: 100vw;
+  overflow-x: hidden;
 }
 
 body {
@@ -82,7 +84,9 @@ body {
   color: var(--text);
   transition: background-color 0.4s ease, color 0.3s ease;
   font-family: var(--font-body), system-ui, -apple-system, sans-serif;
+  max-width: 100vw;
   overflow-x: hidden;
+  position: relative;
 }
 
 /* Headings → Plus Jakarta Sans */
@@ -539,13 +543,15 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Oversized fluid typography watermark */
 .watermark-text {
-  font-size: clamp(80px, 15vw, 220px);
+  font-size: clamp(48px, 14vw, 220px);
   user-select: none;
   pointer-events: none;
   opacity: 0.05;
   font-weight: 900;
   letter-spacing: -0.05em;
   line-height: 0.8;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 /* Accordion max-height */

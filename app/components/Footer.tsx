@@ -37,7 +37,7 @@ export default function Footer() {
       {/* Oversized Watermark Typography from PDF (Technique #27) */}
       <div
         aria-hidden="true"
-        className="absolute bottom-6 left-1/2 -translate-x-1/2 watermark-text text-white/5 whitespace-nowrap select-none pointer-events-none"
+        className="absolute bottom-6 left-1/2 -translate-x-1/2 watermark-text text-white/5 whitespace-nowrap select-none pointer-events-none hidden md:block max-w-full overflow-hidden"
       >
         DIGITAL MEDICAL
       </div>
@@ -204,18 +204,18 @@ export default function Footer() {
               <label className="block text-xs font-semibold text-slate-300 mb-1.5">
                 Subscribe for weekly health digests:
               </label>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                 <input
                   type="email"
                   required
                   placeholder="Your Email Address"
                   value={emailInput}
                   onChange={(e) => setEmailInput(e.target.value)}
-                  className="flex-1 px-4 py-2.5 rounded-full bg-slate-800 text-xs text-white placeholder-slate-500 border border-slate-700 focus:outline-none focus:ring-1 focus:ring-sky-400"
+                  className="w-full sm:flex-1 px-4 py-2.5 rounded-full bg-slate-800 text-xs text-white placeholder-slate-500 border border-slate-700 focus:outline-none focus:ring-1 focus:ring-sky-400"
                 />
                 <button
                   type="submit"
-                  className="px-5 py-2.5 rounded-full font-bold text-xs text-white bg-gradient-to-r from-sky-600 to-sky-500 hover:from-sky-700 hover:to-sky-600 transition-colors flex items-center gap-1 cursor-pointer"
+                  className="w-full sm:w-auto px-5 py-2.5 rounded-full font-bold text-xs text-white bg-gradient-to-r from-sky-600 to-sky-500 hover:from-sky-700 hover:to-sky-600 transition-colors flex items-center justify-center gap-1 cursor-pointer"
                 >
                   <span>SUBSCRIBE</span>
                 </button>
@@ -231,11 +231,11 @@ export default function Footer() {
         </div>
 
         {/* Bottom Bar */}
-        <div className="mt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-3">
+        <div className="mt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-3 text-center sm:text-left">
           <p>
             Copyright &copy; 2026 Digital Medical Inc. All rights reserved. Built with Next.js &amp; CSS Animation Bible specifications.
           </p>
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4">
             <a href="#privacy" className="hover:text-slate-400">Privacy Policy</a>
             <span>•</span>
             <a href="#terms" className="hover:text-slate-400">Terms of Use</a>

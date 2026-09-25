@@ -174,19 +174,19 @@ export default function Navbar({ onOpenAppointment }: NavbarProps) {
             isScrolled ? "scrolled py-2 shadow-lg shadow-sky-950/10" : "py-2.5 sm:py-3.5"
           }`}
         >
-          <div className="max-w-7xl mx-auto px-3.5 sm:px-6 lg:px-8 flex items-center justify-between gap-2 sm:gap-3">
+          <div className="max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8 flex items-center justify-between gap-1.5 sm:gap-3">
             {/* Brand Logo */}
             <Link href="/" className="flex items-center gap-2 sm:gap-2.5 group flex-shrink-0">
-              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-sky-600 to-sky-400 flex items-center justify-center text-white shadow-md shadow-sky-500/20 group-hover:scale-105 transition-transform duration-300 flex-shrink-0">
-                <HeartPulse className="w-5 h-5 sm:w-6 sm:h-6 animate-pulse" />
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-sky-600 to-sky-400 flex items-center justify-center text-white shadow-md shadow-sky-500/20 group-hover:scale-105 transition-transform duration-300 flex-shrink-0">
+                <HeartPulse className="w-4 h-4 sm:w-6 sm:h-6 animate-pulse" />
               </div>
               <div className="flex flex-col">
                 <div className="flex items-center gap-1">
-                  <span className="text-base sm:text-lg lg:text-xl font-bold tracking-tight text-slate-900 dark:text-white leading-tight whitespace-nowrap">
+                  <span className="text-sm sm:text-lg lg:text-xl font-bold tracking-tight text-slate-900 dark:text-white leading-tight whitespace-nowrap">
                     Digital<span className="text-sky-600 dark:text-sky-400">Medical</span>
                   </span>
                 </div>
-                <span className="text-[9px] sm:text-[10px] text-slate-500 dark:text-slate-400 font-medium tracking-wider uppercase block whitespace-nowrap">
+                <span className="text-[9px] sm:text-[10px] text-slate-500 dark:text-slate-400 font-medium tracking-wider uppercase hidden min-[360px]:block whitespace-nowrap">
                   Healthcare Network
                 </span>
               </div>
@@ -212,7 +212,7 @@ export default function Navbar({ onOpenAppointment }: NavbarProps) {
             </div>
 
             {/* Actions & Theme Switcher */}
-            <div className="flex items-center gap-1.5 sm:gap-2.5 flex-shrink-0">
+            <div className="flex items-center gap-1 sm:gap-2.5 flex-shrink-0">
 
 
               {/* Search Bar Trigger */}
@@ -260,7 +260,7 @@ export default function Navbar({ onOpenAppointment }: NavbarProps) {
               {patientUser ? (
                 <Link
                   href="/patient/dashboard"
-                  className="inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-full bg-sky-50 dark:bg-sky-950/70 border border-sky-200 dark:border-sky-800 text-sky-700 dark:text-sky-300 hover:border-sky-400 font-semibold text-xs transition-all shadow-sm group"
+                  className="inline-flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 rounded-full bg-sky-50 dark:bg-sky-950/70 border border-sky-200 dark:border-sky-800 text-sky-700 dark:text-sky-300 hover:border-sky-400 font-semibold text-xs transition-all shadow-sm group"
                   title="Open Patient Portal / My Appointments"
                 >
                   <div className="w-5 h-5 rounded-full bg-gradient-to-tr from-sky-600 to-teal-500 text-white flex items-center justify-center text-[10px] font-bold group-hover:scale-110 transition-transform flex-shrink-0">
@@ -274,7 +274,7 @@ export default function Navbar({ onOpenAppointment }: NavbarProps) {
               ) : (
                 <button
                   onClick={() => setLoginModalOpen(true)}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold text-slate-700 dark:text-slate-200 hover:text-sky-600 dark:hover:text-sky-400 hover:bg-sky-50 dark:hover:bg-slate-800 transition-colors"
+                  className="inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 rounded-full text-xs font-semibold text-slate-700 dark:text-slate-200 hover:text-sky-600 dark:hover:text-sky-400 hover:bg-sky-50 dark:hover:bg-slate-800 transition-colors"
                   title="Patient Sign In / Check Appointments"
                 >
                   <LogIn className="w-3.5 h-3.5 text-sky-500" />

@@ -225,7 +225,7 @@ export default function PatientLoginModal({ isOpen, onClose }: PatientLoginModal
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-[1250] flex items-center justify-center p-4">
+      <div className="fixed inset-0 z-[1250] flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
         {/* Backdrop */}
         <motion.div
           initial={{ opacity: 0 }}
@@ -243,28 +243,28 @@ export default function PatientLoginModal({ isOpen, onClose }: PatientLoginModal
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 15 }}
           transition={{ type: "spring", stiffness: 350, damping: 28 }}
-          className="relative w-full max-w-md bg-white dark:bg-[#0c1424] rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden z-10"
+          className="relative w-full max-w-[calc(100vw-1.5rem)] sm:max-w-md max-h-[min(90dvh,720px)] flex flex-col bg-white dark:bg-[#0c1424] rounded-2xl sm:rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden z-10"
         >
           {/* Header */}
-          <div className="p-6 pb-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
-            <div>
-              <span className="text-[10px] font-extrabold uppercase tracking-wider text-sky-600 dark:text-sky-400 block">
+          <div className="p-4 sm:p-6 pb-3 sm:pb-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between flex-shrink-0">
+            <div className="min-w-0 pr-2">
+              <span className="text-[10px] font-extrabold uppercase tracking-wider text-sky-600 dark:text-sky-400 block truncate">
                 {portalTab === "patient" ? "DigitalMedical Patient Desk" : "DigitalMedical Administration"}
               </span>
-              <h2 className="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-white">
+              <h2 className="text-base sm:text-xl font-extrabold text-slate-900 dark:text-white truncate">
                 {portalTab === "patient" ? "Patient Account Login" : "Admin Portal Sign In"}
               </h2>
             </div>
             <button
               onClick={onClose}
-              className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-700 dark:hover:text-white transition-colors cursor-pointer"
+              className="p-1.5 sm:p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-700 dark:hover:text-white transition-colors cursor-pointer shrink-0"
             >
               <X className="w-5 h-5" />
             </button>
           </div>
 
           {/* Primary Top-level Switcher: Patient Login vs Admin Login */}
-          <div className="px-6 pt-4">
+          <div className="px-4 sm:px-6 pt-3 sm:pt-4 flex-shrink-0">
             <div className="grid grid-cols-2 gap-1.5 p-1 rounded-2xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
               <button
                 type="button"
@@ -273,14 +273,14 @@ export default function PatientLoginModal({ isOpen, onClose }: PatientLoginModal
                   setErrorMsg("");
                   setSuccessMsg("");
                 }}
-                className={`py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                className={`py-2 px-2 sm:px-3 rounded-xl text-[11px] sm:text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1 sm:gap-1.5 ${
                   portalTab === "patient"
                     ? "bg-white dark:bg-slate-800 text-sky-600 dark:text-sky-400 shadow-sm"
                     : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
                 }`}
               >
-                <User className="w-3.5 h-3.5" />
-                <span>Patient Login</span>
+                <User className="w-3.5 h-3.5 shrink-0" />
+                <span className="truncate">Patient Login</span>
               </button>
 
               <button
@@ -290,62 +290,64 @@ export default function PatientLoginModal({ isOpen, onClose }: PatientLoginModal
                   setErrorMsg("");
                   setSuccessMsg("");
                 }}
-                className={`py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                className={`py-2 px-2 sm:px-3 rounded-xl text-[11px] sm:text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1 sm:gap-1.5 ${
                   portalTab === "admin"
                     ? "bg-white dark:bg-slate-800 text-teal-600 dark:text-teal-400 shadow-sm"
                     : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
                 }`}
               >
-                <ShieldCheck className="w-3.5 h-3.5" />
-                <span>Admin Login</span>
+                <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
+                <span className="truncate">Admin Login</span>
               </button>
             </div>
           </div>
 
-          {/* ==================================================== */}
-          {/* OPTION 1: PATIENT LOGIN (Completely Preserved)        */}
-          {/* ==================================================== */}
-          {portalTab === "patient" && (
-            <>
-              {/* Sub-tabs for Patient Login: OTP vs Password */}
-              <div className="px-6 pt-3">
-                <div className="grid grid-cols-2 gap-1.5 p-1 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800/80">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setAuthMode("otp");
-                      setErrorMsg("");
-                    }}
-                    className={`py-1.5 px-3 rounded-xl text-[11px] font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-                      authMode === "otp"
-                        ? "bg-white dark:bg-slate-800 text-sky-600 dark:text-sky-400 shadow-sm"
-                        : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
-                    }`}
-                  >
-                    <Sparkles className="w-3 h-3 text-amber-500" />
-                    <span>Phone + OTP</span>
-                  </button>
+          {/* Scrollable Body Content */}
+          <div className="overflow-y-auto overscroll-contain flex-1">
+            {/* ==================================================== */}
+            {/* OPTION 1: PATIENT LOGIN (Completely Preserved)        */}
+            {/* ==================================================== */}
+            {portalTab === "patient" && (
+              <>
+                {/* Sub-tabs for Patient Login: OTP vs Password */}
+                <div className="px-4 sm:px-6 pt-3">
+                  <div className="grid grid-cols-2 gap-1.5 p-1 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800/80">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setAuthMode("otp");
+                        setErrorMsg("");
+                      }}
+                      className={`py-1.5 px-2 sm:px-3 rounded-xl text-[10px] sm:text-[11px] font-bold transition-all cursor-pointer flex items-center justify-center gap-1 sm:gap-1.5 ${
+                        authMode === "otp"
+                          ? "bg-white dark:bg-slate-800 text-sky-600 dark:text-sky-400 shadow-sm"
+                          : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
+                      }`}
+                    >
+                      <Sparkles className="w-3 h-3 text-amber-500 shrink-0" />
+                      <span className="truncate">Phone + OTP</span>
+                    </button>
 
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setAuthMode("password");
-                      setErrorMsg("");
-                    }}
-                    className={`py-1.5 px-3 rounded-xl text-[11px] font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-                      authMode === "password"
-                        ? "bg-white dark:bg-slate-800 text-sky-600 dark:text-sky-400 shadow-sm"
-                        : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
-                    }`}
-                  >
-                    <KeyRound className="w-3 h-3" />
-                    <span>Phone + Password</span>
-                  </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setAuthMode("password");
+                        setErrorMsg("");
+                      }}
+                      className={`py-1.5 px-2 sm:px-3 rounded-xl text-[10px] sm:text-[11px] font-bold transition-all cursor-pointer flex items-center justify-center gap-1 sm:gap-1.5 ${
+                        authMode === "password"
+                          ? "bg-white dark:bg-slate-800 text-sky-600 dark:text-sky-400 shadow-sm"
+                          : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
+                      }`}
+                    >
+                      <KeyRound className="w-3 h-3 shrink-0" />
+                      <span className="truncate">Phone + Password</span>
+                    </button>
+                  </div>
                 </div>
-              </div>
 
-              {/* Form Content */}
-              <div className="p-6 space-y-4">
+                {/* Form Content */}
+                <div className="p-4 sm:p-6 space-y-3.5 sm:space-y-4">
                 {errorMsg && (
                   <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-900 text-xs text-rose-600 dark:text-rose-300 font-semibold text-center">
                     {errorMsg}
@@ -559,7 +561,7 @@ export default function PatientLoginModal({ isOpen, onClose }: PatientLoginModal
           {/* OPTION 2: ADMIN LOGIN (Super Admin & Clinic Admin)    */}
           {/* ==================================================== */}
           {portalTab === "admin" && (
-            <div className="p-6 space-y-4">
+            <div className="p-4 sm:p-6 space-y-3.5 sm:space-y-4">
               {/* Subtle Role Identification Guidance */}
               <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 flex items-start gap-2.5">
                 <ShieldCheck className="w-4 h-4 text-teal-600 dark:text-teal-400 mt-0.5 shrink-0" />
@@ -581,7 +583,7 @@ export default function PatientLoginModal({ isOpen, onClose }: PatientLoginModal
                 </div>
               )}
 
-              <form onSubmit={handleAdminLogin} className="space-y-4">
+              <form onSubmit={handleAdminLogin} className="space-y-3.5 sm:space-y-4">
                 {/* Admin Email */}
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5">
@@ -639,14 +641,14 @@ export default function PatientLoginModal({ isOpen, onClose }: PatientLoginModal
                   <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block">
                     Quick Demo Credentials:
                   </span>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     <button
                       type="button"
                       onClick={handleFillSuperAdminDemo}
-                      className="p-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60 hover:border-teal-500 text-left transition-colors cursor-pointer group"
+                      className="p-2 sm:p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60 hover:border-teal-500 text-left transition-colors cursor-pointer group"
                     >
                       <div className="flex items-center gap-1.5 text-xs font-bold text-slate-800 dark:text-slate-200 group-hover:text-teal-600 dark:group-hover:text-teal-400">
-                        <Sparkles className="w-3 h-3 text-amber-500" />
+                        <Sparkles className="w-3 h-3 text-amber-500 shrink-0" />
                         <span>Super Admin</span>
                       </div>
                       <span className="text-[10px] text-slate-400 font-mono block truncate">
@@ -657,10 +659,10 @@ export default function PatientLoginModal({ isOpen, onClose }: PatientLoginModal
                     <button
                       type="button"
                       onClick={handleFillClinicAdminDemo}
-                      className="p-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60 hover:border-teal-500 text-left transition-colors cursor-pointer group"
+                      className="p-2 sm:p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60 hover:border-teal-500 text-left transition-colors cursor-pointer group"
                     >
                       <div className="flex items-center gap-1.5 text-xs font-bold text-slate-800 dark:text-slate-200 group-hover:text-teal-600 dark:group-hover:text-teal-400">
-                        <Building2 className="w-3 h-3 text-teal-500" />
+                        <Building2 className="w-3 h-3 text-teal-500 shrink-0" />
                         <span>Clinic Admin</span>
                       </div>
                       <span className="text-[10px] text-slate-400 font-mono block truncate">
@@ -702,6 +704,7 @@ export default function PatientLoginModal({ isOpen, onClose }: PatientLoginModal
               </div>
             </div>
           )}
+          </div>
         </motion.div>
       </div>
     </AnimatePresence>

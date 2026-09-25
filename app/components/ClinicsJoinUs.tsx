@@ -115,16 +115,16 @@ export default function ClinicsJoinUs() {
           <div className="mt-5 flex items-center justify-center gap-3">
             <Link
               href="/clinic/register"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-sky-600 via-sky-500 to-teal-500 hover:from-sky-500 hover:to-teal-400 text-white font-bold text-xs uppercase tracking-wider shadow-lg shadow-sky-600/30 transition-all group cursor-pointer"
+              className="inline-flex items-center justify-center gap-2 px-4 sm:px-6 py-3 rounded-full bg-gradient-to-r from-sky-600 via-sky-500 to-teal-500 hover:from-sky-500 hover:to-teal-400 text-white font-bold text-[11px] sm:text-xs uppercase tracking-wider shadow-lg shadow-sky-600/30 transition-all group cursor-pointer max-w-full text-center"
             >
               <span>Launch Clinic Registration Wizard</span>
-              <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+              <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1 shrink-0" />
             </Link>
           </div>
         </div>
 
         {/* ── Stepper Card — glassmorphism matching site theme ── */}
-        <div className="relative overflow-hidden rounded-3xl border border-white/10 dark:border-slate-700/60 bg-white/[0.04] dark:bg-slate-900/70 backdrop-blur-2xl shadow-2xl shadow-sky-950/40 p-6 sm:p-10">
+        <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-white/10 dark:border-slate-700/60 bg-white/[0.04] dark:bg-slate-900/70 backdrop-blur-2xl shadow-2xl shadow-sky-950/40 p-4 sm:p-10">
 
           {/* Step Progress Tabs */}
           <div className="grid grid-cols-2 gap-3 mb-8 pb-6 border-b border-white/10 dark:border-slate-800">
