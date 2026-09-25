@@ -433,12 +433,12 @@ export default function ClinicDashboardPage() {
               className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm"
               onClick={() => setIsMobileMenuOpen(false)}
             />
-            <div className="relative z-10 w-72 h-full bg-white dark:bg-slate-900 shadow-2xl flex flex-col">
-              <div className="p-4 flex items-center justify-between border-b border-slate-100 dark:border-slate-800">
-                <span className="font-black text-sm text-slate-900 dark:text-white">Menu</span>
+            <div className="relative z-10 w-64 h-full bg-[#152332] text-gray-300 shadow-2xl flex flex-col">
+              <div className="p-4 flex items-center justify-between border-b border-gray-700/50">
+                <span className="font-bold text-sm text-white">Menu</span>
                 <button
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="p-1 rounded-lg text-slate-400"
+                  className="p-1 rounded-lg text-gray-400 hover:text-white"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -468,7 +468,7 @@ export default function ClinicDashboardPage() {
         {/* Right Content Workspace */}
         <div
           className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ${
-            isSidebarCollapsed ? "md:ml-20" : "md:ml-72"
+            isSidebarCollapsed ? "md:ml-20" : "md:ml-64"
           }`}
         >
           {/* Topbar */}
