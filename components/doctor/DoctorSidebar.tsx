@@ -324,13 +324,22 @@ export default function DoctorSidebar() {
         </div>
 
         {/* Doctor portal exit/logout */}
-        <Link
-          href="/"
-          className="flex items-center justify-center gap-2 w-full py-2 px-3 text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 rounded-xl hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
+        <button
+          onClick={() => {
+            if (typeof window !== "undefined") {
+              try {
+                localStorage.removeItem("dm_doctor_session");
+              } catch (e) {
+                // ignore
+              }
+              window.location.href = "/";
+            }
+          }}
+          className="flex items-center justify-center gap-2 w-full py-2 px-3 text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 rounded-xl hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors cursor-pointer"
         >
           <LogOut className="w-3.5 h-3.5" />
           <span>Exit Workspace</span>
-        </Link>
+        </button>
       </div>
     </div>
   );
