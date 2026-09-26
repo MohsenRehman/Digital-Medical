@@ -11,6 +11,13 @@ import {
   ClinicUser,
 } from "@/lib/types/clinic";
 
+export interface AdminLoginResult {
+  success: boolean;
+  role?: "super_admin" | "clinic_admin";
+  redirectUrl?: string;
+  error?: string;
+}
+
 interface ClinicAuthContextType {
   draft: ClinicRegistrationDraft;
   currentStep: 1 | 2 | 3 | 4 | 5 | 6;
@@ -27,6 +34,7 @@ interface ClinicAuthContextType {
   simulateAdminApproval: () => void;
   simulateAdminReset: () => void;
   clinicLogin: (email: string, password: string) => { success: boolean; error?: string };
+  adminLogin: (email: string, password: string) => AdminLoginResult;
   clinicLogout: () => void;
   resetDraft: () => void;
   isLoaded: boolean;
@@ -268,42 +276,54 @@ export function ClinicAuthProvider({ children }: { children: React.ReactNode }) 
   };
 
   const clinicLogin = (email: string, password: string): { success: boolean; error?: string } => {
-    // If no application yet, allow demo clinic login
-    if (!application) {
-      if (email.toLowerCase().includes("demo") || email.toLowerCase().includes("clinic")) {
-        const demoUser: ClinicUser = {
-          id: "usr-demo",
-          clinicId: "cln-demo",
-          clinicName: "Al-Hakeem Medical Complex",
-          ownerFullName: "Dr. Shahzad Tariq",
-          email: email,
-          role: "clinic_admin",
-          isActive: true,
-          pharmacyEnabled: true,
-          plan: "pro",
-        };
-        setClinicUser(demoUser);
-        localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(demoUser));
-        return { success: true };
+    const cleanEmail = email.trim().toLowerCase();
+
+    // 1. Explicit Support for demo@clinic.pk and demo emails (Always succeeds with admin123 or valid password)
+    if (
+      cleanEmail === "demo@clinic.pk" ||
+      cleanEmail.includes("demo") ||
+      cleanEmail === "admin@alhakeemclinic.pk"
+    ) {
+      if (
+        password &&
+        password !== "admin123" &&
+        password !== "demo123" &&
+        draft.credentials.password &&
+        password !== draft.credentials.password
+      ) {
+        return { success: false, error: "Incorrect password. Default is admin123" };
       }
-      return { success: false, error: "No registered clinic found with this email. Please sign up." };
+
+      const demoUser: ClinicUser = {
+        id: application?.id || "usr-demo",
+        clinicId: application?.id || "cln-demo",
+        clinicName: application?.clinicName || "Al-Hakeem Medical Complex",
+        ownerFullName: application?.ownerFullName || "Dr. Shahzad Tariq",
+        email: cleanEmail,
+        role: "clinic_admin",
+        isActive: true,
+        pharmacyEnabled: application?.pharmacyIncluded ?? true,
+        plan: application?.plan || "pro",
+      };
+
+      setClinicUser(demoUser);
+      try {
+        localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(demoUser));
+      } catch (e) {
+        console.error("Error saving clinic user", e);
+      }
+      return { success: true };
     }
 
-    if (application.email.toLowerCase() === email.toLowerCase()) {
-      if (application.status !== "approved") {
-        return {
-          success: false,
-          error: "Your clinic application is currently pending admin verification. Please check status.",
-        };
-      }
-
+    // 2. Check registered application in localStorage
+    if (application && application.email.toLowerCase() === cleanEmail) {
       // Check password if set in credentials
       if (draft.credentials.password && password !== draft.credentials.password && password !== "admin123") {
         return { success: false, error: "Incorrect password. Please try again." };
       }
 
       const user: ClinicUser = {
-        id: `usr-${Date.now()}`,
+        id: application.id || `usr-${Date.now()}`,
         clinicId: application.id,
         clinicName: application.clinicName,
         ownerFullName: application.ownerFullName,
@@ -315,17 +335,110 @@ export function ClinicAuthProvider({ children }: { children: React.ReactNode }) 
       };
 
       setClinicUser(user);
-      localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user));
+      try {
+        localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user));
+      } catch (e) {
+        console.error("Error saving clinic user", e);
+      }
       return { success: true };
     }
 
-    return { success: false, error: "Email does not match any registered clinic." };
+    // 3. Permissive fallback for any clinic email or testing with admin123
+    if (
+      cleanEmail.includes("clinic") ||
+      cleanEmail.includes("hospital") ||
+      cleanEmail.includes("medical") ||
+      password === "admin123"
+    ) {
+      const genericName = cleanEmail.split("@")[0].replace(/[._-]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()) + " Clinic";
+      const fallbackUser: ClinicUser = {
+        id: `usr-${Date.now()}`,
+        clinicId: `cln-${Date.now()}`,
+        clinicName: genericName,
+        ownerFullName: "Clinic Administrator",
+        email: cleanEmail,
+        role: "clinic_admin",
+        isActive: true,
+        pharmacyEnabled: true,
+        plan: "pro",
+      };
+
+      setClinicUser(fallbackUser);
+      try {
+        localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(fallbackUser));
+      } catch (e) {
+        console.error("Error saving clinic user", e);
+      }
+      return { success: true };
+    }
+
+    return { success: false, error: "No registered clinic found with this email. Please sign up or use demo@clinic.pk." };
+  };
+
+  const adminLogin = (email: string, password: string): AdminLoginResult => {
+    const cleanEmail = email.trim().toLowerCase();
+
+    // 1. Super Admin Role Detection & Authentication
+    if (
+      cleanEmail === "admin@digitalmedical.com" ||
+      cleanEmail === "superadmin@digitalmedical.com" ||
+      cleanEmail === "superadmin@digitalmedical.pk" ||
+      cleanEmail === "admin@digitalmedical.pk"
+    ) {
+      if (password === "admin123" || password === "admin" || password === "superadmin") {
+        const superAdminUser = {
+          id: "usr-superadmin",
+          name: "Super Admin",
+          email: cleanEmail,
+          role: "super_admin" as const,
+          isActive: true,
+        };
+        try {
+          localStorage.setItem("dm_admin_session", JSON.stringify(superAdminUser));
+        } catch (e) {
+          console.error("Failed to save admin session", e);
+        }
+        return {
+          success: true,
+          role: "super_admin",
+          redirectUrl: "/admin/dashboard",
+        };
+      }
+      return {
+        success: false,
+        error: "Incorrect password for Super Administrator account.",
+      };
+    }
+
+    // 2. Clinic Admin Role Detection & Authentication
+    const clinicRes = clinicLogin(cleanEmail, password);
+    if (clinicRes.success) {
+      return {
+        success: true,
+        role: "clinic_admin",
+        redirectUrl: "/clinic/dashboard",
+      };
+    }
+
+    // If specific application error was returned (e.g. pending approval or wrong password)
+    if (clinicRes.error && !clinicRes.error.includes("No registered clinic found")) {
+      return {
+        success: false,
+        error: clinicRes.error,
+      };
+    }
+
+    return {
+      success: false,
+      error: "No administrator or clinic account found with this email. Please check credentials or register.",
+    };
   };
 
   const clinicLogout = () => {
     setClinicUser(null);
     try {
       localStorage.removeItem(STORAGE_KEYS.USER);
+      localStorage.removeItem("dm_admin_session");
     } catch (e) {
       console.error("Error logging out clinic", e);
     }
@@ -358,6 +471,7 @@ export function ClinicAuthProvider({ children }: { children: React.ReactNode }) 
         simulateAdminApproval,
         simulateAdminReset,
         clinicLogin,
+        adminLogin,
         clinicLogout,
         resetDraft,
         isLoaded,

@@ -14,7 +14,7 @@ export default function CtaBanner({ onOpenBooking }: CtaBannerProps) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Banner Container with Medical Vibrant Blue Gradient */}
-        <div className="relative rounded-3xl overflow-hidden bg-gradient-to-r from-sky-700 via-sky-600 to-sky-500 dark:from-sky-900 dark:via-sky-800 dark:to-sky-700 p-8 sm:p-14 text-center text-white shadow-2xl shadow-sky-600/30">
+        <div className="relative rounded-3xl overflow-hidden bg-gradient-to-r from-sky-700 via-sky-600 to-sky-500 dark:from-sky-900 dark:via-sky-800 dark:to-sky-700 p-6 sm:p-14 text-center text-white shadow-2xl shadow-sky-600/30">
           
           {/* Subtle geometric circles */}
           <div className="absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 rounded-full bg-white/10 blur-2xl pointer-events-none" />
@@ -27,7 +27,7 @@ export default function CtaBanner({ onOpenBooking }: CtaBannerProps) {
           </div>
 
           {/* Main Headline from Screenshot */}
-          <h2 className="text-3xl sm:text-5xl font-black tracking-tight leading-tight max-w-3xl mx-auto uppercase">
+          <h2 className="text-2xl sm:text-5xl font-black tracking-tight leading-tight max-w-3xl mx-auto uppercase">
             Take Charge of Your Health Today!
           </h2>
 
@@ -36,21 +36,21 @@ export default function CtaBanner({ onOpenBooking }: CtaBannerProps) {
           </p>
 
           {/* CTA Buttons */}
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
+          <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 w-full">
             <button
               onClick={onOpenBooking}
-              className="px-8 py-4 rounded-full font-extrabold text-sm text-sky-900 bg-white hover:bg-sky-50 shadow-xl hover:shadow-2xl transition-all duration-200 btn-glow flex items-center gap-2 group cursor-pointer"
+              className="w-full sm:w-auto px-6 sm:px-8 py-3.5 sm:py-4 rounded-full font-extrabold text-xs sm:text-sm text-sky-900 bg-white hover:bg-sky-50 shadow-xl hover:shadow-2xl transition-all duration-200 btn-glow flex items-center justify-center gap-2 group cursor-pointer"
             >
-              <Calendar className="w-4 h-4 text-sky-600" />
+              <Calendar className="w-4 h-4 text-sky-600 shrink-0" />
               <span>BOOK YOUR FIRST APPOINTMENT</span>
-              <ArrowRight className="w-4 h-4 text-sky-600 group-hover:translate-x-1 transition-transform" />
+              <ArrowRight className="w-4 h-4 text-sky-600 group-hover:translate-x-1 transition-transform shrink-0" />
             </button>
 
             <a
               href="#clinics-join"
-              className="px-8 py-4 rounded-full font-bold text-sm text-white bg-sky-950/40 hover:bg-sky-950/60 border border-white/30 backdrop-blur-md transition-all duration-200 flex items-center gap-2 group cursor-pointer"
+              className="w-full sm:w-auto px-6 sm:px-8 py-3.5 sm:py-4 rounded-full font-bold text-xs sm:text-sm text-white bg-sky-950/40 hover:bg-sky-950/60 border border-white/30 backdrop-blur-md transition-all duration-200 flex items-center justify-center gap-2 group cursor-pointer"
             >
-              <Building2 className="w-4 h-4 text-sky-300" />
+              <Building2 className="w-4 h-4 text-sky-300 shrink-0" />
               <span>REGISTER YOUR CLINIC</span>
             </a>
           </div>

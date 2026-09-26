@@ -31,9 +31,9 @@ pnpm-debug.log*
 next-env.d.ts
 
 # ============================
-#  Package Managers
+#  Package Managers (Locks tracked for Vercel/CI reproducibility)
 # ============================
-package-lock.json
+# package-lock.json
 yarn.lock
 pnpm-lock.yaml
 
