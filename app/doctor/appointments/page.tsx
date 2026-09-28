@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect, Suspense } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   CalendarDays,
   Clock,
@@ -24,15 +24,61 @@ import {
 import { useDoctor } from "@/app/context/DoctorContext";
 import { DoctorAppointment, AppointmentStatus } from "@/lib/types/doctor";
 
-export default function DoctorAppointmentsPage() {
+function DoctorAppointmentsContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { appointments, updateAppointmentStatus, activeClinic } = useDoctor();
 
+  const filterParam = searchParams.get("filter");
+  const statusParam = searchParams.get("status");
+  const dateParam = searchParams.get("date");
+
+  const getInitialDateFilter = (): "today" | "tomorrow" | "this_week" | "all" => {
+    if (filterParam === "tomorrow" || dateParam === "tomorrow") return "tomorrow";
+    if (filterParam === "this_week" || dateParam === "this_week") return "this_week";
+    if (filterParam === "all" || dateParam === "all") return "all";
+    return "today";
+  };
+
+  const getInitialStatusFilter = (): string => {
+    if (filterParam === "upcoming" || statusParam === "upcoming") return "upcoming";
+    if (
+      statusParam &&
+      ["waiting", "in_progress", "confirmed", "scheduled", "completed", "no_show", "cancelled"].includes(
+        statusParam
+      )
+    ) {
+      return statusParam;
+    }
+    return "all";
+  };
+
   // Filters
-  const [dateFilter, setDateFilter] = useState<"today" | "tomorrow" | "this_week" | "all">("today");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [dateFilter, setDateFilter] = useState<"today" | "tomorrow" | "this_week" | "all">(getInitialDateFilter);
+  const [statusFilter, setStatusFilter] = useState<string>(getInitialStatusFilter);
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
+
+  // Sync filters if URL search params change
+  useEffect(() => {
+    if (filterParam === "upcoming" || statusParam === "upcoming") {
+      setStatusFilter("upcoming");
+    } else if (statusParam) {
+      setStatusFilter(statusParam);
+    } else if (filterParam === "today") {
+      setStatusFilter("all");
+    }
+
+    if (filterParam === "today" || dateParam === "today") {
+      setDateFilter("today");
+    } else if (filterParam === "tomorrow" || dateParam === "tomorrow") {
+      setDateFilter("tomorrow");
+    } else if (filterParam === "this_week" || dateParam === "this_week") {
+      setDateFilter("this_week");
+    } else if (filterParam === "all" || dateParam === "all") {
+      setDateFilter("all");
+    }
+  }, [filterParam, statusParam, dateParam]);
 
   // Action modal state
   const [cancelModalApt, setCancelModalApt] = useState<DoctorAppointment | null>(null);
@@ -97,8 +143,13 @@ export default function DoctorAppointmentsPage() {
     return appointments.filter((apt) => {
       // Date filter
       if (dateFilter === "today" && apt.scheduledAt !== "2026-09-24") return false;
+      if (dateFilter === "tomorrow" && apt.scheduledAt !== "2026-09-25") return false;
       // Status filter
-      if (statusFilter !== "all" && apt.status !== statusFilter) return false;
+      if (statusFilter === "upcoming") {
+        if (apt.status !== "scheduled" && apt.status !== "confirmed") return false;
+      } else if (statusFilter !== "all" && apt.status !== statusFilter) {
+        return false;
+      }
       // Type filter
       if (typeFilter !== "all" && apt.consultationType !== typeFilter) return false;
       // Search
@@ -190,6 +241,7 @@ export default function DoctorAppointmentsPage() {
             className="px-3 py-2 rounded-xl text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 focus:outline-none"
           >
             <option value="all">All Statuses ({appointments.length})</option>
+            <option value="upcoming">Upcoming (Scheduled & Confirmed)</option>
             <option value="waiting">Waiting in Clinic</option>
             <option value="in_progress">In Progress</option>
             <option value="confirmed">Confirmed</option>
@@ -427,3 +479,12 @@ export default function DoctorAppointmentsPage() {
     </div>
   );
 }
+
+export default function DoctorAppointmentsPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center text-xs text-slate-400">Loading appointments...</div>}>
+      <DoctorAppointmentsContent />
+    </Suspense>
+  );
+}
+

@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import {
   Stethoscope,
   Search,
@@ -18,11 +19,26 @@ import { useDoctor } from "@/app/context/DoctorContext";
 import PrescriptionPreviewModal from "@/components/doctor/PrescriptionPreviewModal";
 import { DigitalPrescription } from "@/lib/types/doctor";
 
-export default function DoctorConsultationsPage() {
+function DoctorConsultationsContent() {
+  const searchParams = useSearchParams();
+  const statusParam = searchParams.get("status");
+
   const { consultations, appointments, prescriptions, activeClinic } = useDoctor();
   const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState(() => {
+    if (statusParam && ["all", "in_progress", "draft", "completed"].includes(statusParam)) {
+      return statusParam;
+    }
+    return "all";
+  });
   const [selectedPrescription, setSelectedPrescription] = useState<DigitalPrescription | null>(null);
+
+  // Sync statusFilter if URL search params change
+  useEffect(() => {
+    if (statusParam && ["all", "in_progress", "draft", "completed"].includes(statusParam)) {
+      setStatusFilter(statusParam);
+    }
+  }, [statusParam]);
 
   const filteredConsultations = consultations.filter((enc) => {
     if (statusFilter !== "all" && enc.status !== statusFilter) return false;
@@ -184,3 +200,12 @@ export default function DoctorConsultationsPage() {
     </div>
   );
 }
+
+export default function DoctorConsultationsPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center text-xs text-slate-400">Loading consultations...</div>}>
+      <DoctorConsultationsContent />
+    </Suspense>
+  );
+}
+

@@ -1,330 +1,325 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   User,
+  Stethoscope,
   ShieldCheck,
   Building2,
   DollarSign,
-  Globe,
+  Clock,
+  Eye,
+  Star,
+  Bell,
+  Key,
+  Sliders,
   Award,
-  Save,
   CheckCircle2,
   ExternalLink,
   Lock,
 } from "lucide-react";
 import { useDoctor } from "@/app/context/DoctorContext";
+import DoctorProfileHeader from "@/components/doctor/settings/DoctorProfileHeader";
+import ProfilePhotoUploader from "@/components/doctor/settings/ProfilePhotoUploader";
+import PersonalInfoForm from "@/components/doctor/settings/PersonalInfoForm";
+import ProfessionalInfoForm from "@/components/doctor/settings/ProfessionalInfoForm";
+import DoctorVerificationCard from "@/components/doctor/settings/DoctorVerificationCard";
+import ProfessionalDocumentsCard from "@/components/doctor/settings/ProfessionalDocumentsCard";
+import ClinicAffiliationsCard from "@/components/doctor/settings/ClinicAffiliationsCard";
+import ConsultationSettingsCard from "@/components/doctor/settings/ConsultationSettingsCard";
+import AvailabilityEditorTab from "@/components/doctor/settings/AvailabilityEditorTab";
+import PublicProfilePreviewTab from "@/components/doctor/settings/PublicProfilePreviewTab";
+import PatientReviewsTab from "@/components/doctor/settings/PatientReviewsTab";
+import NotificationPreferencesCard from "@/components/doctor/settings/NotificationPreferencesCard";
+import SecuritySettingsCard from "@/components/doctor/settings/SecuritySettingsCard";
+import AccountSettingsCard from "@/components/doctor/settings/AccountSettingsCard";
 
-export default function DoctorSettingsPage() {
-  const { doctor, updateDoctorProfile, activeClinic } = useDoctor();
+const SETTINGS_TABS = [
+  { id: "profile", label: "Profile", icon: User },
+  { id: "professional", label: "Professional", icon: Stethoscope },
+  { id: "documents", label: "Verification & Docs", icon: ShieldCheck },
+  { id: "clinics", label: "Clinics & Practice", icon: Building2 },
+  { id: "consultation", label: "Consultation Settings", icon: DollarSign },
+  { id: "availability", label: "Availability", icon: Clock },
+  { id: "public", label: "Public Profile", icon: Eye },
+  { id: "reviews", label: "Patient Feedback", icon: Star },
+  { id: "notifications", label: "Notifications", icon: Bell },
+  { id: "security", label: "Security", icon: Key },
+  { id: "account", label: "Account", icon: Sliders },
+] as const;
 
-  const [name, setName] = useState(doctor.name);
-  const [specialty, setSpecialty] = useState(doctor.specialty);
-  const [subSpecialty, setSubSpecialty] = useState(doctor.subSpecialty || "");
-  const [bio, setBio] = useState(doctor.bio);
-  const [consultationFee, setConsultationFee] = useState(doctor.consultationFee);
-  const [videoFee, setVideoFee] = useState(doctor.videoConsultationFee);
-  const [experienceYears, setExperienceYears] = useState(doctor.experienceYears);
+type TabId = (typeof SETTINGS_TABS)[number]["id"];
 
-  const [savedSuccess, setSavedSuccess] = useState(false);
+function DoctorSettingsContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const { doctor, updateDoctorProfile, activeClinic, switchClinic, availability, updateAvailability, reviews } = useDoctor();
 
-  const handleSave = (e: React.FormEvent) => {
-    e.preventDefault();
+  const tabParam = searchParams.get("tab") as TabId | null;
+  const [activeTab, setActiveTab] = useState<TabId>(() => {
+    if (tabParam && SETTINGS_TABS.some((t) => t.id === tabParam)) {
+      return tabParam;
+    }
+    return "profile";
+  });
+
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (tabParam && SETTINGS_TABS.some((t) => t.id === tabParam)) {
+      setActiveTab(tabParam);
+    }
+  }, [tabParam]);
+
+  const handleSelectTab = (tabId: string) => {
+    if (SETTINGS_TABS.some((t) => t.id === tabId)) {
+      setActiveTab(tabId as TabId);
+      router.replace(`/doctor/settings?tab=${tabId}`, { scroll: false });
+    }
+  };
+
+  const handleToggleVisibility = (visible: boolean) => {
     updateDoctorProfile({
-      name,
-      specialty,
-      subSpecialty,
-      bio,
-      consultationFee,
-      videoConsultationFee: videoFee,
-      experienceYears,
+      profileVisibility: visible ? "public" : "hidden",
     });
-    setSavedSuccess(true);
-    setTimeout(() => setSavedSuccess(false), 3000);
+    showToast(visible ? "Doctor profile is now visible in discovery directory." : "Doctor profile is now hidden from directory search.");
+  };
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3500);
   };
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div className="space-y-6 max-w-7xl mx-auto">
+      {/* Top Breadcrumb & Page Title */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-xl md:text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
-            Doctor Profile & Clinical Settings
+          <div className="flex items-center gap-2 text-xs text-slate-400 font-medium mb-1">
+            <Link href="/doctor" className="hover:text-sky-600 transition-colors">
+              Doctor Dashboard
+            </Link>
+            <span>/</span>
+            <span className="text-slate-700 dark:text-slate-300 font-semibold">
+              Settings & Profile
+            </span>
+          </div>
+          <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+            Doctor Profile & Practice Settings
           </h1>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            Manage your PMDC credentials, specialty qualifications, and consultation fee structure.
+            Manage your professional identity, clinical credentials, practice locations, fees, and public discovery profile.
           </p>
         </div>
 
         <Link
           href="/doctor/settings/profile"
-          className="px-3.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-200 flex items-center gap-1.5 hover:bg-slate-50 self-start md:self-auto"
+          className="px-4 py-2 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-200 flex items-center gap-1.5 hover:bg-slate-50 dark:hover:bg-slate-700 self-start sm:self-auto shadow-xs"
         >
           <ExternalLink className="w-3.5 h-3.5" />
-          <span>Public Profile Preview</span>
+          <span>Patient-Facing Profile Page →</span>
         </Link>
       </div>
 
-      {savedSuccess && (
-        <div className="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs font-semibold flex items-center gap-2 animate-fadeInUp">
+      {toastMessage && (
+        <div className="p-3.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/70 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs font-semibold flex items-center gap-2 animate-fadeInUp">
           <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-          <span>Doctor credentials and consultation fees updated successfully.</span>
+          <span>{toastMessage}</span>
         </div>
       )}
 
-      {/* Profile Overview Card */}
-      <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col md:flex-row items-center gap-6">
-        <div className="relative">
-          <img
-            src={doctor.avatarUrl}
-            alt={doctor.name}
-            className="w-24 h-24 rounded-3xl object-cover border-4 border-white dark:border-slate-800 shadow-md"
-          />
-          {doctor.pmdcVerified && (
-            <span
-              className="absolute -bottom-1 -right-1 p-1 rounded-full bg-sky-600 text-white shadow-xs"
-              title="Verified by Pakistan Medical & Dental Council"
+      {/* 1. Doctor Profile Header Banner */}
+      <DoctorProfileHeader
+        doctor={doctor}
+        activeClinicName={activeClinic.name}
+        activeClinicCity={activeClinic.city}
+        onSelectTab={handleSelectTab}
+        onToggleVisibility={handleToggleVisibility}
+      />
+
+      {/* 2. Navigation Tabs */}
+      <div className="flex items-center gap-1.5 overflow-x-auto pb-1.5 scrollbar-thin border-b border-slate-200 dark:border-slate-800">
+        {SETTINGS_TABS.map((tab) => {
+          const Icon = tab.icon;
+          const isActive = activeTab === tab.id;
+
+          return (
+            <button
+              key={tab.id}
+              onClick={() => handleSelectTab(tab.id)}
+              className={`flex items-center gap-2 px-3.5 py-2.5 rounded-2xl text-xs font-semibold whitespace-nowrap transition-all ${
+                isActive
+                  ? "bg-sky-600 text-white shadow-sm shadow-sky-600/20"
+                  : "bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200/80 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white"
+              }`}
             >
-              <ShieldCheck className="w-4 h-4" />
-            </span>
-          )}
-        </div>
-
-        <div className="flex-1 text-center md:text-left space-y-1">
-          <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
-            <h2 className="text-xl font-extrabold text-slate-900 dark:text-white">
-              {doctor.name}
-            </h2>
-            {doctor.verificationStatus === "verified" ? (
-              <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 flex items-center gap-1">
-                <ShieldCheck className="w-3.5 h-3.5" />
-                <span>Verified Doctor</span>
-              </span>
-            ) : (
-              <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800">
-                Pending Verification
-              </span>
-            )}
-          </div>
-
-          <p className="text-xs text-sky-700 dark:text-sky-300 font-semibold">{doctor.title}</p>
-          <div className="text-xs text-slate-500 flex flex-wrap items-center justify-center md:justify-start gap-3 pt-1">
-            <span>PMDC Registration: <strong>{doctor.pmdcRegistration}</strong></span>
-            <span>•</span>
-            <span>Experience: <strong>{doctor.experienceYears} Years</strong></span>
-            <span>•</span>
-            <span>Rating: <strong>★ {doctor.rating} ({doctor.reviewCount} reviews)</strong></span>
-          </div>
-        </div>
+              <Icon className={`w-3.5 h-3.5 ${isActive ? "text-white" : "text-slate-400"}`} />
+              <span>{tab.label}</span>
+            </button>
+          );
+        })}
       </div>
 
-      {/* Settings Form */}
-      <form onSubmit={handleSave} className="space-y-6">
-        {/* Basic Clinical Information */}
-        <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-4">
-          <h3 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider">
-            1. Professional Credentials & Identification
-          </h3>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-            <div>
-              <label className="text-[11px] font-bold text-slate-400 uppercase block mb-1">
-                Full Legal Name
-              </label>
-              <input
-                type="text"
-                required
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-semibold"
-              />
-            </div>
-
-            <div>
-              <label className="text-[11px] font-bold text-slate-400 uppercase block mb-1">
-                PMDC Registration Number (Protected)
-              </label>
-              <div className="relative">
-                <input
-                  type="text"
-                  disabled
-                  value={doctor.pmdcRegistration}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 font-mono font-bold text-slate-500 cursor-not-allowed"
-                />
-                <Lock className="w-3.5 h-3.5 absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" />
-              </div>
-              <span className="text-[10px] text-slate-400 mt-0.5 block">
-                PMDC registration is verified with the Pakistan Medical Commission portal.
-              </span>
-            </div>
-
-            <div>
-              <label className="text-[11px] font-bold text-slate-400 uppercase block mb-1">
-                Primary Specialty
-              </label>
-              <input
-                type="text"
-                required
-                value={specialty}
-                onChange={(e) => setSpecialty(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700"
-              />
-            </div>
-
-            <div>
-              <label className="text-[11px] font-bold text-slate-400 uppercase block mb-1">
-                Sub-Specialty Focus
-              </label>
-              <input
-                type="text"
-                value={subSpecialty}
-                onChange={(e) => setSubSpecialty(e.target.value)}
-                placeholder="e.g. Interventional Cardiology & Hypertension"
-                className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="text-[11px] font-bold text-slate-400 uppercase block mb-1">
-              Professional Biography
-            </label>
-            <textarea
-              rows={3}
-              value={bio}
-              onChange={(e) => setBio(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs"
+      {/* 3. Tab Body Content */}
+      <div className="space-y-6">
+        {/* TAB 1: PROFILE (Personal Information & Photo) */}
+        {activeTab === "profile" && (
+          <div className="space-y-6 animate-fadeIn">
+            <ProfilePhotoUploader
+              currentPhotoUrl={doctor.avatarUrl}
+              onPhotoChange={(newUrl) => {
+                updateDoctorProfile({ avatarUrl: newUrl });
+                showToast("Profile photograph updated.");
+              }}
+            />
+            <PersonalInfoForm
+              doctor={doctor}
+              onSave={(updates) => {
+                updateDoctorProfile(updates);
+                showToast("Personal contact information saved.");
+              }}
             />
           </div>
-        </div>
+        )}
 
-        {/* Fees and Consultation Structure */}
-        <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-4">
-          <h3 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider">
-            2. Consultation Fee Structure (PKR)
-          </h3>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
-            <div>
-              <label className="text-[11px] font-bold text-slate-400 uppercase block mb-1">
-                In-Clinic OPD Fee (PKR)
-              </label>
-              <div className="relative">
-                <input
-                  type="number"
-                  min="0"
-                  step="100"
-                  value={consultationFee}
-                  onChange={(e) => setConsultationFee(Number(e.target.value))}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-mono font-bold"
-                />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs font-bold">
-                  PKR
-                </span>
-              </div>
-            </div>
-
-            <div>
-              <label className="text-[11px] font-bold text-slate-400 uppercase block mb-1">
-                Video Telehealth Fee (PKR)
-              </label>
-              <div className="relative">
-                <input
-                  type="number"
-                  min="0"
-                  step="100"
-                  value={videoFee}
-                  onChange={(e) => setVideoFee(Number(e.target.value))}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-mono font-bold"
-                />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs font-bold">
-                  PKR
-                </span>
-              </div>
-            </div>
-
-            <div>
-              <label className="text-[11px] font-bold text-slate-400 uppercase block mb-1">
-                Clinical Experience
-              </label>
-              <div className="relative">
-                <input
-                  type="number"
-                  min="1"
-                  max="60"
-                  value={experienceYears}
-                  onChange={(e) => setExperienceYears(Number(e.target.value))}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-mono font-bold"
-                />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs">
-                  Years
-                </span>
-              </div>
-            </div>
+        {/* TAB 2: PROFESSIONAL */}
+        {activeTab === "professional" && (
+          <div className="space-y-6 animate-fadeIn">
+            <ProfessionalInfoForm
+              doctor={doctor}
+              onSave={(updates) => {
+                updateDoctorProfile(updates);
+                showToast("Professional information and bio saved.");
+              }}
+            />
           </div>
-        </div>
+        )}
 
-        {/* Qualifications & Affiliations Display */}
-        <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-4">
-          <h3 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider">
-            3. Accredited Qualifications & Clinic Branches
-          </h3>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-            <div>
-              <span className="font-bold text-slate-700 dark:text-slate-300 block mb-2">
-                Medical Degrees & Fellowships
-              </span>
-              <ul className="space-y-1.5">
-                {doctor.qualifications.map((q, i) => (
-                  <li key={i} className="flex items-center gap-2 text-slate-600 dark:text-slate-300">
-                    <CheckCircle2 className="w-4 h-4 text-sky-600 flex-shrink-0" />
-                    <span>{q}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div>
-              <span className="font-bold text-slate-700 dark:text-slate-300 block mb-2">
-                Multi-Clinic Affiliations
-              </span>
-              <div className="space-y-2">
-                {doctor.affiliatedClinics.map((clinic) => (
-                  <div
-                    key={clinic.id}
-                    className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-between"
-                  >
-                    <div>
-                      <p className="font-bold text-slate-900 dark:text-white">{clinic.name}</p>
-                      <p className="text-[11px] text-slate-500">
-                        {clinic.city} • {clinic.roomNumber}
-                      </p>
-                    </div>
-                    {clinic.isPrimary && (
-                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-sky-100 text-sky-800">
-                        Primary Hub
-                      </span>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
+        {/* TAB 3: VERIFICATION & DOCUMENTS */}
+        {activeTab === "documents" && (
+          <div className="space-y-6 animate-fadeIn">
+            <DoctorVerificationCard doctor={doctor} />
+            <ProfessionalDocumentsCard
+              documents={doctor.documents || []}
+              onUploadDocument={(newDoc) => {
+                const currentDocs = doctor.documents || [];
+                updateDoctorProfile({
+                  documents: [newDoc, ...currentDocs],
+                });
+                showToast("Document submitted for verification.");
+              }}
+            />
           </div>
-        </div>
+        )}
 
-        {/* Save Button */}
-        <div className="flex items-center justify-end">
-          <button
-            type="submit"
-            className="px-6 py-3 rounded-2xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs md:text-sm flex items-center gap-2 shadow-sm transition-all active:scale-95"
-          >
-            <Save className="w-4 h-4" />
-            <span>Save Profile Settings</span>
-          </button>
-        </div>
-      </form>
+        {/* TAB 4: CLINICS & PRACTICE */}
+        {activeTab === "clinics" && (
+          <div className="space-y-6 animate-fadeIn">
+            <ClinicAffiliationsCard
+              clinics={doctor.affiliatedClinics}
+              activeClinicId={doctor.activeClinicId}
+              onSwitchActiveClinic={(clinicId) => {
+                switchClinic(clinicId);
+                showToast("Switched active clinical workspace.");
+              }}
+              onManageSchedule={() => handleSelectTab("availability")}
+            />
+          </div>
+        )}
+
+        {/* TAB 5: CONSULTATION SETTINGS */}
+        {activeTab === "consultation" && (
+          <div className="space-y-6 animate-fadeIn">
+            <ConsultationSettingsCard
+              doctor={doctor}
+              onSave={(updates) => {
+                updateDoctorProfile(updates);
+                showToast("Consultation fees and booking policies updated.");
+              }}
+            />
+          </div>
+        )}
+
+        {/* TAB 6: AVAILABILITY */}
+        {activeTab === "availability" && (
+          <div className="space-y-6 animate-fadeIn">
+            <AvailabilityEditorTab
+              availability={availability}
+              activeClinicName={activeClinic.name}
+              onUpdateAvailability={(config) => {
+                updateAvailability(config);
+                showToast("Clinical practice schedule saved.");
+              }}
+            />
+          </div>
+        )}
+
+        {/* TAB 7: PUBLIC PROFILE */}
+        {activeTab === "public" && (
+          <div className="space-y-6 animate-fadeIn">
+            <PublicProfilePreviewTab
+              doctor={doctor}
+              activeClinicName={activeClinic.name}
+              activeClinicCity={activeClinic.city}
+              onToggleVisibility={handleToggleVisibility}
+            />
+          </div>
+        )}
+
+        {/* TAB 8: PATIENT FEEDBACK */}
+        {activeTab === "reviews" && (
+          <div className="space-y-6 animate-fadeIn">
+            <PatientReviewsTab
+              reviews={reviews}
+              rating={doctor.rating}
+              reviewCount={doctor.reviewCount}
+            />
+          </div>
+        )}
+
+        {/* TAB 9: NOTIFICATIONS */}
+        {activeTab === "notifications" && (
+          <div className="space-y-6 animate-fadeIn">
+            <NotificationPreferencesCard
+              doctor={doctor}
+              onSave={(updates) => {
+                updateDoctorProfile(updates);
+                showToast("Notification preferences updated.");
+              }}
+            />
+          </div>
+        )}
+
+        {/* TAB 10: SECURITY */}
+        {activeTab === "security" && (
+          <div className="space-y-6 animate-fadeIn">
+            <SecuritySettingsCard
+              doctor={doctor}
+              onSave={(updates) => {
+                updateDoctorProfile(updates);
+                showToast("Security settings updated.");
+              }}
+            />
+          </div>
+        )}
+
+        {/* TAB 11: ACCOUNT */}
+        {activeTab === "account" && (
+          <div className="space-y-6 animate-fadeIn">
+            <AccountSettingsCard doctor={doctor} />
+          </div>
+        )}
+      </div>
     </div>
+  );
+}
+
+export default function DoctorSettingsPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center text-xs text-slate-400">Loading Doctor Settings...</div>}>
+      <DoctorSettingsContent />
+    </Suspense>
   );
 }

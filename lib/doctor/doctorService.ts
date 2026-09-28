@@ -16,6 +16,7 @@ import {
   DoctorAvailabilityConfig,
   DoctorNotificationItem,
   DoctorAnalyticsSummary,
+  DoctorReview,
 } from "@/lib/types/doctor";
 import {
   MOCK_DOCTOR_PROFILE,
@@ -29,6 +30,7 @@ import {
   MOCK_AVAILABILITY,
   MOCK_NOTIFICATIONS,
   MOCK_ANALYTICS,
+  MOCK_DOCTOR_REVIEWS,
 } from "@/lib/doctor/mockData";
 
 export interface DoctorServiceState {
@@ -68,7 +70,9 @@ export class DoctorService {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
-        return JSON.parse(stored);
+        const parsed = JSON.parse(stored);
+        parsed.doctor = { ...MOCK_DOCTOR_PROFILE, ...parsed.doctor };
+        return parsed;
       }
     } catch {
       // ignore
@@ -125,6 +129,10 @@ export class DoctorService {
     state.doctor = { ...state.doctor, ...updates };
     this.saveState(state);
     return state.doctor;
+  }
+
+  static getReviews(): DoctorReview[] {
+    return MOCK_DOCTOR_REVIEWS;
   }
 
   // --- Appointments ---

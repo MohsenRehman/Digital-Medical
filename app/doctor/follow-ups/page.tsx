@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import {
   RotateCcw,
   Search,
@@ -16,10 +17,25 @@ import {
 import { useDoctor } from "@/app/context/DoctorContext";
 import { FollowUpRecord } from "@/lib/types/doctor";
 
-export default function DoctorFollowUpsPage() {
+function DoctorFollowUpsContent() {
+  const searchParams = useSearchParams();
+  const filterParam = searchParams.get("filter");
   const { followUps, markFollowUpCompleted, activeClinic } = useDoctor();
-  const [filterTab, setFilterTab] = useState<"today" | "upcoming" | "overdue" | "all">("today");
+
+  const [filterTab, setFilterTab] = useState<"today" | "upcoming" | "overdue" | "all">(() => {
+    if (filterParam && ["today", "upcoming", "overdue", "all"].includes(filterParam)) {
+      return filterParam as "today" | "upcoming" | "overdue" | "all";
+    }
+    return "today";
+  });
   const [searchQuery, setSearchQuery] = useState("");
+
+  // Sync filterTab if searchParams change
+  useEffect(() => {
+    if (filterParam && ["today", "upcoming", "overdue", "all"].includes(filterParam)) {
+      setFilterTab(filterParam as "today" | "upcoming" | "overdue" | "all");
+    }
+  }, [filterParam]);
 
   const todayStr = "2026-09-24";
 
@@ -210,3 +226,12 @@ export default function DoctorFollowUpsPage() {
     </div>
   );
 }
+
+export default function DoctorFollowUpsPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center text-xs text-slate-400">Loading follow-ups...</div>}>
+      <DoctorFollowUpsContent />
+    </Suspense>
+  );
+}
+

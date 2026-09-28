@@ -38,15 +38,111 @@ export interface ClinicAffiliation {
   phone: string;
 }
 
+export interface DoctorConsultationSettings {
+  inClinicEnabled: boolean;
+  videoEnabled: boolean;
+  slotDurationMinutes: 15 | 20 | 30 | 45 | 60;
+  bufferMinutes: 5 | 10 | 15;
+  allowNewPatients: boolean;
+  allowFollowUpBooking: boolean;
+  bookingNotice: "Same day" | "1 day" | "2 days" | "3 days" | "7 days";
+  cancellationWindowHours: number; // e.g. 2, 4, 12, 24
+}
+
+export interface DoctorNotificationPreferences {
+  newAppointment: boolean;
+  appointmentCancellation: boolean;
+  appointmentReminder: boolean;
+  patientCheckIn: boolean;
+  labResultAvailable: boolean;
+  followUpDue: boolean;
+  systemAnnouncements: boolean;
+  securityAlerts: boolean; // Mandatory
+  channels: {
+    email: boolean;
+    sms: boolean;
+    whatsapp: boolean;
+    push: boolean;
+  };
+}
+
+export interface ActiveSessionItem {
+  id: string;
+  device: string;
+  browser: string;
+  location: string;
+  ip: string;
+  lastActive: string;
+  current: boolean;
+}
+
+export interface DoctorSecuritySettings {
+  twoFactorEnabled: boolean;
+  twoFactorMethod: "app" | "sms";
+  lastPasswordChange: string;
+  activeSessions: ActiveSessionItem[];
+}
+
+export interface DoctorProfessionalDocument {
+  id: string;
+  name: string;
+  type: "PMDC Registration" | "Medical Degree" | "Specialty Certification" | "Fellowship" | "License" | "Other";
+  uploadedDate: string;
+  status: "verified" | "pending" | "rejected";
+  fileSize?: string;
+  fileUrl?: string;
+}
+
+export interface DoctorReview {
+  id: string;
+  patientName: string;
+  rating: number;
+  date: string;
+  comment: string;
+  response?: string;
+  verifiedVisit: boolean;
+}
+
+export interface DoctorPublicProfile {
+  id: string;
+  displayName: string;
+  avatarUrl: string;
+  title: string;
+  specialty: string;
+  subSpecialty?: string;
+  pmdcRegistration: string;
+  pmdcVerified: boolean;
+  verificationStatus: DoctorVerificationStatus;
+  qualifications: string[];
+  experienceYears: number;
+  languages: string[];
+  bio: string;
+  rating: number;
+  reviewCount: number;
+  consultationFee: number;
+  videoConsultationFee: number;
+  affiliatedClinics: ClinicAffiliation[];
+  profileVisibility: "public" | "hidden";
+}
+
 export interface DoctorProfile {
   id: string;
   userId: string;
   name: string;
+  displayName?: string;
+  email?: string;
+  phone?: string;
+  gender?: "male" | "female" | "other";
+  dateOfBirth?: string;
+  city?: string;
+  country?: string;
   title: string;
   specialty: string;
   subSpecialty?: string;
   pmdcRegistration: string; // e.g. "48291-P"
   pmdcVerified: boolean;
+  medicalCouncil?: string;
+  verificationDate?: string;
   qualifications: string[]; // e.g. ["MBBS (KMC)", "FCPS (Cardiology)", "MRCP (UK)"]
   experienceYears: number;
   languages: string[];
@@ -59,6 +155,11 @@ export interface DoctorProfile {
   reviewCount: number;
   affiliatedClinics: ClinicAffiliation[];
   activeClinicId: string;
+  profileVisibility?: "public" | "hidden";
+  consultationSettings?: DoctorConsultationSettings;
+  notificationPreferences?: DoctorNotificationPreferences;
+  securitySettings?: DoctorSecuritySettings;
+  documents?: DoctorProfessionalDocument[];
 }
 
 export interface PatientProfile {
