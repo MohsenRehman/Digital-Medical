@@ -5,6 +5,7 @@ import { pendingRegistrations, Clinic } from "../data/mockData";
 import clsx from "clsx";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
+import { Eye, X, Check, XCircle, CheckCircle } from "lucide-react";
 
 const containerVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -68,10 +69,11 @@ export default function PendingRegistrations() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             className={clsx(
-              "absolute top-4 right-4 px-4 py-2 rounded-lg text-sm font-medium z-10",
+              "absolute top-4 right-4 px-4 py-2 rounded-lg text-sm font-medium z-10 flex items-center gap-2",
               notification.type === "success" ? "bg-emerald-100 text-emerald-800" : "bg-red-100 text-red-800"
             )}
           >
+            {notification.type === "success" ? <CheckCircle size={16} /> : <XCircle size={16} />}
             {notification.message}
           </motion.div>
         )}
@@ -120,8 +122,9 @@ export default function PendingRegistrations() {
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       onClick={() => handleReview(clinic)}
-                      className="text-sm font-medium text-[#059669] hover:text-[#047857] transition-colors bg-emerald-50 px-3 py-1.5 rounded-lg inline-block"
+                      className="text-sm font-medium text-[#059669] hover:text-[#047857] transition-colors bg-emerald-50 px-3 py-1.5 rounded-lg inline-flex items-center gap-1.5"
                     >
+                      <Eye size={16} />
                       Review
                     </motion.button>
                   </td>
@@ -148,8 +151,11 @@ export default function PendingRegistrations() {
               transition={{ duration: 0.2 }}
               className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md overflow-hidden"
             >
-              <div className="p-6 border-b border-gray-100 dark:border-gray-700">
+              <div className="p-6 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
                 <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">Clinic Details</h2>
+                <button onClick={closeReview} className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
+                  <X size={20} />
+                </button>
               </div>
               <div className="p-6 space-y-4">
                 <div>
@@ -186,24 +192,26 @@ export default function PendingRegistrations() {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={closeReview}
-                  className="px-4 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-200 transition-colors bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
+                  className="px-4 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-200 transition-colors bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 flex items-center gap-1.5"
                 >
-                  Close
+                  Cancel
                 </motion.button>
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={handleReject}
-                  className="px-4 py-2 rounded-lg text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 transition-colors"
+                  className="px-4 py-2 rounded-lg text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 transition-colors flex items-center gap-1.5"
                 >
+                  <X size={16} />
                   Reject
                 </motion.button>
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={handleApprove}
-                  className="px-4 py-2 rounded-lg text-sm font-medium text-white bg-[#059669] hover:bg-[#047857] transition-colors"
+                  className="px-4 py-2 rounded-lg text-sm font-medium text-white bg-[#059669] hover:bg-[#047857] transition-colors flex items-center gap-1.5"
                 >
+                  <Check size={16} />
                   Approve
                 </motion.button>
               </div>

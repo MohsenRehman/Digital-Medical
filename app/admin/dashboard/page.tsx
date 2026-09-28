@@ -4,6 +4,7 @@ import React from "react";
 import KpiCards from "../components/KpiCards";
 import PendingRegistrations from "../components/PendingRegistrations";
 import ClinicOverview from "../components/ClinicOverview";
+import AllClinicsTable from "../components/AllClinicsTable";
 import SubscriptionOverview from "../components/SubscriptionOverview";
 import BillingSummary from "../components/BillingSummary";
 import RecentActivity from "../components/RecentActivity";
@@ -18,21 +19,26 @@ export default function DashboardPage() {
         <KpiCards />
       </section>
 
+      {/* Two-column row: Chart & Recent Activities */}
+      <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <ClinicOverview />
+        <RecentActivity />
+      </section>
+
       {/* Pending Registrations */}
       <section>
         <PendingRegistrations />
       </section>
 
-      {/* Clinic Overview */}
+      {/* All Clinics Table */}
       <section>
-        <ClinicOverview />
+        <AllClinicsTable />
       </section>
 
-      {/* Bottom Grid */}
-      <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+      {/* Bottom Grid for remaining widgets */}
+      <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <SubscriptionOverview />
         <BillingSummary />
-        <RecentActivity />
       </section>
     </div>
   );
