@@ -47,14 +47,6 @@ export default function DashboardHome({
   onOpenAddFamily,
   onViewAppointmentDetail,
 }: DashboardHomeProps) {
-  // Determine dynamic greeting based on current hour
-  const greeting = useMemo(() => {
-    const hour = new Date().getHours();
-    if (hour < 12) return "Good Morning";
-    if (hour < 17) return "Good Afternoon";
-    return "Good Evening";
-  }, []);
-
   const patientName = patientUser?.name || "Muhammad Ahmed";
 
   // Filter upcoming appointments (confirmed appointments)
@@ -122,33 +114,7 @@ export default function DashboardHome({
 
   return (
     <div className="space-y-6 sm:space-y-8 animate-fadeInUp">
-      {/* 1. Greeting Section */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gradient-to-r from-teal-500/10 via-cyan-500/5 to-transparent p-5 sm:p-7 rounded-3xl border border-teal-500/20 shadow-xs">
-        <div>
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-teal-500/15 text-teal-700 dark:text-teal-300 text-xs font-bold mb-2">
-            <span className="w-2 h-2 rounded-full bg-teal-500 animate-pulse" />
-            <span>Digital Medical Patient Portal</span>
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
-            {greeting}, {patientName} 👋
-          </h1>
-          <p className="mt-1 text-xs sm:text-sm text-slate-600 dark:text-slate-400">
-            Here's an overview of your healthcare activity.
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2.5 self-start sm:self-auto">
-          <button
-            onClick={() => onOpenBooking()}
-            className="flex items-center gap-1.5 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-teal-600 to-cyan-500 hover:from-teal-500 hover:to-cyan-400 text-white font-bold text-xs shadow-md shadow-teal-500/25 transition-all cursor-pointer"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Book Appointment</span>
-          </button>
-        </div>
-      </div>
-
-      {/* 2. Top Summary KPI Cards (4 Cards) */}
+      {/* 1. Top Summary KPI Cards (4 Cards) */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-5">
         {/* Card 1: Upcoming Appointments */}
         <div className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-[#0c1424] border border-slate-200/80 dark:border-slate-800 shadow-xs hover:shadow-md transition-shadow">
