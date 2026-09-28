@@ -22,6 +22,7 @@ import {
   Building2,
   Mail,
   Lock,
+  Stethoscope,
 } from "lucide-react";
 
 interface PatientLoginModalProps {
@@ -34,8 +35,8 @@ export default function PatientLoginModal({ isOpen, onClose }: PatientLoginModal
   const { loginWithOtp, loginWithPassword, patientUser } = usePatientAuth();
   const { adminLogin } = useClinicAuth();
 
-  // Top-level Tab: Patient Login vs Admin Login
-  const [portalTab, setPortalTab] = useState<"patient" | "admin">("patient");
+  // Top-level Tab: Patient Login vs Doctor Login vs Admin Login
+  const [portalTab, setPortalTab] = useState<"patient" | "doctor" | "admin">("patient");
 
   // Patient Login States
   const [authMode, setAuthMode] = useState<"otp" | "password">("otp");
@@ -48,6 +49,12 @@ export default function PatientLoginModal({ isOpen, onClose }: PatientLoginModal
   const [otpDigits, setOtpDigits] = useState(["", "", "", ""]);
   const [countdown, setCountdown] = useState(30);
   const [isVerifying, setIsVerifying] = useState(false);
+
+  // Doctor Login States
+  const [doctorEmail, setDoctorEmail] = useState("");
+  const [doctorPassword, setDoctorPassword] = useState("");
+  const [showDoctorPassword, setShowDoctorPassword] = useState(false);
+  const [isDoctorSubmitting, setIsDoctorSubmitting] = useState(false);
 
   // Admin Login States
   const [adminEmail, setAdminEmail] = useState("");
@@ -76,6 +83,8 @@ export default function PatientLoginModal({ isOpen, onClose }: PatientLoginModal
       setSuccessMsg("");
       setAdminEmail("");
       setAdminPassword("");
+      setDoctorEmail("");
+      setDoctorPassword("");
       if (patientUser?.phone) {
         setPhone(patientUser.phone);
       }
@@ -197,18 +206,75 @@ export default function PatientLoginModal({ isOpen, onClose }: PatientLoginModal
       if (res.success) {
         if (res.role === "super_admin") {
           setSuccessMsg("Welcome Super Admin! Redirecting to Platform Dashboard...");
+        } else if (res.role === "doctor") {
+          setSuccessMsg("Welcome Dr. Tariq Mahmood! Accessing Clinical Workspace...");
         } else {
           setSuccessMsg("Welcome Clinic Admin! Accessing your Clinic Desk...");
         }
 
         setTimeout(() => {
           onClose();
-          router.push(res.redirectUrl || (res.role === "super_admin" ? "/admin/dashboard" : "/clinic/dashboard"));
+          router.push(res.redirectUrl || (res.role === "super_admin" ? "/admin/dashboard" : res.role === "doctor" ? "/doctor" : "/clinic/dashboard"));
         }, 700);
       } else {
         setErrorMsg(res.error || "Invalid credentials. Please verify your email and password.");
       }
     }, 500);
+  };
+
+  const handleDoctorLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMsg("");
+    setSuccessMsg("");
+
+    const email = (doctorEmail || "doctor@digitalmedical.com").trim().toLowerCase();
+    const pass = doctorPassword || "admin123";
+
+    if (!email.includes("@")) {
+      setErrorMsg("Please enter a valid medical email address.");
+      return;
+    }
+    if (!pass) {
+      setErrorMsg("Please enter your account password.");
+      return;
+    }
+
+    setIsDoctorSubmitting(true);
+
+    setTimeout(() => {
+      setIsDoctorSubmitting(false);
+      const doctorUser = {
+        id: "doc-tariq-01",
+        name: "Dr. Tariq Mahmood",
+        email: email,
+        role: "doctor" as const,
+        isActive: true,
+      };
+      try {
+        localStorage.setItem("dm_doctor_session", JSON.stringify(doctorUser));
+      } catch (err) {
+        console.error("Failed to save doctor session", err);
+      }
+
+      setSuccessMsg("Welcome Dr. Tariq Mahmood! Accessing Clinical Desk...");
+
+      setTimeout(() => {
+        onClose();
+        router.push("/doctor");
+      }, 700);
+    }, 450);
+  };
+
+  const handleFillDoctorDemo = () => {
+    setDoctorEmail("doctor@digitalmedical.com");
+    setDoctorPassword("admin123");
+    setErrorMsg("");
+  };
+
+  const handleFillDoctorFromAdminDemo = () => {
+    setAdminEmail("doctor@digitalmedical.com");
+    setAdminPassword("admin123");
+    setErrorMsg("");
   };
 
   const handleFillSuperAdminDemo = () => {
@@ -249,10 +315,18 @@ export default function PatientLoginModal({ isOpen, onClose }: PatientLoginModal
           <div className="p-4 sm:p-6 pb-3 sm:pb-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between flex-shrink-0">
             <div className="min-w-0 pr-2">
               <span className="text-[10px] font-extrabold uppercase tracking-wider text-sky-600 dark:text-sky-400 block truncate">
-                {portalTab === "patient" ? "DigitalMedical Patient Desk" : "DigitalMedical Administration"}
+                {portalTab === "patient"
+                  ? "DigitalMedical Patient Desk"
+                  : portalTab === "doctor"
+                  ? "DigitalMedical Clinical Desk"
+                  : "DigitalMedical Administration"}
               </span>
               <h2 className="text-base sm:text-xl font-extrabold text-slate-900 dark:text-white truncate">
-                {portalTab === "patient" ? "Patient Account Login" : "Admin Portal Sign In"}
+                {portalTab === "patient"
+                  ? "Patient Account Login"
+                  : portalTab === "doctor"
+                  ? "Doctor Portal Sign In"
+                  : "Admin Portal Sign In"}
               </h2>
             </div>
             <button
@@ -263,9 +337,9 @@ export default function PatientLoginModal({ isOpen, onClose }: PatientLoginModal
             </button>
           </div>
 
-          {/* Primary Top-level Switcher: Patient Login vs Admin Login */}
+          {/* Primary Top-level Switcher: Patient vs Doctor vs Admin */}
           <div className="px-4 sm:px-6 pt-3 sm:pt-4 flex-shrink-0">
-            <div className="grid grid-cols-2 gap-1.5 p-1 rounded-2xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+            <div className="grid grid-cols-3 gap-1 sm:gap-1.5 p-1 rounded-2xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
               <button
                 type="button"
                 onClick={() => {
@@ -273,14 +347,31 @@ export default function PatientLoginModal({ isOpen, onClose }: PatientLoginModal
                   setErrorMsg("");
                   setSuccessMsg("");
                 }}
-                className={`py-2 px-2 sm:px-3 rounded-xl text-[11px] sm:text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1 sm:gap-1.5 ${
+                className={`py-2 px-1 sm:px-2 rounded-xl text-[10.5px] sm:text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1 sm:gap-1.5 ${
                   portalTab === "patient"
                     ? "bg-white dark:bg-slate-800 text-sky-600 dark:text-sky-400 shadow-sm"
                     : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
                 }`}
               >
                 <User className="w-3.5 h-3.5 shrink-0" />
-                <span className="truncate">Patient Login</span>
+                <span className="truncate">Patient</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setPortalTab("doctor");
+                  setErrorMsg("");
+                  setSuccessMsg("");
+                }}
+                className={`py-2 px-1 sm:px-2 rounded-xl text-[10.5px] sm:text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1 sm:gap-1.5 ${
+                  portalTab === "doctor"
+                    ? "bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 shadow-sm"
+                    : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
+                }`}
+              >
+                <Stethoscope className="w-3.5 h-3.5 shrink-0" />
+                <span className="truncate">Doctor</span>
               </button>
 
               <button
@@ -290,14 +381,14 @@ export default function PatientLoginModal({ isOpen, onClose }: PatientLoginModal
                   setErrorMsg("");
                   setSuccessMsg("");
                 }}
-                className={`py-2 px-2 sm:px-3 rounded-xl text-[11px] sm:text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1 sm:gap-1.5 ${
+                className={`py-2 px-1 sm:px-2 rounded-xl text-[10.5px] sm:text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1 sm:gap-1.5 ${
                   portalTab === "admin"
                     ? "bg-white dark:bg-slate-800 text-teal-600 dark:text-teal-400 shadow-sm"
                     : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
                 }`}
               >
                 <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
-                <span className="truncate">Admin Login</span>
+                <span className="truncate">Admin</span>
               </button>
             </div>
           </div>
@@ -558,7 +649,142 @@ export default function PatientLoginModal({ isOpen, onClose }: PatientLoginModal
           )}
 
           {/* ==================================================== */}
-          {/* OPTION 2: ADMIN LOGIN (Super Admin & Clinic Admin)    */}
+          {/* OPTION 2: DOCTOR LOGIN (Clinical Workspace)          */}
+          {/* ==================================================== */}
+          {portalTab === "doctor" && (
+            <div className="p-4 sm:p-6 space-y-3.5 sm:space-y-4">
+              {/* Subtle Role Identification Guidance */}
+              <div className="p-3 rounded-xl bg-sky-50 dark:bg-sky-950/50 border border-sky-200 dark:border-sky-800 flex items-start gap-2.5">
+                <Stethoscope className="w-4 h-4 text-sky-600 dark:text-sky-400 mt-0.5 shrink-0" />
+                <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">
+                  Clinical Desk access for <strong>Registered Doctors &amp; Specialists</strong>. Access live patient queue, digital consultations, and e-prescriptions.
+                </p>
+              </div>
+
+              {errorMsg && (
+                <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-900 text-xs text-rose-600 dark:text-rose-300 font-semibold text-center">
+                  {errorMsg}
+                </div>
+              )}
+
+              {successMsg && (
+                <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800 text-xs text-emerald-600 dark:text-emerald-300 font-bold flex items-center justify-center gap-2 animate-fadeIn">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                  <span>{successMsg}</span>
+                </div>
+              )}
+
+              <form onSubmit={handleDoctorLogin} className="space-y-3.5 sm:space-y-4">
+                {/* Doctor Email */}
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5">
+                    Doctor Official Email / PMDC ID
+                  </label>
+                  <div className="relative flex items-center">
+                    <Mail className="w-4 h-4 text-slate-400 absolute left-3.5" />
+                    <input
+                      type="email"
+                      required
+                      value={doctorEmail}
+                      onChange={(e) => setDoctorEmail(e.target.value)}
+                      placeholder="doctor@digitalmedical.com"
+                      className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-sky-500 shadow-sm"
+                    />
+                  </div>
+                </div>
+
+                {/* Doctor Password */}
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300">
+                      Account Password
+                    </label>
+                    <span className="text-[11px] text-slate-400">Default: admin123</span>
+                  </div>
+                  <div className="relative flex items-center">
+                    <Lock className="w-4 h-4 text-slate-400 absolute left-3.5" />
+                    <input
+                      type={showDoctorPassword ? "text" : "password"}
+                      required
+                      value={doctorPassword}
+                      onChange={(e) => setDoctorPassword(e.target.value)}
+                      placeholder="Enter account password"
+                      className="w-full pl-10 pr-11 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-sky-500 shadow-sm"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowDoctorPassword(!showDoctorPassword)}
+                      className="absolute right-3 text-slate-400 hover:text-slate-600 p-1"
+                    >
+                      {showDoctorPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Quick Doctor Demo Credentials */}
+                <div className="space-y-1.5 pt-1">
+                  <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block">
+                    Quick Demo Credentials:
+                  </span>
+                  <button
+                    type="button"
+                    onClick={handleFillDoctorDemo}
+                    className="w-full p-2.5 rounded-xl border border-sky-200 dark:border-sky-800 bg-sky-50/60 dark:bg-sky-950/40 hover:border-sky-500 text-left transition-colors cursor-pointer group flex items-center justify-between"
+                  >
+                    <div>
+                      <div className="flex items-center gap-1.5 text-xs font-bold text-slate-800 dark:text-slate-200 group-hover:text-sky-600 dark:group-hover:text-sky-400">
+                        <Sparkles className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                        <span>Dr. Tariq Mahmood (Cardiologist)</span>
+                      </div>
+                      <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono block mt-0.5">
+                        doctor@digitalmedical.com • password: admin123
+                      </span>
+                    </div>
+                    <span className="text-[10px] font-bold text-sky-600 dark:text-sky-400 bg-white dark:bg-slate-800 px-2 py-0.5 rounded shadow-xs shrink-0">
+                      Auto Fill
+                    </span>
+                  </button>
+                </div>
+
+                {/* Submit Button */}
+                <button
+                  type="submit"
+                  disabled={isDoctorSubmitting}
+                  className="w-full py-3.5 rounded-full text-xs font-bold uppercase tracking-wider text-white bg-gradient-to-r from-sky-600 via-sky-500 to-teal-500 hover:from-sky-500 hover:to-teal-400 flex items-center justify-center gap-2 shadow-md shadow-sky-600/25 cursor-pointer disabled:opacity-50 transition-all"
+                >
+                  {isDoctorSubmitting ? (
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <>
+                      <Stethoscope className="w-4 h-4" />
+                      <span>Sign In to Doctor Dashboard</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </>
+                  )}
+                </button>
+              </form>
+
+              {/* Doctor Footer note */}
+              <div className="pt-2 border-t border-slate-100 dark:border-slate-800 text-center">
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Are you a hospital or clinic administrator?{" "}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setPortalTab("admin");
+                      setErrorMsg("");
+                    }}
+                    className="text-sky-600 dark:text-sky-400 font-bold hover:underline"
+                  >
+                    Admin Portal Sign In →
+                  </button>
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* ==================================================== */}
+          {/* OPTION 3: ADMIN LOGIN (Super Admin & Clinic Admin)    */}
           {/* ==================================================== */}
           {portalTab === "admin" && (
             <div className="p-4 sm:p-6 space-y-3.5 sm:space-y-4">
@@ -566,7 +792,7 @@ export default function PatientLoginModal({ isOpen, onClose }: PatientLoginModal
               <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 flex items-start gap-2.5">
                 <ShieldCheck className="w-4 h-4 text-teal-600 dark:text-teal-400 mt-0.5 shrink-0" />
                 <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">
-                  Unified access for <strong>Super Admins</strong> and <strong>Clinic Administrators</strong>. The system automatically detects your role and directs you to your workspace.
+                  Unified access for <strong>Super Admins</strong>, <strong>Clinic Administrators</strong>, and <strong>Physicians</strong>. The system automatically detects your role and directs you to your workspace.
                 </p>
               </div>
 
@@ -641,7 +867,7 @@ export default function PatientLoginModal({ isOpen, onClose }: PatientLoginModal
                   <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block">
                     Quick Demo Credentials:
                   </span>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                     <button
                       type="button"
                       onClick={handleFillSuperAdminDemo}
@@ -667,6 +893,20 @@ export default function PatientLoginModal({ isOpen, onClose }: PatientLoginModal
                       </div>
                       <span className="text-[10px] text-slate-400 font-mono block truncate">
                         demo@clinic.pk
+                      </span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={handleFillDoctorFromAdminDemo}
+                      className="p-2 sm:p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60 hover:border-teal-500 text-left transition-colors cursor-pointer group"
+                    >
+                      <div className="flex items-center gap-1.5 text-xs font-bold text-slate-800 dark:text-slate-200 group-hover:text-teal-600 dark:group-hover:text-teal-400">
+                        <Stethoscope className="w-3 h-3 text-sky-500 shrink-0" />
+                        <span>Doctor Desk</span>
+                      </div>
+                      <span className="text-[10px] text-slate-400 font-mono block truncate">
+                        doctor@digitalmedical.com
                       </span>
                     </button>
                   </div>

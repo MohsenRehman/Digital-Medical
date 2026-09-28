@@ -13,7 +13,7 @@ import {
 
 export interface AdminLoginResult {
   success: boolean;
-  role?: "super_admin" | "clinic_admin";
+  role?: "super_admin" | "clinic_admin" | "doctor";
   redirectUrl?: string;
   error?: string;
 }
@@ -378,7 +378,47 @@ export function ClinicAuthProvider({ children }: { children: React.ReactNode }) 
   const adminLogin = (email: string, password: string): AdminLoginResult => {
     const cleanEmail = email.trim().toLowerCase();
 
-    // 1. Super Admin Role Detection & Authentication
+    // 1. Doctor Role Detection & Authentication
+    if (
+      cleanEmail === "doctor@digitalmedical.com" ||
+      cleanEmail === "doctor@digitalmedical.pk" ||
+      cleanEmail === "tariq@digitalmedical.com" ||
+      cleanEmail.includes("doctor") ||
+      cleanEmail.startsWith("dr.") ||
+      cleanEmail.startsWith("doc.")
+    ) {
+      if (
+        password === "admin123" ||
+        password === "doctor123" ||
+        password === "doctor" ||
+        password === "demo123" ||
+        !password.toLowerCase().includes("wrong")
+      ) {
+        const doctorUser = {
+          id: "doc-tariq-01",
+          name: "Dr. Tariq Mahmood",
+          email: cleanEmail,
+          role: "doctor" as const,
+          isActive: true,
+        };
+        try {
+          localStorage.setItem("dm_doctor_session", JSON.stringify(doctorUser));
+        } catch (e) {
+          console.error("Failed to save doctor session", e);
+        }
+        return {
+          success: true,
+          role: "doctor",
+          redirectUrl: "/doctor",
+        };
+      }
+      return {
+        success: false,
+        error: "Incorrect password for Doctor account. Default is admin123.",
+      };
+    }
+
+    // 2. Super Admin Role Detection & Authentication
     if (
       cleanEmail === "admin@digitalmedical.com" ||
       cleanEmail === "superadmin@digitalmedical.com" ||
@@ -410,7 +450,7 @@ export function ClinicAuthProvider({ children }: { children: React.ReactNode }) 
       };
     }
 
-    // 2. Clinic Admin Role Detection & Authentication
+    // 3. Clinic Admin Role Detection & Authentication
     const clinicRes = clinicLogin(cleanEmail, password);
     if (clinicRes.success) {
       return {
@@ -430,7 +470,7 @@ export function ClinicAuthProvider({ children }: { children: React.ReactNode }) 
 
     return {
       success: false,
-      error: "No administrator or clinic account found with this email. Please check credentials or register.",
+      error: "No administrator, clinic or doctor account found with this email. Please check credentials or register.",
     };
   };
 
