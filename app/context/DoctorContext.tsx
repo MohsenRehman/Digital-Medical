@@ -15,6 +15,7 @@ import {
   DoctorNotificationItem,
   DoctorAnalyticsSummary,
   DoctorAvailabilityStatus,
+  DoctorReview,
 } from "@/lib/types/doctor";
 import { DoctorService } from "@/lib/doctor/doctorService";
 
@@ -26,6 +27,9 @@ interface DoctorContextType {
   setDoctorStatus: (status: DoctorAvailabilityStatus) => void;
   switchClinic: (clinicId: string) => void;
   updateDoctorProfile: (updates: Partial<DoctorProfile>) => void;
+
+  // Reviews
+  reviews: DoctorReview[];
 
   // Appointments
   appointments: DoctorAppointment[];
@@ -93,6 +97,7 @@ export function DoctorProvider({ children }: { children: React.ReactNode }) {
   const [availability, setAvailability] = useState<DoctorAvailabilityConfig>(() => DoctorService.getAvailability());
   const [notifications, setNotifications] = useState<DoctorNotificationItem[]>([]);
   const [analytics, setAnalytics] = useState<DoctorAnalyticsSummary>(() => DoctorService.getAnalytics());
+  const [reviews, setReviews] = useState<DoctorReview[]>(() => DoctorService.getReviews());
 
   const refreshAll = useCallback(() => {
     setDoctor(DoctorService.getProfile());
@@ -106,6 +111,7 @@ export function DoctorProvider({ children }: { children: React.ReactNode }) {
     setAvailability(DoctorService.getAvailability());
     setNotifications(DoctorService.getNotifications());
     setAnalytics(DoctorService.getAnalytics());
+    setReviews(DoctorService.getReviews());
   }, []);
 
   useEffect(() => {
@@ -261,6 +267,7 @@ export function DoctorProvider({ children }: { children: React.ReactNode }) {
         setDoctorStatus,
         switchClinic,
         updateDoctorProfile,
+        reviews,
         appointments,
         refreshAppointments,
         updateAppointmentStatus,
