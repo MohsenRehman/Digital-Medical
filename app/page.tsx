@@ -64,7 +64,7 @@ export default function HomePage() {
   };
 
   return (
-    <main className="min-h-screen relative selection:bg-teal-500 selection:text-white pb-20 md:pb-0">
+    <main className="min-h-screen relative selection:bg-teal-500 selection:text-white pb-20 md:pb-0 w-full max-w-full overflow-x-hidden">
       {/* 1. Ambient Starfield Particle Background (Technique #25, #28) */}
       <ParticleBackground />
 

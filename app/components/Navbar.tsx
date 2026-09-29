@@ -36,10 +36,30 @@ export default function Navbar({ onOpenAppointment }: NavbarProps) {
   const { patientUser } = usePatientAuth();
   const { clinicUser } = useClinicAuth();
   const [loginModalOpen, setLoginModalOpen] = useState(false);
+  const [doctorUser, setDoctorUser] = useState<{ name?: string; email?: string } | null>(null);
   const pathname = usePathname();
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("hero");
+
+  // Check doctor session from localStorage
+  useEffect(() => {
+    const checkDoctorSession = () => {
+      try {
+        const raw = localStorage.getItem("dm_doctor_session");
+        if (raw) {
+          setDoctorUser(JSON.parse(raw));
+        } else {
+          setDoctorUser(null);
+        }
+      } catch (e) {
+        setDoctorUser(null);
+      }
+    };
+    checkDoctorSession();
+    window.addEventListener("storage", checkDoctorSession);
+    return () => window.removeEventListener("storage", checkDoctorSession);
+  }, []);
 
   const navItems = [
     { label: "Home", href: "/#hero", id: "hero", icon: Home },
@@ -174,19 +194,19 @@ export default function Navbar({ onOpenAppointment }: NavbarProps) {
             isScrolled ? "scrolled py-2 shadow-lg shadow-sky-950/10" : "py-2.5 sm:py-3.5"
           }`}
         >
-          <div className="max-w-7xl mx-auto px-3.5 sm:px-6 lg:px-8 flex items-center justify-between gap-2 sm:gap-3">
+          <div className="max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8 flex items-center justify-between gap-1.5 sm:gap-3">
             {/* Brand Logo */}
             <Link href="/" className="flex items-center gap-2 sm:gap-2.5 group flex-shrink-0">
-              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-sky-600 to-sky-400 flex items-center justify-center text-white shadow-md shadow-sky-500/20 group-hover:scale-105 transition-transform duration-300 flex-shrink-0">
-                <HeartPulse className="w-5 h-5 sm:w-6 sm:h-6 animate-pulse" />
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-sky-600 to-sky-400 flex items-center justify-center text-white shadow-md shadow-sky-500/20 group-hover:scale-105 transition-transform duration-300 flex-shrink-0">
+                <HeartPulse className="w-4 h-4 sm:w-6 sm:h-6 animate-pulse" />
               </div>
               <div className="flex flex-col">
                 <div className="flex items-center gap-1">
-                  <span className="text-base sm:text-lg lg:text-xl font-bold tracking-tight text-slate-900 dark:text-white leading-tight whitespace-nowrap">
+                  <span className="text-sm sm:text-lg lg:text-xl font-bold tracking-tight text-slate-900 dark:text-white leading-tight whitespace-nowrap">
                     Digital<span className="text-sky-600 dark:text-sky-400">Medical</span>
                   </span>
                 </div>
-                <span className="text-[9px] sm:text-[10px] text-slate-500 dark:text-slate-400 font-medium tracking-wider uppercase block whitespace-nowrap">
+                <span className="text-[9px] sm:text-[10px] text-slate-500 dark:text-slate-400 font-medium tracking-wider uppercase hidden min-[360px]:block whitespace-nowrap">
                   Healthcare Network
                 </span>
               </div>
@@ -212,7 +232,7 @@ export default function Navbar({ onOpenAppointment }: NavbarProps) {
             </div>
 
             {/* Actions & Theme Switcher */}
-            <div className="flex items-center gap-1.5 sm:gap-2.5 flex-shrink-0">
+            <div className="flex items-center gap-1 sm:gap-2.5 flex-shrink-0">
 
 
               {/* Search Bar Trigger */}
@@ -256,11 +276,11 @@ export default function Navbar({ onOpenAppointment }: NavbarProps) {
               {/* Elegant Divider */}
               <div className="hidden sm:block h-6 w-[1px] bg-slate-200 dark:bg-slate-700/60 mx-0.5" />
 
-              {/* Patient Login or My Portal Pill */}
+              {/* Patient Login or Doctor Desk or Sign In */}
               {patientUser ? (
                 <Link
                   href="/patient/dashboard"
-                  className="inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-full bg-sky-50 dark:bg-sky-950/70 border border-sky-200 dark:border-sky-800 text-sky-700 dark:text-sky-300 hover:border-sky-400 font-semibold text-xs transition-all shadow-sm group"
+                  className="inline-flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 rounded-full bg-sky-50 dark:bg-sky-950/70 border border-sky-200 dark:border-sky-800 text-sky-700 dark:text-sky-300 hover:border-sky-400 font-semibold text-xs transition-all shadow-sm group"
                   title="Open Patient Portal / My Appointments"
                 >
                   <div className="w-5 h-5 rounded-full bg-gradient-to-tr from-sky-600 to-teal-500 text-white flex items-center justify-center text-[10px] font-bold group-hover:scale-110 transition-transform flex-shrink-0">
@@ -271,11 +291,25 @@ export default function Navbar({ onOpenAppointment }: NavbarProps) {
                   </span>
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                 </Link>
+              ) : doctorUser ? (
+                <Link
+                  href="/doctor"
+                  className="inline-flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 rounded-full bg-cyan-50 dark:bg-cyan-950/70 border border-cyan-200 dark:border-cyan-800 text-cyan-700 dark:text-cyan-300 hover:border-cyan-400 font-semibold text-xs transition-all shadow-sm group"
+                  title="Open Doctor Clinical Workspace"
+                >
+                  <div className="w-5 h-5 rounded-full bg-gradient-to-tr from-cyan-600 to-sky-500 text-white flex items-center justify-center text-[10px] font-bold group-hover:scale-110 transition-transform flex-shrink-0">
+                    <Stethoscope className="w-3 h-3" />
+                  </div>
+                  <span className="hidden sm:inline max-w-[90px] md:max-w-[120px] truncate">
+                    {doctorUser.name || "Doctor Desk"}
+                  </span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                </Link>
               ) : (
                 <button
                   onClick={() => setLoginModalOpen(true)}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold text-slate-700 dark:text-slate-200 hover:text-sky-600 dark:hover:text-sky-400 hover:bg-sky-50 dark:hover:bg-slate-800 transition-colors"
-                  title="Patient Sign In / Check Appointments"
+                  className="inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 rounded-full text-xs font-semibold text-slate-700 dark:text-slate-200 hover:text-sky-600 dark:hover:text-sky-400 hover:bg-sky-50 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                  title="Sign In (Patient, Doctor, Admin)"
                 >
                   <LogIn className="w-3.5 h-3.5 text-sky-500" />
                   <span className="hidden sm:inline">Sign In</span>
@@ -435,7 +469,7 @@ export default function Navbar({ onOpenAppointment }: NavbarProps) {
                     })}
                   </div>
 
-                  {/* Mobile Patient Profile / Login Card */}
+                  {/* Mobile Patient Profile / Doctor Profile / Login Card */}
                   {patientUser ? (
                     <div className="p-3 sm:p-3.5 border-t border-slate-100 dark:border-slate-800/80 bg-sky-50/60 dark:bg-sky-950/20">
                       <Link
@@ -461,6 +495,31 @@ export default function Navbar({ onOpenAppointment }: NavbarProps) {
                         </span>
                       </Link>
                     </div>
+                  ) : doctorUser ? (
+                    <div className="p-3 sm:p-3.5 border-t border-slate-100 dark:border-slate-800/80 bg-cyan-50/60 dark:bg-cyan-950/20">
+                      <Link
+                        href="/doctor"
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="flex items-center justify-between w-full p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-cyan-100 dark:border-cyan-900 shadow-sm hover:border-cyan-300 transition-all"
+                      >
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-cyan-600 to-sky-500 text-white flex items-center justify-center font-bold text-xs flex-shrink-0">
+                            <Stethoscope className="w-4 h-4" />
+                          </div>
+                          <div className="min-w-0 text-left">
+                            <div className="text-xs font-bold text-slate-900 dark:text-white truncate">
+                              {doctorUser.name || "Dr. Tariq Mahmood"}
+                            </div>
+                            <div className="text-[10px] text-cyan-600 dark:text-cyan-400 font-medium truncate">
+                              Doctor Clinical Workspace
+                            </div>
+                          </div>
+                        </div>
+                        <span className="text-[11px] font-semibold text-cyan-600 dark:text-cyan-400 flex items-center gap-1">
+                          Clinical Desk <ChevronRight className="w-3.5 h-3.5" />
+                        </span>
+                      </Link>
+                    </div>
                   ) : (
                     <div className="p-3 sm:p-3.5 border-t border-slate-100 dark:border-slate-800/80 bg-slate-50/80 dark:bg-slate-900/40">
                       <button
@@ -468,10 +527,10 @@ export default function Navbar({ onOpenAppointment }: NavbarProps) {
                           setMobileMenuOpen(false);
                           setLoginModalOpen(true);
                         }}
-                        className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-bold hover:border-sky-500 hover:text-sky-600 transition-colors shadow-sm"
+                        className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-bold hover:border-sky-500 hover:text-sky-600 transition-colors shadow-sm cursor-pointer"
                       >
                         <LogIn className="w-4 h-4 text-sky-500" />
-                        <span>Patient Sign In / Check Appointments</span>
+                        <span>Sign In (Patient • Doctor • Admin)</span>
                       </button>
                     </div>
                   )}

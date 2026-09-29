@@ -7,6 +7,7 @@ import {
   FamilyMemberRecord,
   BookingDraft,
   GenderType,
+  AppointmentRelation,
 } from "@/lib/types/patient";
 
 interface PatientAuthContextType {
