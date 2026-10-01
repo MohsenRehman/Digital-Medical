@@ -16,8 +16,6 @@ import {
   BarChart3,
   Bell,
   Settings,
-  ShieldCheck,
-  Building2,
   LogOut,
   ChevronDown,
   Menu,
@@ -42,8 +40,6 @@ interface NavSection {
 export default function DoctorSidebar() {
   const pathname = usePathname();
   const {
-    doctor,
-    activeClinic,
     doctorStatus,
     setDoctorStatus,
     waitingQueue,
@@ -185,42 +181,6 @@ export default function DoctorSidebar() {
           >
             <X className="w-5 h-5" />
           </button>
-        </div>
-
-        {/* Doctor Info Card */}
-        <div className="mt-4 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/60">
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <img
-                src={doctor.avatarUrl}
-                alt={doctor.name}
-                className="w-11 h-11 rounded-full object-cover border-2 border-white dark:border-slate-700 shadow-sm"
-              />
-              <span
-                className={`absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full border-2 border-white dark:border-slate-800 ${currentStatus.color}`}
-              />
-            </div>
-            <div className="flex-1 min-w-0">
-              <h2 className="text-sm font-semibold text-slate-900 dark:text-white truncate">
-                {doctor.name}
-              </h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
-                {doctor.specialty}
-              </p>
-              <div className="flex items-center gap-1 mt-0.5">
-                <ShieldCheck className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400 flex-shrink-0" />
-                <span className="text-[11px] font-medium text-sky-700 dark:text-sky-300">
-                  PMDC #{doctor.pmdcRegistration} • Verified
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Active Clinic quick display */}
-          <div className="mt-2.5 pt-2 border-t border-slate-200/60 dark:border-slate-700/50 flex items-center gap-1.5 text-[11px] text-slate-600 dark:text-slate-300">
-            <Building2 className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
-            <span className="truncate font-medium">{activeClinic.name} ({activeClinic.city})</span>
-          </div>
         </div>
       </div>
 

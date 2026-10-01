@@ -87,15 +87,15 @@ export function DoctorProvider({ children }: { children: React.ReactNode }) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [doctor, setDoctor] = useState<DoctorProfile>(() => DoctorService.getProfile());
   const [doctorStatus, setDoctorStatus] = useState<DoctorAvailabilityStatus>("available");
-  const [appointments, setAppointments] = useState<DoctorAppointment[]>([]);
-  const [queue, setQueue] = useState<QueueEntry[]>([]);
-  const [patients, setPatients] = useState<PatientProfile[]>([]);
-  const [consultations, setConsultations] = useState<ClinicalEncounter[]>([]);
-  const [prescriptions, setPrescriptions] = useState<DigitalPrescription[]>([]);
-  const [labOrders, setLabOrders] = useState<LabOrder[]>([]);
-  const [followUps, setFollowUps] = useState<FollowUpRecord[]>([]);
+  const [appointments, setAppointments] = useState<DoctorAppointment[]>(() => DoctorService.getAppointments());
+  const [queue, setQueue] = useState<QueueEntry[]>(() => DoctorService.getQueue());
+  const [patients, setPatients] = useState<PatientProfile[]>(() => DoctorService.getPatients());
+  const [consultations, setConsultations] = useState<ClinicalEncounter[]>(() => DoctorService.getConsultations());
+  const [prescriptions, setPrescriptions] = useState<DigitalPrescription[]>(() => DoctorService.getPrescriptions());
+  const [labOrders, setLabOrders] = useState<LabOrder[]>(() => DoctorService.getLabOrders());
+  const [followUps, setFollowUps] = useState<FollowUpRecord[]>(() => DoctorService.getFollowUps());
   const [availability, setAvailability] = useState<DoctorAvailabilityConfig>(() => DoctorService.getAvailability());
-  const [notifications, setNotifications] = useState<DoctorNotificationItem[]>([]);
+  const [notifications, setNotifications] = useState<DoctorNotificationItem[]>(() => DoctorService.getNotifications());
   const [analytics, setAnalytics] = useState<DoctorAnalyticsSummary>(() => DoctorService.getAnalytics());
   const [reviews, setReviews] = useState<DoctorReview[]>(() => DoctorService.getReviews());
 
