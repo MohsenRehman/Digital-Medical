@@ -50,6 +50,22 @@ export interface DoctorServiceState {
 const STORAGE_KEY = "dm_doctor_workspace_v1";
 
 export class DoctorService {
+  static getBaseState(): DoctorServiceState {
+    return {
+      doctor: MOCK_DOCTOR_PROFILE,
+      patients: MOCK_PATIENT_PROFILES,
+      appointments: MOCK_APPOINTMENTS,
+      queue: MOCK_QUEUE,
+      consultations: MOCK_CONSULTATIONS,
+      prescriptions: MOCK_PRESCRIPTIONS,
+      followUps: MOCK_FOLLOW_UPS,
+      labOrders: MOCK_LAB_ORDERS,
+      availability: MOCK_AVAILABILITY,
+      notifications: MOCK_NOTIFICATIONS,
+      analytics: MOCK_ANALYTICS,
+    };
+  }
+
   private static loadState(): DoctorServiceState {
     if (typeof window === "undefined") {
       return {

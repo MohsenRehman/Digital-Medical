@@ -205,26 +205,27 @@ export default function DoctorSidebar() {
                     onClick={() => setMobileOpen(false)}
                     className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-all group ${
                       isActive
-                        ? "bg-sky-50 dark:bg-sky-950/60 text-sky-700 dark:text-sky-300 font-semibold shadow-xs"
-                        : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-white"
+                        ? "bg-sky-600 text-white font-semibold shadow-sm shadow-sky-600/30"
+                        : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-white active:bg-sky-600 active:text-white"
                     }`}
                   >
                     <div className="flex items-center gap-2.5 min-w-0">
                       <Icon
                         className={`w-4 h-4 transition-colors ${
                           isActive
-                            ? "text-sky-600 dark:text-sky-400"
-                            : "text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-200"
+                            ? "text-white"
+                            : "text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-200 group-active:text-white"
                         }`}
                       />
                       <span className="truncate">{item.name}</span>
                     </div>
                     {item.badge && (
                       <span
-                        className={`text-[10px] px-2 py-0.5 font-bold rounded-full ${
+                        suppressHydrationWarning
+                        className={`text-[10px] px-2 py-0.5 font-bold rounded-full transition-colors ${
                           isActive
-                            ? "bg-sky-200/80 dark:bg-sky-800/80 text-sky-800 dark:text-sky-100"
-                            : "bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200"
+                            ? "bg-white/20 text-white"
+                            : "bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 group-active:bg-white/20 group-active:text-white"
                         }`}
                       >
                         {item.badge}
