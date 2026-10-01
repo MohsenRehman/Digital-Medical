@@ -1,140 +1,140 @@
 "use client";
 
-import React from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import React, { useState } from "react";
 import {
-  Calendar,
+  Stethoscope,
   Building2,
-  Play,
-  Clock,
-  Sparkles,
-  ArrowRight,
-  ShieldCheck,
-  CheckCircle2,
-  Users,
+  Printer,
+  Download,
+  Eye,
 } from "lucide-react";
 import { useDoctor } from "@/app/context/DoctorContext";
 import DoctorKpiCards from "@/components/doctor/DoctorKpiCards";
-import LiveQueueCard from "@/components/doctor/LiveQueueCard";
 import AppointmentTable from "@/components/doctor/AppointmentTable";
+import LiveQueueCard from "@/components/doctor/LiveQueueCard";
+import RecentClinicalActivity from "@/components/doctor/RecentClinicalActivity";
+import PrescriptionPreviewModal from "@/components/doctor/PrescriptionPreviewModal";
+import { DocumentType } from "@/lib/doctor/medicalDocumentTemplates";
 
 export default function DoctorDashboardOverview() {
-  const router = useRouter();
-  const { doctor, activeClinic, doctorStatus, currentQueuePatient, waitingQueue } = useDoctor();
+  const { doctor, activeClinic, prescriptions, consultations } = useDoctor();
+  const [modalOpen, setModalOpen] = useState(false);
+  const [activeDocType, setActiveDocType] = useState<DocumentType>("prescription");
 
-  const handleStartConsultation = () => {
-    if (currentQueuePatient) {
-      router.push(`/doctor/consultations/${currentQueuePatient.appointmentId}`);
-    } else if (waitingQueue.length > 0) {
-      router.push(`/doctor/consultations/${waitingQueue[0].appointmentId}`);
-    } else {
-      router.push("/doctor/queue");
-    }
+  const latestPrescription = prescriptions[0] || null;
+  const latestEncounter = consultations[0] || null;
+
+  const handleOpenDocument = (type: DocumentType) => {
+    setActiveDocType(type);
+    setModalOpen(true);
   };
-
-  const statusLabel = {
-    available: "Available",
-    in_consultation: "In Consultation",
-    on_break: "On Break",
-    offline: "Offline",
-  }[doctorStatus];
-
-  const statusDot = {
-    available: "bg-emerald-500",
-    in_consultation: "bg-amber-500",
-    on_break: "bg-blue-500",
-    offline: "bg-slate-400",
-  }[doctorStatus];
 
   return (
     <div className="space-y-6">
-      {/* Welcome Header */}
-      <section className="p-6 md:p-8 rounded-3xl bg-gradient-to-r from-sky-600 via-sky-700 to-teal-700 text-white shadow-lg relative overflow-hidden">
-        {/* Background decorative medical shapes */}
-        <div className="absolute right-0 top-0 bottom-0 w-96 opacity-10 pointer-events-none flex items-center justify-center">
-          <div className="w-80 h-80 rounded-full border-8 border-white transform translate-x-20" />
-        </div>
-
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-white/20 backdrop-blur-xs text-white border border-white/20">
-                Cardiology Department
-              </span>
-              <span className="text-sky-100 text-xs flex items-center gap-1">
-                <Calendar className="w-3.5 h-3.5" />
-                Thursday, 24 September 2026
-              </span>
-            </div>
-
-            <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">
-              Good morning, {doctor.name.split(" ")[0]} {doctor.name.split(" ")[1]}
+      {/* 1. Compact Doctor Identity Header with Print / PDF Quick Actions */}
+      <section className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-4 md:p-5 shadow-xs">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="space-y-1.5 min-w-0">
+            <h1 className="text-xl md:text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+              Doctor Dashboard
             </h1>
-            <p className="text-sm text-sky-100 max-w-xl">
-              Here&apos;s your clinical schedule for today. You have{" "}
-              <span className="font-bold underline decoration-sky-300">
-                {waitingQueue.length} patients waiting
-              </span>{" "}
-              in the reception lounge.
-            </p>
-
-            <div className="pt-2 flex flex-wrap items-center gap-4 text-xs text-sky-100">
-              <div className="flex items-center gap-1.5">
-                <Building2 className="w-4 h-4 text-sky-300" />
-                <span>
-                  Clinic: <strong className="text-white">{activeClinic.name} — {activeClinic.city}</strong> ({activeClinic.roomNumber})
-                </span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <span className={`w-2 h-2 rounded-full ${statusDot} ring-2 ring-white/30`} />
-                <span>
-                  Status: <strong className="text-white">{statusLabel}</strong>
-                </span>
-              </div>
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-600 dark:text-slate-400">
+              <span className="font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
+                <Stethoscope className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400 flex-shrink-0" />
+                <span>{doctor.name || "Dr. Tariq Mahmood"}</span>
+              </span>
+              <span className="text-slate-300 dark:text-slate-700 hidden sm:inline">•</span>
+              <span className="text-slate-700 dark:text-slate-300 font-medium">
+                {doctor.specialty || "Cardiologist"}
+              </span>
+              <span className="text-slate-300 dark:text-slate-700 hidden sm:inline">•</span>
+              <span className="inline-flex items-center gap-1 text-slate-600 dark:text-slate-400">
+                <Building2 className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
+                <span>{activeClinic.name || "City Medical Center"}</span>
+              </span>
             </div>
           </div>
 
-          {/* Contextual Action Button */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-            <button
-              onClick={handleStartConsultation}
-              className="px-5 py-3 rounded-2xl bg-white hover:bg-sky-50 text-sky-800 font-bold text-xs md:text-sm flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all active:scale-95 group"
-            >
-              <Play className="w-4 h-4 text-sky-600 fill-current group-hover:scale-110 transition-transform" />
-              <span>
-                {currentQueuePatient
-                  ? `Resume Token ${currentQueuePatient.tokenNumber}`
-                  : waitingQueue.length > 0
-                  ? `Start Consultation (${waitingQueue[0].tokenNumber})`
-                  : "Start Consultation"}
-              </span>
-            </button>
-            <Link
-              href="/doctor/queue"
-              className="px-4 py-3 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-semibold text-xs md:text-sm flex items-center justify-center gap-1.5 border border-white/20 transition-colors"
-            >
-              <Users className="w-4 h-4" />
-              <span>Manage Queue</span>
-            </Link>
+          {/* Right: Quick PDF Actions & Doctor Profile Avatar */}
+          <div className="flex items-center gap-3 self-end md:self-center flex-shrink-0 flex-wrap">
+            {/* Direct PDF / Print Buttons */}
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => handleOpenDocument("prescription")}
+                className="px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-200 flex items-center gap-1.5 transition-colors shadow-xs"
+                title="Preview printable prescription PDF"
+              >
+                <Eye className="w-3.5 h-3.5 text-sky-600" />
+                <span>Preview PDF</span>
+              </button>
+
+              <button
+                onClick={() => handleOpenDocument("prescription")}
+                className="px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-200 hidden sm:flex items-center gap-1.5 transition-colors shadow-xs"
+                title="Download official A4 PDF document"
+              >
+                <Download className="w-3.5 h-3.5 text-sky-600" />
+                <span>Download PDF</span>
+              </button>
+
+              <button
+                onClick={() => handleOpenDocument("prescription")}
+                className="px-3.5 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-xs font-semibold flex items-center gap-1.5 transition-colors shadow-xs"
+                title="Print prescription directly"
+              >
+                <Printer className="w-3.5 h-3.5" />
+                <span>Print Prescription</span>
+              </button>
+            </div>
+
+            {/* Avatar */}
+            <div className="relative pl-1">
+              <img
+                src={
+                  doctor.avatarUrl ||
+                  "https://images.unsplash.com/photo-1622253692010-333f2da6031d?q=80&w=400&auto=format&fit=crop"
+                }
+                alt={doctor.name || "Dr. Tariq Mahmood"}
+                className="w-11 h-11 rounded-2xl object-cover border-2 border-white dark:border-slate-800 shadow-sm ring-1 ring-slate-200 dark:ring-slate-700"
+              />
+              <span
+                className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-white dark:border-slate-900"
+                title="Online"
+              />
+            </div>
           </div>
         </div>
       </section>
 
-      {/* KPI Cards */}
+      {/* 2. KPI Cards (Primary Visual Element) */}
       <section>
         <DoctorKpiCards />
       </section>
 
-      {/* Live Patient Queue */}
+      {/* 3. Today's Appointments */}
+      <section>
+        <AppointmentTable limit={6} />
+      </section>
+
+      {/* 4. Waiting Queue / Current Patients */}
       <section>
         <LiveQueueCard />
       </section>
 
-      {/* Today's Appointments List */}
+      {/* 5. Recent Clinical Activity */}
       <section>
-        <AppointmentTable limit={6} />
+        <RecentClinicalActivity />
       </section>
+
+      {/* Medical Document Print / Preview Modal */}
+      {modalOpen && (
+        <PrescriptionPreviewModal
+          prescription={latestPrescription}
+          encounter={latestEncounter}
+          initialDocType={activeDocType}
+          onClose={() => setModalOpen(false)}
+        />
+      )}
     </div>
   );
 }
