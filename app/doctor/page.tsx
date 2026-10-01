@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { useDoctor } from "@/app/context/DoctorContext";
 import DoctorKpiCards from "@/components/doctor/DoctorKpiCards";
+import DoctorAnalysisSection from "@/components/doctor/analysis/DoctorAnalysisSection";
 import AppointmentTable from "@/components/doctor/AppointmentTable";
 import LiveQueueCard from "@/components/doctor/LiveQueueCard";
 import RecentClinicalActivity from "@/components/doctor/RecentClinicalActivity";
@@ -111,17 +112,22 @@ export default function DoctorDashboardOverview() {
         <DoctorKpiCards />
       </section>
 
-      {/* 3. Today's Appointments */}
+      {/* 3. ANALYSIS */}
+      <section>
+        <DoctorAnalysisSection />
+      </section>
+
+      {/* 4. Today's Appointments */}
       <section>
         <AppointmentTable limit={6} />
       </section>
 
-      {/* 4. Waiting Queue / Current Patients */}
+      {/* 5. Waiting Queue / Current Patients */}
       <section>
         <LiveQueueCard />
       </section>
 
-      {/* 5. Recent Clinical Activity */}
+      {/* 6. Recent Clinical Activity */}
       <section>
         <RecentClinicalActivity />
       </section>

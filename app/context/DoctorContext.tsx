@@ -85,18 +85,19 @@ const DoctorContext = createContext<DoctorContextType | undefined>(undefined);
 
 export function DoctorProvider({ children }: { children: React.ReactNode }) {
   const [isLoaded, setIsLoaded] = useState(false);
-  const [doctor, setDoctor] = useState<DoctorProfile>(() => DoctorService.getProfile());
+  const base = useMemo(() => DoctorService.getBaseState(), []);
+  const [doctor, setDoctor] = useState<DoctorProfile>(base.doctor);
   const [doctorStatus, setDoctorStatus] = useState<DoctorAvailabilityStatus>("available");
-  const [appointments, setAppointments] = useState<DoctorAppointment[]>(() => DoctorService.getAppointments());
-  const [queue, setQueue] = useState<QueueEntry[]>(() => DoctorService.getQueue());
-  const [patients, setPatients] = useState<PatientProfile[]>(() => DoctorService.getPatients());
-  const [consultations, setConsultations] = useState<ClinicalEncounter[]>(() => DoctorService.getConsultations());
-  const [prescriptions, setPrescriptions] = useState<DigitalPrescription[]>(() => DoctorService.getPrescriptions());
-  const [labOrders, setLabOrders] = useState<LabOrder[]>(() => DoctorService.getLabOrders());
-  const [followUps, setFollowUps] = useState<FollowUpRecord[]>(() => DoctorService.getFollowUps());
-  const [availability, setAvailability] = useState<DoctorAvailabilityConfig>(() => DoctorService.getAvailability());
-  const [notifications, setNotifications] = useState<DoctorNotificationItem[]>(() => DoctorService.getNotifications());
-  const [analytics, setAnalytics] = useState<DoctorAnalyticsSummary>(() => DoctorService.getAnalytics());
+  const [appointments, setAppointments] = useState<DoctorAppointment[]>(base.appointments);
+  const [queue, setQueue] = useState<QueueEntry[]>(base.queue);
+  const [patients, setPatients] = useState<PatientProfile[]>(base.patients);
+  const [consultations, setConsultations] = useState<ClinicalEncounter[]>(base.consultations);
+  const [prescriptions, setPrescriptions] = useState<DigitalPrescription[]>(base.prescriptions);
+  const [labOrders, setLabOrders] = useState<LabOrder[]>(base.labOrders);
+  const [followUps, setFollowUps] = useState<FollowUpRecord[]>(base.followUps);
+  const [availability, setAvailability] = useState<DoctorAvailabilityConfig>(base.availability);
+  const [notifications, setNotifications] = useState<DoctorNotificationItem[]>(base.notifications);
+  const [analytics, setAnalytics] = useState<DoctorAnalyticsSummary>(base.analytics);
   const [reviews, setReviews] = useState<DoctorReview[]>(() => DoctorService.getReviews());
 
   const refreshAll = useCallback(() => {
