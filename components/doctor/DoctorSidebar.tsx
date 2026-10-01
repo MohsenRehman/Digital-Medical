@@ -13,7 +13,6 @@ import {
   FlaskConical,
   RotateCcw,
   Clock,
-  BarChart3,
   Bell,
   Settings,
   LogOut,
@@ -23,6 +22,8 @@ import {
   Radio,
 } from "lucide-react";
 import { useDoctor } from "@/app/context/DoctorContext";
+import { useNavigationLoading } from "@/components/doctor/loading/NavigationProgress";
+import { LoadingSpinner } from "@/components/doctor/loading/LoadingSpinner";
 import { DoctorAvailabilityStatus } from "@/lib/types/doctor";
 
 interface NavItem {
@@ -46,6 +47,8 @@ export default function DoctorSidebar() {
     followUps,
     unreadNotificationsCount,
   } = useDoctor();
+
+  const { navigatingHref, startNavigation } = useNavigationLoading();
 
   const [mobileOpen, setMobileOpen] = useState(false);
   const [statusDropdownOpen, setStatusDropdownOpen] = useState(false);
@@ -113,16 +116,6 @@ export default function DoctorSidebar() {
           name: "Availability & Schedule",
           href: "/doctor/availability",
           icon: Clock,
-        },
-      ],
-    },
-    {
-      title: "INSIGHTS",
-      items: [
-        {
-          name: "Analytics",
-          href: "/doctor/analytics",
-          icon: BarChart3,
         },
       ],
     },
@@ -197,14 +190,21 @@ export default function DoctorSidebar() {
                 const isActive =
                   pathname === item.href ||
                   (item.href !== "/doctor" && pathname.startsWith(item.href));
+                const isTargetLoading =
+                  navigatingHref === item.href && pathname !== item.href;
 
                 return (
                   <Link
                     key={item.href}
                     href={item.href}
-                    onClick={() => setMobileOpen(false)}
+                    onClick={() => {
+                      setMobileOpen(false);
+                      startNavigation(item.href);
+                    }}
                     className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-all group ${
-                      isActive
+                      isTargetLoading
+                        ? "bg-sky-500 text-white font-semibold shadow-sm animate-pulse"
+                        : isActive
                         ? "bg-sky-600 text-white font-semibold shadow-sm shadow-sky-600/30"
                         : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-white active:bg-sky-600 active:text-white"
                     }`}
@@ -212,25 +212,31 @@ export default function DoctorSidebar() {
                     <div className="flex items-center gap-2.5 min-w-0">
                       <Icon
                         className={`w-4 h-4 transition-colors ${
-                          isActive
+                          isActive || isTargetLoading
                             ? "text-white"
                             : "text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-200 group-active:text-white"
                         }`}
                       />
                       <span className="truncate">{item.name}</span>
                     </div>
-                    {item.badge && (
-                      <span
-                        suppressHydrationWarning
-                        className={`text-[10px] px-2 py-0.5 font-bold rounded-full transition-colors ${
-                          isActive
-                            ? "bg-white/20 text-white"
-                            : "bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 group-active:bg-white/20 group-active:text-white"
-                        }`}
-                      >
-                        {item.badge}
-                      </span>
-                    )}
+
+                    <div className="flex items-center gap-1.5 flex-shrink-0">
+                      {isTargetLoading && (
+                        <LoadingSpinner size="xs" color="#ffffff" label="Navigating..." />
+                      )}
+                      {item.badge && !isTargetLoading && (
+                        <span
+                          suppressHydrationWarning
+                          className={`text-[10px] px-2 py-0.5 font-bold rounded-full transition-colors ${
+                            isActive
+                              ? "bg-white/20 text-white"
+                              : "bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 group-active:bg-white/20 group-active:text-white"
+                          }`}
+                        >
+                          {item.badge}
+                        </span>
+                      )}
+                    </div>
                   </Link>
                 );
               })}

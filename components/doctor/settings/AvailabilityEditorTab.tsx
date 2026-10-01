@@ -14,6 +14,8 @@ import {
   Check,
 } from "lucide-react";
 import { DoctorAvailabilityConfig, ConsultationType } from "@/lib/types/doctor";
+import { LoadingSpinner } from "@/components/doctor/loading/LoadingSpinner";
+import { useDoctorToast } from "@/components/doctor/loading/DoctorToast";
 
 interface AvailabilityEditorTabProps {
   availability: DoctorAvailabilityConfig;
@@ -36,6 +38,7 @@ export default function AvailabilityEditorTab({
   activeClinicName,
   onUpdateAvailability,
 }: AvailabilityEditorTabProps) {
+  const { showToast } = useDoctorToast();
   const [workingDays, setWorkingDays] = useState<DoctorAvailabilityConfig["workingDays"]>(
     availability.workingDays
   );
@@ -77,6 +80,7 @@ export default function AvailabilityEditorTab({
       });
       setSaving(false);
       setSavedSuccess(true);
+      showToast("Clinical practice hours saved successfully", "success");
       setTimeout(() => setSavedSuccess(false), 3000);
     }, 400);
   };
@@ -227,10 +231,19 @@ export default function AvailabilityEditorTab({
         <button
           type="submit"
           disabled={saving}
-          className="px-5 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 disabled:opacity-50 text-white font-semibold text-xs flex items-center gap-2 shadow-xs transition-colors"
+          className="px-5 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 disabled:opacity-60 text-white font-semibold text-xs flex items-center gap-2 shadow-xs transition-colors"
         >
-          <Save className="w-3.5 h-3.5" />
-          <span>{saving ? "Saving Changes..." : "Save Availability Hours"}</span>
+          {saving ? (
+            <>
+              <LoadingSpinner size="xs" color="text-white" />
+              <span>Saving Changes...</span>
+            </>
+          ) : (
+            <>
+              <Save className="w-3.5 h-3.5" />
+              <span>Save Availability Hours</span>
+            </>
+          )}
         </button>
       </div>
     </form>

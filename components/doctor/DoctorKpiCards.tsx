@@ -10,9 +10,12 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { useDoctor } from "@/app/context/DoctorContext";
+import { useNavigationLoading } from "@/components/doctor/loading/NavigationProgress";
+import { LoadingSpinner } from "@/components/doctor/loading/LoadingSpinner";
 
 export default function DoctorKpiCards() {
-  const { appointments, waitingQueue, queue } = useDoctor();
+  const { appointments, waitingQueue, queue, isLoaded } = useDoctor();
+  const { navigatingHref, startNavigation } = useNavigationLoading();
 
   // Compute live aggregates with realistic fallbacks adhering to clinical schedule
   const todayApts = appointments.filter((a) => a.scheduledAt === "2026-09-24");
@@ -88,12 +91,20 @@ export default function DoctorKpiCards() {
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
       {kpis.map((kpi) => {
         const Icon = kpi.icon;
+        const isTargetLoading = navigatingHref === kpi.href;
+
         return (
           <Link
             key={kpi.title}
             href={kpi.href}
+            onClick={() => startNavigation(kpi.href)}
             aria-label={kpi.ariaLabel}
-            className={`group relative block p-5 rounded-2xl bg-white dark:bg-slate-900 border ${kpi.border} ${kpi.hoverBorder} shadow-xs hover:shadow-md transition-all duration-200 hover:-translate-y-1 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900`}
+            aria-busy={isTargetLoading}
+            className={`group relative block p-5 rounded-2xl bg-white dark:bg-slate-900 border ${
+              isTargetLoading
+                ? "border-sky-500 ring-2 ring-sky-500/20 shadow-md"
+                : `${kpi.border} ${kpi.hoverBorder} shadow-xs hover:shadow-md`
+            } transition-all duration-200 hover:-translate-y-1 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900`}
           >
             {/* Top row: Label and Icon */}
             <div className="flex items-center justify-between gap-2 mb-3">
@@ -103,15 +114,23 @@ export default function DoctorKpiCards() {
               <div
                 className={`p-2.5 rounded-xl ${kpi.accentBg} group-hover:scale-105 transition-transform flex-shrink-0`}
               >
-                <Icon className={`w-5 h-5 ${kpi.accentText}`} />
+                {isTargetLoading ? (
+                  <LoadingSpinner size="sm" color="#0284c7" label="Loading route..." />
+                ) : (
+                  <Icon className={`w-5 h-5 ${kpi.accentText}`} />
+                )}
               </div>
             </div>
 
-            {/* Metric Value */}
+            {/* Metric Value: Skeleton or Real Value */}
             <div className="flex items-baseline gap-2">
-              <span className="text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">
-                {kpi.value}
-              </span>
+              {!isLoaded ? (
+                <div className="h-9 w-20 bg-slate-200 dark:bg-slate-700 rounded-lg animate-pulse my-0.5" />
+              ) : (
+                <span className="text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">
+                  {kpi.value}
+                </span>
+              )}
               <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${kpi.pillBg}`}>
                 {kpi.pillText}
               </span>
@@ -122,10 +141,20 @@ export default function DoctorKpiCards() {
               {kpi.description}
             </p>
 
-            {/* Hover Action Indicator */}
-            <div className="mt-3 pt-2.5 border-t border-slate-100 dark:border-slate-800 text-[11px] font-semibold text-slate-400 group-hover:text-sky-600 dark:group-hover:text-sky-400 flex items-center justify-between transition-colors">
-              <span>View details</span>
-              <ArrowRight className="w-3.5 h-3.5 transform group-hover:translate-x-1 transition-transform" />
+            {/* Hover / Active Action Indicator */}
+            <div
+              className={`mt-3 pt-2.5 border-t border-slate-100 dark:border-slate-800 text-[11px] font-semibold flex items-center justify-between transition-colors ${
+                isTargetLoading
+                  ? "text-sky-600 dark:text-sky-400"
+                  : "text-slate-400 group-hover:text-sky-600 dark:group-hover:text-sky-400"
+              }`}
+            >
+              <span>{isTargetLoading ? "Opening view..." : "View details"}</span>
+              {isTargetLoading ? (
+                <LoadingSpinner size="xs" color="#0284c7" />
+              ) : (
+                <ArrowRight className="w-3.5 h-3.5 transform group-hover:translate-x-1 transition-transform" />
+              )}
             </div>
           </Link>
         );

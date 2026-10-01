@@ -31,6 +31,7 @@ import {
   generatePrescriptionHtml,
   PrescriptionRenderData,
 } from "@/lib/doctor/medicalDocumentTemplates";
+import { LoadingSpinner } from "@/components/doctor/loading/LoadingSpinner";
 
 export interface MedicalDocumentViewerProps {
   prescription?: DigitalPrescription | null;
@@ -47,6 +48,10 @@ export default function MedicalDocumentViewer({
 }: MedicalDocumentViewerProps) {
   const [docType, setDocType] = useState<DocumentType>(initialDocType);
   const [actionNotice, setActionNotice] = useState<string | null>(null);
+  const [isPrinting, setIsPrinting] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [downloadFailed, setDownloadFailed] = useState(false);
+  const [isSharing, setIsSharing] = useState(false);
 
   const printContainerRef = useRef<HTMLDivElement>(null);
 
@@ -197,6 +202,10 @@ export default function MedicalDocumentViewer({
 
   // Print execution: renders exclusively the clean A4 document in an isolated frame
   const handlePrint = () => {
+    if (isPrinting) return;
+    setIsPrinting(true);
+    setActionNotice("Preparing print layout...");
+
     const printIframe = document.createElement("iframe");
     printIframe.style.position = "fixed";
     printIframe.style.right = "0";
@@ -209,6 +218,7 @@ export default function MedicalDocumentViewer({
     const doc = printIframe.contentWindow?.document;
     if (!doc) {
       window.print();
+      setIsPrinting(false);
       return;
     }
 
@@ -237,16 +247,23 @@ export default function MedicalDocumentViewer({
     setTimeout(() => {
       printIframe.contentWindow?.focus();
       printIframe.contentWindow?.print();
+      setIsPrinting(false);
+      setActionNotice("Print dialog initiated.");
+      setTimeout(() => setActionNotice(null), 3000);
       setTimeout(() => {
         if (document.body.contains(printIframe)) {
           document.body.removeChild(printIframe);
         }
       }, 3000);
-    }, 400);
+    }, 450);
   };
 
   const handleDownloadPdf = () => {
-    // Try triggering direct API download if available, or print dialog
+    if (isDownloading) return;
+    setIsDownloading(true);
+    setDownloadFailed(false);
+    setActionNotice("Preparing PDF document...");
+
     const pdfUrl = `/api/doctor/prescriptions/${encodeURIComponent(prescriptionId)}/pdf`;
     
     // Test if endpoint exists by initiating download or fallback to print
@@ -259,6 +276,7 @@ export default function MedicalDocumentViewer({
           document.body.appendChild(a);
           a.click();
           document.body.removeChild(a);
+          setIsDownloading(false);
           setActionNotice(`Prescription PDF (${prescriptionId}) downloaded successfully.`);
           setTimeout(() => setActionNotice(null), 3500);
         } else {
@@ -271,20 +289,26 @@ export default function MedicalDocumentViewer({
   };
 
   const fallbackPrintToPdf = () => {
-    setActionNotice("Opening print dialog. Select 'Save as PDF' to download your official A4 medical document.");
+    setActionNotice("Opening print dialog. Select 'Save as PDF' to save your official document.");
     setTimeout(() => {
+      setIsDownloading(false);
       handlePrint();
-      setTimeout(() => setActionNotice(null), 4000);
-    }, 400);
+    }, 500);
   };
 
   const handleShareWhatsApp = () => {
+    if (isSharing) return;
+    setIsSharing(true);
+    setActionNotice("Preparing document link for WhatsApp...");
     const text = encodeURIComponent(
       `Hello ${patientData.name}, your official Digital Medical prescription (${prescriptionId}) from ${doctorName} at ${clinicName} is available: ${verificationUrl}`
     );
-    window.open(`https://api.whatsapp.com/send?phone=${patientData.phone.replace(/[^0-9]/g, "")}&text=${text}`, "_blank");
-    setActionNotice(`Prescription link prepared for WhatsApp delivery to ${patientData.phone}.`);
-    setTimeout(() => setActionNotice(null), 3500);
+    setTimeout(() => {
+      window.open(`https://api.whatsapp.com/send?phone=${patientData.phone.replace(/[^0-9]/g, "")}&text=${text}`, "_blank");
+      setIsSharing(false);
+      setActionNotice(`Prescription link prepared for WhatsApp delivery to ${patientData.phone}.`);
+      setTimeout(() => setActionNotice(null), 3500);
+    }, 350);
   };
 
   return (
@@ -330,32 +354,67 @@ export default function MedicalDocumentViewer({
             {/* Secondary Action: Print */}
             <button
               onClick={handlePrint}
+              disabled={isPrinting}
               aria-label="Print prescription"
-              className="px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold text-xs flex items-center gap-1.5 transition-colors shadow-xs"
+              className="px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-60 text-slate-700 dark:text-slate-200 font-semibold text-xs flex items-center gap-1.5 transition-colors shadow-xs"
             >
-              <Printer className="w-4 h-4 text-slate-600 dark:text-slate-300" />
-              <span className="hidden sm:inline">Print</span>
+              {isPrinting ? (
+                <>
+                  <LoadingSpinner size="xs" />
+                  <span>Preparing print...</span>
+                </>
+              ) : (
+                <>
+                  <Printer className="w-4 h-4 text-slate-600 dark:text-slate-300" />
+                  <span className="hidden sm:inline">Print</span>
+                </>
+              )}
             </button>
 
             {/* Primary Action: Download PDF */}
             <button
               onClick={handleDownloadPdf}
+              disabled={isDownloading}
               aria-label="Download prescription PDF"
-              className="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs flex items-center gap-1.5 transition-colors shadow-xs"
+              className="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 disabled:opacity-60 text-white font-bold text-xs flex items-center gap-1.5 transition-colors shadow-xs"
             >
-              <Download className="w-4 h-4" />
-              <span>Download PDF</span>
+              {isDownloading ? (
+                <>
+                  <LoadingSpinner size="xs" color="text-white" />
+                  <span>Preparing PDF...</span>
+                </>
+              ) : downloadFailed ? (
+                <>
+                  <Download className="w-4 h-4" />
+                  <span>Try Again</span>
+                </>
+              ) : (
+                <>
+                  <Download className="w-4 h-4" />
+                  <span>Download PDF</span>
+                </>
+              )}
             </button>
 
             {/* Secondary Action: WhatsApp */}
             <button
               onClick={handleShareWhatsApp}
+              disabled={isSharing}
               aria-label="Share prescription on WhatsApp"
-              className="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs hidden sm:flex items-center gap-1.5 transition-colors shadow-xs"
+              className="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 text-white font-semibold text-xs hidden sm:flex items-center gap-1.5 transition-colors shadow-xs"
               title="Share digital copy via WhatsApp"
             >
-              <Share2 className="w-3.5 h-3.5" />
-              <span>WhatsApp</span>
+              {isSharing ? (
+                <>
+                  <LoadingSpinner size="xs" color="text-white" />
+                  <span>Preparing document...</span>
+                </>
+              ) : (
+                <>
+                  <Share2 className="w-3.5 h-3.5" />
+                  <span>WhatsApp</span>
+                </>
+              )}
             </button>
 
             {/* Divider */}

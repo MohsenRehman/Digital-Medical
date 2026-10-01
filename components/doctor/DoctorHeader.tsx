@@ -19,10 +19,13 @@ import {
 } from "lucide-react";
 import { useDoctor } from "@/app/context/DoctorContext";
 import { PatientProfile } from "@/lib/types/doctor";
+import { LoadingSpinner } from "@/components/doctor/loading/LoadingSpinner";
+import { useDoctorToast } from "@/components/doctor/loading/DoctorToast";
 
 export default function DoctorHeader() {
   const router = useRouter();
   const pathname = usePathname();
+  const { showToast } = useDoctorToast();
   const {
     doctor,
     activeClinic,
@@ -39,23 +42,31 @@ export default function DoctorHeader() {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<PatientProfile[]>([]);
   const [searchFocused, setSearchFocused] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
 
   // Clinic switcher state
   const [clinicDropdownOpen, setClinicDropdownOpen] = useState(false);
+  const [switchingClinicId, setSwitchingClinicId] = useState<string | null>(null);
   const clinicRef = useRef<HTMLDivElement>(null);
 
   // Notification dropdown state
   const [notifDropdownOpen, setNotifDropdownOpen] = useState(false);
   const notifRef = useRef<HTMLDivElement>(null);
 
-  // Handle global patient search
+  // Handle global patient search with perceived loading feedback
   useEffect(() => {
     if (searchQuery.trim().length > 1) {
-      const results = searchPatients(searchQuery);
-      setSearchResults(results);
+      setIsSearching(true);
+      const timer = setTimeout(() => {
+        const results = searchPatients(searchQuery);
+        setSearchResults(results);
+        setIsSearching(false);
+      }, 160);
+      return () => clearTimeout(timer);
     } else {
       setSearchResults([]);
+      setIsSearching(false);
     }
   }, [searchQuery, searchPatients]);
 
@@ -125,25 +136,36 @@ export default function DoctorHeader() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onFocus={() => setSearchFocused(true)}
-              className="w-full pl-10 pr-9 py-2 rounded-xl text-xs bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent text-slate-800 dark:text-slate-100 placeholder-slate-400 transition-all shadow-xs"
+              className="w-full pl-10 pr-10 py-2 rounded-xl text-xs bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent text-slate-800 dark:text-slate-100 placeholder-slate-400 transition-all shadow-xs"
             />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery("")}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
-            )}
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
+              {isSearching && <LoadingSpinner size="xs" />}
+              {searchQuery && !isSearching && (
+                <button
+                  onClick={() => setSearchQuery("")}
+                  className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Search Results Dropdown */}
           {searchFocused && searchQuery.trim().length > 1 && (
             <div className="absolute top-full mt-2 left-0 right-0 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl overflow-hidden z-50 animate-popIn">
               <div className="p-3 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500">
-                <span className="font-semibold text-slate-700 dark:text-slate-300">
-                  Search Results ({searchResults.length})
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="font-semibold text-slate-700 dark:text-slate-300">
+                    Search Results ({searchResults.length})
+                  </span>
+                  {isSearching && (
+                    <span className="inline-flex items-center gap-1 text-[11px] text-sky-600 dark:text-sky-400 font-medium">
+                      <LoadingSpinner size="xs" />
+                      <span>Updating...</span>
+                    </span>
+                  )}
+                </div>
                 <span className="text-[11px]">Strict Clinical RBAC Protected</span>
               </div>
 
@@ -236,9 +258,16 @@ export default function DoctorHeader() {
                     return (
                       <button
                         key={clinic.id}
+                        disabled={switchingClinicId !== null}
                         onClick={() => {
-                          switchClinic(clinic.id);
-                          setClinicDropdownOpen(false);
+                          if (switchingClinicId) return;
+                          setSwitchingClinicId(clinic.id);
+                          setTimeout(() => {
+                            switchClinic(clinic.id);
+                            setSwitchingClinicId(null);
+                            setClinicDropdownOpen(false);
+                            showToast(`Switched workspace to ${clinic.name}`, "success");
+                          }, 250);
                         }}
                         className={`w-full text-left p-2.5 rounded-xl text-xs transition-colors flex items-start justify-between ${
                           isSelected
@@ -252,7 +281,11 @@ export default function DoctorHeader() {
                             {clinic.city} • {clinic.roomNumber}
                           </p>
                         </div>
-                        {isSelected && <CheckCircle2 className="w-4 h-4 text-sky-600 flex-shrink-0 mt-0.5" />}
+                        {switchingClinicId === clinic.id ? (
+                          <LoadingSpinner size="xs" />
+                        ) : isSelected ? (
+                          <CheckCircle2 className="w-4 h-4 text-sky-600 flex-shrink-0 mt-0.5" />
+                        ) : null}
                       </button>
                     );
                   })}

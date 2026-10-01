@@ -20,9 +20,12 @@ import {
 } from "lucide-react";
 import { useDoctor } from "@/app/context/DoctorContext";
 import { QueueEntry } from "@/lib/types/doctor";
+import { LoadingSpinner } from "@/components/doctor/loading/LoadingSpinner";
+import { useDoctorToast } from "@/components/doctor/loading/DoctorToast";
 
 export default function DoctorQueuePage() {
   const router = useRouter();
+  const { showToast } = useDoctorToast();
   const {
     queue,
     currentQueuePatient,
@@ -34,14 +37,27 @@ export default function DoctorQueuePage() {
     activeClinic,
   } = useDoctor();
 
-  // Action confirmation states
+  // Action states
   const [confirmNoShowEntry, setConfirmNoShowEntry] = useState<QueueEntry | null>(null);
   const [announcementPlayed, setAnnouncementPlayed] = useState(false);
+  const [isCallingNext, setIsCallingNext] = useState(false);
+  const [startingQueueId, setStartingQueueId] = useState<string | null>(null);
+  const [isSubmittingNoShow, setIsSubmittingNoShow] = useState(false);
 
   const completedQueue = queue.filter((q) => q.status === "completed");
   const nextPatient = waitingQueue[0];
 
+  const handleCallNext = () => {
+    if (isCallingNext) return;
+    setIsCallingNext(true);
+    callNextPatient();
+    showToast("Calling next queued patient...", "info");
+    setTimeout(() => setIsCallingNext(false), 450);
+  };
+
   const handleStartConsultation = (entry: QueueEntry) => {
+    if (startingQueueId) return;
+    setStartingQueueId(entry.id);
     startConsultationFromQueue(entry.id);
     router.push(`/doctor/consultations/${entry.appointmentId}`);
   };
@@ -53,8 +69,13 @@ export default function DoctorQueuePage() {
 
   const handleConfirmNoShow = () => {
     if (confirmNoShowEntry) {
-      markQueueNoShow(confirmNoShowEntry.id);
-      setConfirmNoShowEntry(null);
+      setIsSubmittingNoShow(true);
+      setTimeout(() => {
+        markQueueNoShow(confirmNoShowEntry.id);
+        showToast(`Patient ${confirmNoShowEntry.patientName} marked as No Show`, "warning");
+        setIsSubmittingNoShow(false);
+        setConfirmNoShowEntry(null);
+      }, 300);
     }
   };
 
@@ -92,12 +113,21 @@ export default function DoctorQueuePage() {
           </button>
 
           <button
-            onClick={callNextPatient}
-            disabled={waitingQueue.length === 0}
+            onClick={handleCallNext}
+            disabled={waitingQueue.length === 0 || isCallingNext}
             className="px-4 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 disabled:opacity-50 text-white font-bold text-xs flex items-center gap-2 shadow-sm transition-all active:scale-95"
           >
-            <Play className="w-4 h-4 fill-current" />
-            <span>Call Next Patient</span>
+            {isCallingNext ? (
+              <>
+                <LoadingSpinner size="xs" color="text-white" />
+                <span>Calling...</span>
+              </>
+            ) : (
+              <>
+                <Play className="w-4 h-4 fill-current" />
+                <span>Call Next Patient</span>
+              </>
+            )}
           </button>
         </div>
       </div>
@@ -318,9 +348,17 @@ export default function DoctorQueuePage() {
                     <div className="flex items-center justify-end gap-1.5">
                       <button
                         onClick={() => handleStartConsultation(item)}
-                        className="px-3 py-1 rounded-lg bg-sky-600 hover:bg-sky-700 text-white font-semibold text-xs shadow-xs"
+                        disabled={startingQueueId !== null}
+                        className="px-3 py-1 rounded-lg bg-sky-600 hover:bg-sky-700 disabled:opacity-60 text-white font-semibold text-xs shadow-xs flex items-center gap-1"
                       >
-                        Start
+                        {startingQueueId === item.id ? (
+                          <>
+                            <LoadingSpinner size="xs" color="text-white" />
+                            <span>Starting...</span>
+                          </>
+                        ) : (
+                          <span>Start</span>
+                        )}
                       </button>
                       <button
                         onClick={() => skipQueuePatient(item.id)}
@@ -395,9 +433,17 @@ export default function DoctorQueuePage() {
               </button>
               <button
                 onClick={handleConfirmNoShow}
-                className="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold shadow-xs"
+                disabled={isSubmittingNoShow}
+                className="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 disabled:opacity-60 text-white text-xs font-semibold shadow-xs flex items-center gap-1.5"
               >
-                Confirm No Show
+                {isSubmittingNoShow ? (
+                  <>
+                    <LoadingSpinner size="xs" color="text-white" />
+                    <span>Confirming...</span>
+                  </>
+                ) : (
+                  <span>Confirm No Show</span>
+                )}
               </button>
             </div>
           </div>

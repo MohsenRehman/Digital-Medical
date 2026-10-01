@@ -36,10 +36,13 @@ import {
   DigitalPrescription,
 } from "@/lib/types/doctor";
 import PrescriptionPreviewModal from "@/components/doctor/PrescriptionPreviewModal";
+import { LoadingSpinner } from "@/components/doctor/loading/LoadingSpinner";
+import { useDoctorToast } from "@/components/doctor/loading/DoctorToast";
 
 export default function DoctorConsultationWorkspace() {
   const params = useParams();
   const router = useRouter();
+  const { showToast } = useDoctorToast();
   const appointmentId = params?.appointmentId as string;
 
   const {
@@ -121,6 +124,8 @@ export default function DoctorConsultationWorkspace() {
   // Completion modal & preview
   const [generatedPrescription, setGeneratedPrescription] = useState<DigitalPrescription | null>(null);
   const [isCompleted, setIsCompleted] = useState(false);
+  const [isSavingDraft, setIsSavingDraft] = useState(false);
+  const [isCompleting, setIsCompleting] = useState(false);
   const [notificationBanner, setNotificationBanner] = useState<string | null>(null);
 
   // Prepopulate form if existing encounter exists
@@ -221,55 +226,65 @@ export default function DoctorConsultationWorkspace() {
   };
 
   const handleSaveDraft = () => {
-    if (!appointment) return;
-    saveConsultationDraft({
-      appointmentId: appointment.id,
-      patientProfileId: appointment.patientProfileId,
-      patientName: appointment.patientName,
-      chiefComplaint,
-      symptoms: symptomsList,
-      vitals: { ...vitals, bmi: calculatedBMI },
-      clinicalNotes,
-      assessment,
-      diagnosis,
-      icd10Code,
-      medications,
-      labOrders: orderedLabs,
-      followUpRequired,
-      followUpDate,
-      followUpReason,
-    });
-    setNotificationBanner("Draft consultation progress saved successfully.");
-    setTimeout(() => setNotificationBanner(null), 3000);
+    if (!appointment || isSavingDraft) return;
+    setIsSavingDraft(true);
+    setTimeout(() => {
+      saveConsultationDraft({
+        appointmentId: appointment.id,
+        patientProfileId: appointment.patientProfileId,
+        patientName: appointment.patientName,
+        chiefComplaint,
+        symptoms: symptomsList,
+        vitals: { ...vitals, bmi: calculatedBMI },
+        clinicalNotes,
+        assessment,
+        diagnosis,
+        icd10Code,
+        medications,
+        labOrders: orderedLabs,
+        followUpRequired,
+        followUpDate,
+        followUpReason,
+      });
+      setIsSavingDraft(false);
+      showToast("Draft consultation progress saved", "success");
+      setNotificationBanner("Draft consultation progress saved successfully.");
+      setTimeout(() => setNotificationBanner(null), 3000);
+    }, 300);
   };
 
   const handleCompleteEncounter = () => {
-    if (!appointment) return;
-    // Save draft first
-    const saved = saveConsultationDraft({
-      appointmentId: appointment.id,
-      patientProfileId: appointment.patientProfileId,
-      patientName: appointment.patientName,
-      chiefComplaint,
-      symptoms: symptomsList,
-      vitals: { ...vitals, bmi: calculatedBMI },
-      clinicalNotes,
-      assessment,
-      diagnosis: diagnosis || "Clinical evaluation completed",
-      icd10Code,
-      medications,
-      labOrders: orderedLabs,
-      followUpRequired,
-      followUpDate,
-      followUpReason,
-    });
+    if (!appointment || isCompleting) return;
+    setIsCompleting(true);
+    setTimeout(() => {
+      // Save draft first
+      const saved = saveConsultationDraft({
+        appointmentId: appointment.id,
+        patientProfileId: appointment.patientProfileId,
+        patientName: appointment.patientName,
+        chiefComplaint,
+        symptoms: symptomsList,
+        vitals: { ...vitals, bmi: calculatedBMI },
+        clinicalNotes,
+        assessment,
+        diagnosis: diagnosis || "Clinical evaluation completed",
+        icd10Code,
+        medications,
+        labOrders: orderedLabs,
+        followUpRequired,
+        followUpDate,
+        followUpReason,
+      });
 
-    const { encounter, prescription } = completeConsultation(saved.id);
-    setIsCompleted(true);
-    setGeneratedPrescription(prescription);
-    setNotificationBanner(
-      `Consultation completed! Prescription ${prescription.prescriptionNumber} generated and clinic billing event recorded.`
-    );
+      const { encounter, prescription } = completeConsultation(saved.id);
+      setIsCompleting(false);
+      setIsCompleted(true);
+      setGeneratedPrescription(prescription);
+      showToast(`Consultation completed! Prescription ${prescription.prescriptionNumber} generated.`, "success");
+      setNotificationBanner(
+        `Consultation completed! Prescription ${prescription.prescriptionNumber} generated and clinic billing event recorded.`
+      );
+    }, 450);
   };
 
   if (!appointment) {
@@ -366,20 +381,39 @@ export default function DoctorConsultationWorkspace() {
         <div className="flex items-center gap-3">
           <button
             onClick={handleSaveDraft}
-            disabled={isCompleted}
-            className="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-semibold flex items-center gap-2 transition-colors disabled:opacity-50"
+            disabled={isCompleted || isSavingDraft}
+            className="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-60 text-slate-700 dark:text-slate-200 text-xs font-semibold flex items-center gap-2 transition-colors"
           >
-            <Save className="w-4 h-4 text-slate-400" />
-            <span>Save Draft</span>
+            {isSavingDraft ? (
+              <>
+                <LoadingSpinner size="xs" />
+                <span>Saving...</span>
+              </>
+            ) : (
+              <>
+                <Save className="w-4 h-4 text-slate-400" />
+                <span>Save Draft</span>
+              </>
+            )}
           </button>
 
           {!isCompleted ? (
             <button
               onClick={handleCompleteEncounter}
-              className="px-5 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs flex items-center gap-2 shadow-sm transition-all active:scale-95"
+              disabled={isCompleting}
+              className="px-5 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 disabled:opacity-60 text-white font-bold text-xs flex items-center gap-2 shadow-sm transition-all active:scale-95"
             >
-              <CheckCircle2 className="w-4 h-4" />
-              <span>Complete Consultation</span>
+              {isCompleting ? (
+                <>
+                  <LoadingSpinner size="xs" color="text-white" />
+                  <span>Completing...</span>
+                </>
+              ) : (
+                <>
+                  <CheckCircle2 className="w-4 h-4" />
+                  <span>Complete Consultation</span>
+                </>
+              )}
             </button>
           ) : (
             <button

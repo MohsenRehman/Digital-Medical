@@ -21,13 +21,19 @@ export default function DoctorDashboardOverview() {
   const { doctor, activeClinic, prescriptions, consultations } = useDoctor();
   const [modalOpen, setModalOpen] = useState(false);
   const [activeDocType, setActiveDocType] = useState<DocumentType>("prescription");
+  const [openingAction, setOpeningAction] = useState<"preview" | "download" | "print" | null>(null);
 
   const latestPrescription = prescriptions[0] || null;
   const latestEncounter = consultations[0] || null;
 
-  const handleOpenDocument = (type: DocumentType) => {
+  const handleOpenDocument = (type: DocumentType, action: "preview" | "download" | "print") => {
+    if (openingAction) return;
+    setOpeningAction(action);
     setActiveDocType(type);
-    setModalOpen(true);
+    setTimeout(() => {
+      setModalOpen(true);
+      setOpeningAction(null);
+    }, 150);
   };
 
   return (
@@ -61,30 +67,60 @@ export default function DoctorDashboardOverview() {
             {/* Direct PDF / Print Buttons */}
             <div className="flex items-center gap-1.5">
               <button
-                onClick={() => handleOpenDocument("prescription")}
-                className="px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-200 flex items-center gap-1.5 transition-colors shadow-xs"
+                onClick={() => handleOpenDocument("prescription", "preview")}
+                disabled={openingAction !== null}
+                className="px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-60 text-xs font-semibold text-slate-700 dark:text-slate-200 flex items-center gap-1.5 transition-colors shadow-xs"
                 title="Preview printable prescription PDF"
               >
-                <Eye className="w-3.5 h-3.5 text-sky-600" />
-                <span>Preview PDF</span>
+                {openingAction === "preview" ? (
+                  <>
+                    <span className="w-3.5 h-3.5 border-2 border-sky-600 border-t-transparent rounded-full animate-spin" />
+                    <span>Opening...</span>
+                  </>
+                ) : (
+                  <>
+                    <Eye className="w-3.5 h-3.5 text-sky-600" />
+                    <span>Preview PDF</span>
+                  </>
+                )}
               </button>
 
               <button
-                onClick={() => handleOpenDocument("prescription")}
-                className="px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-200 hidden sm:flex items-center gap-1.5 transition-colors shadow-xs"
+                onClick={() => handleOpenDocument("prescription", "download")}
+                disabled={openingAction !== null}
+                className="px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-60 text-xs font-semibold text-slate-700 dark:text-slate-200 hidden sm:flex items-center gap-1.5 transition-colors shadow-xs"
                 title="Download official A4 PDF document"
               >
-                <Download className="w-3.5 h-3.5 text-sky-600" />
-                <span>Download PDF</span>
+                {openingAction === "download" ? (
+                  <>
+                    <span className="w-3.5 h-3.5 border-2 border-sky-600 border-t-transparent rounded-full animate-spin" />
+                    <span>Preparing PDF...</span>
+                  </>
+                ) : (
+                  <>
+                    <Download className="w-3.5 h-3.5 text-sky-600" />
+                    <span>Download PDF</span>
+                  </>
+                )}
               </button>
 
               <button
-                onClick={() => handleOpenDocument("prescription")}
-                className="px-3.5 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-xs font-semibold flex items-center gap-1.5 transition-colors shadow-xs"
+                onClick={() => handleOpenDocument("prescription", "print")}
+                disabled={openingAction !== null}
+                className="px-3.5 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-700 disabled:opacity-60 text-white text-xs font-semibold flex items-center gap-1.5 transition-colors shadow-xs"
                 title="Print prescription directly"
               >
-                <Printer className="w-3.5 h-3.5" />
-                <span>Print Prescription</span>
+                {openingAction === "print" ? (
+                  <>
+                    <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <span>Preparing Print...</span>
+                  </>
+                ) : (
+                  <>
+                    <Printer className="w-3.5 h-3.5" />
+                    <span>Print Prescription</span>
+                  </>
+                )}
               </button>
             </div>
 

@@ -14,6 +14,8 @@ import {
   ShieldAlert,
 } from "lucide-react";
 import { DoctorProfile } from "@/lib/types/doctor";
+import { LoadingSpinner } from "@/components/doctor/loading/LoadingSpinner";
+import { useDoctorToast } from "@/components/doctor/loading/DoctorToast";
 
 interface PersonalInfoFormProps {
   doctor: DoctorProfile;
@@ -21,6 +23,7 @@ interface PersonalInfoFormProps {
 }
 
 export default function PersonalInfoForm({ doctor, onSave }: PersonalInfoFormProps) {
+  const { showToast } = useDoctorToast();
   const [fullName, setFullName] = useState(doctor.name || "");
   const [displayName, setDisplayName] = useState(doctor.displayName || doctor.name || "");
   const [email, setEmail] = useState(doctor.email || "dr.tariq.mahmood@digitalmedical.pk");
@@ -67,6 +70,7 @@ export default function PersonalInfoForm({ doctor, onSave }: PersonalInfoFormPro
       });
       setSaving(false);
       setSavedSuccess(true);
+      showToast("Personal profile details updated", "success");
       setTimeout(() => setSavedSuccess(false), 3000);
     }, 400);
   };
@@ -254,10 +258,19 @@ export default function PersonalInfoForm({ doctor, onSave }: PersonalInfoFormPro
         <button
           type="submit"
           disabled={saving}
-          className="px-5 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 disabled:opacity-50 text-white font-semibold text-xs flex items-center gap-2 shadow-xs transition-colors"
+          className="px-5 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 disabled:opacity-60 text-white font-semibold text-xs flex items-center gap-2 shadow-xs transition-colors"
         >
-          <Save className="w-3.5 h-3.5" />
-          <span>{saving ? "Saving Changes..." : "Save Personal Info"}</span>
+          {saving ? (
+            <>
+              <LoadingSpinner size="xs" color="text-white" />
+              <span>Saving Changes...</span>
+            </>
+          ) : (
+            <>
+              <Save className="w-3.5 h-3.5" />
+              <span>Save Personal Info</span>
+            </>
+          )}
         </button>
       </div>
     </form>
