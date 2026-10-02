@@ -93,7 +93,7 @@ export function QuickClinicalInsights() {
   ];
 
   return (
-    <div className="space-y-2.5">
+    <div className="space-y-1.5">
       {/* Small Section Label */}
       <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
         <Sparkles className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400" />
@@ -101,7 +101,7 @@ export function QuickClinicalInsights() {
       </div>
 
       {/* 4 Compact Informational Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-3.5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 md:gap-3">
         {insights.map((item) => {
           const Icon = item.icon;
           return (
@@ -109,9 +109,9 @@ export function QuickClinicalInsights() {
               key={item.id}
               href={item.href}
               aria-label={item.ariaLabel}
-              className="group p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-slate-300 dark:hover:border-slate-700 shadow-2xs hover:shadow-xs transition-all flex items-start justify-between gap-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
+              className="group p-2.5 sm:p-3 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-slate-300 dark:hover:border-slate-700 shadow-2xs hover:shadow-xs transition-all flex items-start justify-between gap-2.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
             >
-              <div className="space-y-1 min-w-0">
+              <div className="space-y-0.5 min-w-0">
                 <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block truncate">
                   {item.label}
                 </span>
@@ -127,9 +127,9 @@ export function QuickClinicalInsights() {
               </div>
 
               <div
-                className={`p-2 rounded-lg ${item.iconBg} ${item.iconColor} flex-shrink-0 group-hover:scale-105 transition-transform`}
+                className={`p-1.5 rounded-lg ${item.iconBg} ${item.iconColor} flex-shrink-0 group-hover:scale-105 transition-transform`}
               >
-                <Icon className="w-4 h-4" />
+                <Icon className="w-3.5 h-3.5" />
               </div>
             </Link>
           );

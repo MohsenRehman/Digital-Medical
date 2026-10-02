@@ -135,9 +135,16 @@ export default function PublicProfilePreviewTab({
             />
             <div className="flex-1 text-center sm:text-left space-y-1">
               <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
-                <h4 className="text-base font-bold text-slate-900 dark:text-white">
-                  {doctor.name}
-                </h4>
+                <div className="flex items-center gap-1.5">
+                  <h4 className="text-base font-bold text-slate-900 dark:text-white">
+                    {doctor.name}
+                  </h4>
+                  <img
+                    src="/images/varified-badge.png"
+                    alt="Verified Doctor"
+                    className="w-4 h-4 object-contain inline-block flex-shrink-0"
+                  />
+                </div>
                 {doctor.verificationStatus === "verified" && (
                   <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-50 dark:bg-sky-950 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-800 flex items-center gap-1">
                     <ShieldCheck className="w-3 h-3 text-sky-600" />

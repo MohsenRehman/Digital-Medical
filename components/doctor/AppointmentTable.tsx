@@ -127,11 +127,11 @@ export default function AppointmentTable({ showAllAppointments = false, limit }:
   };
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+    <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-2xs overflow-hidden">
       {/* Table Header & Controls */}
-      <div className="p-5 md:p-6 border-b border-slate-100 dark:border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="p-3.5 sm:p-4 md:p-4.5 border-b border-slate-100 dark:border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div>
-          <h2 className="text-base md:text-lg font-bold text-slate-900 dark:text-white">
+          <h2 className="text-sm md:text-base font-bold text-slate-900 dark:text-white">
             Today&apos;s Appointments
           </h2>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
@@ -140,16 +140,16 @@ export default function AppointmentTable({ showAllAppointments = false, limit }:
         </div>
 
         {/* Filter Toolbar */}
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
           {/* Quick Search */}
           <div className="relative">
-            <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
               placeholder="Filter by patient/token..."
               value={searchFilter}
               onChange={(e) => setSearchFilter(e.target.value)}
-              className="pl-8 pr-3 py-1.5 rounded-xl text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-sky-500"
+              className="pl-8 pr-2.5 py-1 rounded-lg text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-sky-500"
             />
           </div>
 
@@ -157,7 +157,7 @@ export default function AppointmentTable({ showAllAppointments = false, limit }:
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-2.5 py-1.5 rounded-xl text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 focus:outline-none"
+            className="px-2 py-1 rounded-lg text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 focus:outline-none"
           >
             <option value="all">All Statuses</option>
             <option value="waiting">Waiting in Clinic</option>
@@ -173,7 +173,7 @@ export default function AppointmentTable({ showAllAppointments = false, limit }:
           <select
             value={typeFilter}
             onChange={(e) => setTypeFilter(e.target.value)}
-            className="px-2.5 py-1.5 rounded-xl text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 focus:outline-none"
+            className="px-2 py-1 rounded-lg text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 focus:outline-none"
           >
             <option value="all">All Consultation Types</option>
             <option value="in_clinic">In-Clinic Visits</option>
@@ -187,20 +187,20 @@ export default function AppointmentTable({ showAllAppointments = false, limit }:
         <table className="w-full text-left text-xs text-slate-700 dark:text-slate-300">
           <thead className="bg-slate-50/80 dark:bg-slate-800/50 text-[11px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-200 dark:border-slate-800">
             <tr>
-              <th className="py-3 px-4">Time</th>
-              <th className="py-3 px-4">Patient</th>
-              <th className="py-3 px-4">Type</th>
-              <th className="py-3 px-4">Status</th>
-              <th className="py-3 px-4">Token</th>
-              <th className="py-3 px-4 text-right">Actions</th>
+              <th className="py-2.5 px-3 sm:px-3.5">Time</th>
+              <th className="py-2.5 px-3 sm:px-3.5">Patient</th>
+              <th className="py-2.5 px-3 sm:px-3.5">Type</th>
+              <th className="py-2.5 px-3 sm:px-3.5">Status</th>
+              <th className="py-2.5 px-3 sm:px-3.5">Token</th>
+              <th className="py-2.5 px-3 sm:px-3.5 text-right">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
             {displayedList.length === 0 ? (
               <tr>
-                <td colSpan={6} className="py-12 text-center text-slate-400">
+                <td colSpan={6} className="py-8 text-center text-slate-400">
                   <div className="flex flex-col items-center justify-center gap-1.5">
-                    <CalendarDays className="w-8 h-8 text-slate-300 dark:text-slate-700" />
+                    <CalendarDays className="w-7 h-7 text-slate-300 dark:text-slate-700" />
                     <p className="font-semibold text-slate-700 dark:text-slate-300">No appointments found</p>
                     <p className="text-[11px] text-slate-400">
                       {searchFilter || statusFilter !== "all" || typeFilter !== "all"
@@ -214,7 +214,7 @@ export default function AppointmentTable({ showAllAppointments = false, limit }:
                           setStatusFilter("all");
                           setTypeFilter("all");
                         }}
-                        className="mt-2 px-3 py-1 text-xs text-sky-600 dark:text-sky-400 font-semibold border border-sky-200 dark:border-sky-800 rounded-lg hover:bg-sky-50 dark:hover:bg-sky-950/50"
+                        className="mt-1.5 px-2.5 py-1 text-xs text-sky-600 dark:text-sky-400 font-semibold border border-sky-200 dark:border-sky-800 rounded-lg hover:bg-sky-50 dark:hover:bg-sky-950/50"
                       >
                         Reset Filters
                       </button>
@@ -233,12 +233,12 @@ export default function AppointmentTable({ showAllAppointments = false, limit }:
                     className="hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition-colors"
                   >
                     {/* Time */}
-                    <td className="py-3 px-4 font-mono font-semibold text-slate-900 dark:text-white whitespace-nowrap">
+                    <td className="py-2.5 px-3 sm:px-3.5 font-mono font-semibold text-slate-900 dark:text-white whitespace-nowrap">
                       {apt.timeSlot}
                     </td>
 
                     {/* Patient */}
-                    <td className="py-3 px-4">
+                    <td className="py-2.5 px-3 sm:px-3.5">
                       <div>
                         <Link
                           href={`/doctor/patients/${apt.patientProfileId}`}
@@ -255,14 +255,14 @@ export default function AppointmentTable({ showAllAppointments = false, limit }:
                     </td>
 
                     {/* Consultation Type */}
-                    <td className="py-3 px-4 whitespace-nowrap">
+                    <td className="py-2.5 px-3 sm:px-3.5 whitespace-nowrap">
                       {apt.consultationType === "video" ? (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200/60 dark:border-indigo-800">
+                        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200/60 dark:border-indigo-800">
                           <Video className="w-3 h-3" />
                           <span>Video</span>
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
                           <Building2 className="w-3 h-3 text-slate-500" />
                           <span>In-Clinic</span>
                         </span>
@@ -270,9 +270,9 @@ export default function AppointmentTable({ showAllAppointments = false, limit }:
                     </td>
 
                     {/* Status */}
-                    <td className="py-3 px-4 whitespace-nowrap">
+                    <td className="py-2.5 px-3 sm:px-3.5 whitespace-nowrap">
                       <span
-                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold border ${statusMeta.bg} ${statusMeta.text} ${statusMeta.border}`}
+                        className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold border ${statusMeta.bg} ${statusMeta.text} ${statusMeta.border}`}
                       >
                         <StatusIcon className="w-3 h-3" />
                         <span>{statusMeta.label}</span>
@@ -280,9 +280,9 @@ export default function AppointmentTable({ showAllAppointments = false, limit }:
                     </td>
 
                     {/* Token */}
-                    <td className="py-3 px-4 whitespace-nowrap">
+                    <td className="py-2.5 px-3 sm:px-3.5 whitespace-nowrap">
                       {apt.tokenNumber ? (
-                        <span className="font-mono font-bold text-xs px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700">
+                        <span className="font-mono font-bold text-xs px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700">
                           {apt.tokenNumber}
                         </span>
                       ) : (
@@ -291,13 +291,13 @@ export default function AppointmentTable({ showAllAppointments = false, limit }:
                     </td>
 
                     {/* Action buttons */}
-                    <td className="py-3 px-4 text-right whitespace-nowrap">
+                    <td className="py-2.5 px-3 sm:px-3.5 text-right whitespace-nowrap">
                       <div className="flex items-center justify-end gap-1.5">
                         {apt.status === "waiting" || apt.status === "confirmed" ? (
                           <button
                             onClick={() => handleStartConsultation(apt.id)}
                             disabled={startingAptId !== null}
-                            className="px-3 py-1 rounded-lg bg-sky-600 hover:bg-sky-700 disabled:opacity-60 text-white font-semibold text-xs flex items-center gap-1 shadow-xs transition-colors"
+                            className="px-2.5 py-1 rounded-lg bg-sky-600 hover:bg-sky-700 disabled:opacity-60 text-white font-semibold text-xs flex items-center gap-1 shadow-2xs transition-colors"
                           >
                             {startingAptId === apt.id ? (
                               <>
@@ -314,7 +314,7 @@ export default function AppointmentTable({ showAllAppointments = false, limit }:
                         ) : apt.status === "in_progress" ? (
                           <Link
                             href={`/doctor/consultations/${apt.id}`}
-                            className="px-3 py-1 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-semibold text-xs flex items-center gap-1 shadow-xs transition-colors"
+                            className="px-2.5 py-1 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-semibold text-xs flex items-center gap-1 shadow-2xs transition-colors"
                           >
                             <Play className="w-3 h-3 fill-current" />
                             <span>Resume</span>
@@ -323,7 +323,7 @@ export default function AppointmentTable({ showAllAppointments = false, limit }:
 
                         <Link
                           href={`/doctor/patients/${apt.patientProfileId}`}
-                          className="px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 font-medium text-xs flex items-center gap-1 transition-colors"
+                          className="px-2 py-1 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 font-medium text-xs flex items-center gap-1 transition-colors"
                         >
                           <Eye className="w-3 h-3" />
                           <span>View</span>
@@ -340,7 +340,7 @@ export default function AppointmentTable({ showAllAppointments = false, limit }:
 
       {/* Footer link to view full schedule if limited */}
       {limit && filteredAppointments.length > limit && (
-        <div className="p-3 border-t border-slate-100 dark:border-slate-800 text-center bg-slate-50/50 dark:bg-slate-900/50">
+        <div className="p-2.5 border-t border-slate-100 dark:border-slate-800 text-center bg-slate-50/50 dark:bg-slate-900/50">
           <Link
             href="/doctor/appointments"
             className="text-xs font-semibold text-sky-600 dark:text-sky-400 hover:underline"

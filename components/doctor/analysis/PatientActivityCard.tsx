@@ -124,21 +124,21 @@ export function PatientActivityCard() {
   return (
     <div
       aria-label="Patient Activity Card"
-      className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-5 md:p-6 shadow-xs flex flex-col justify-between h-full transition-all"
+      className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/80 dark:border-slate-800 p-3.5 sm:p-4 md:p-4.5 shadow-2xs flex flex-col justify-between h-full transition-all"
     >
       <div>
         {/* Top Header: Title & Time Filter */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800/80">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-2.5 border-b border-slate-100 dark:border-slate-800/80">
           <div>
-            <div className="flex items-center gap-2">
-              <span className="p-1.5 rounded-lg bg-sky-50 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400">
-                <TrendingUp className="w-4 h-4" />
+            <div className="flex items-center gap-1.5">
+              <span className="p-1 rounded-md bg-sky-50 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400">
+                <TrendingUp className="w-3.5 h-3.5" />
               </span>
-              <h2 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider">
+              <h2 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider">
                 PATIENT ACTIVITY
               </h2>
             </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
               {subtitleText}
             </p>
           </div>
@@ -147,7 +147,7 @@ export function PatientActivityCard() {
           <div
             role="group"
             aria-label="Select patient activity time range"
-            className="inline-flex items-center rounded-xl bg-slate-100/90 dark:bg-slate-800/80 p-0.5 border border-slate-200/80 dark:border-slate-700/80 self-start sm:self-center"
+            className="inline-flex items-center rounded-lg bg-slate-100/90 dark:bg-slate-800/80 p-0.5 border border-slate-200/80 dark:border-slate-700/80 self-start sm:self-center"
           >
             {(["7d", "30d", "90d"] as TimeRange[]).map((r) => {
               const label = r === "7d" ? "7 Days" : r === "30d" ? "30 Days" : "90 Days";
@@ -158,10 +158,10 @@ export function PatientActivityCard() {
                   type="button"
                   onClick={() => setRange(r)}
                   aria-pressed={isSelected}
-                  className={`px-2.5 py-1 text-xs font-semibold rounded-lg transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 ${
+                  className={`px-2.5 py-1 text-xs font-semibold rounded-md transition-all outline-none focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 active:outline-none border-0 ${
                     isSelected
-                      ? "bg-white dark:bg-slate-900 text-sky-600 dark:text-sky-400 shadow-xs"
-                      : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
+                      ? "bg-sky-600 text-white shadow-sm shadow-sky-600/30 font-semibold"
+                      : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-700/50"
                   }`}
                 >
                   {label}
@@ -172,30 +172,30 @@ export function PatientActivityCard() {
         </div>
 
         {/* Aggregate Banner */}
-        <div className="flex items-center justify-between pt-3 pb-1 text-xs">
-          <div className="flex items-baseline gap-2">
-            <span className="text-2xl font-black text-slate-900 dark:text-white font-mono">
+        <div className="flex items-center justify-between pt-2 pb-0.5 text-xs">
+          <div className="flex items-baseline gap-1.5">
+            <span className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white font-mono">
               {totalPatientsInRange}
             </span>
-            <span className="text-slate-500 font-medium">total patients seen</span>
+            <span className="text-slate-500 font-medium text-[11px] sm:text-xs">total patients seen</span>
           </div>
-          <div className="flex items-center gap-3 text-[11px] text-slate-500 dark:text-slate-400">
+          <div className="flex items-center gap-2.5 text-[11px] text-slate-500 dark:text-slate-400">
             <span className="inline-flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-sky-500" />
+              <span className="w-2 h-2 rounded-full bg-sky-500" />
               <span>Patients</span>
             </span>
             <span className="inline-flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+              <span className="w-2 h-2 rounded-full bg-emerald-500" />
               <span>{totalCompletedInRange} Completed</span>
             </span>
           </div>
         </div>
 
         {/* Chart View or Empty State */}
-        <div className="w-full h-56 pt-2 pb-1 relative min-h-[220px]">
+        <div className="w-full h-48 pt-1 pb-0.5 relative min-h-[190px]">
           {isEmpty ? (
-            <div className="h-full flex flex-col items-center justify-center text-center p-4 rounded-xl bg-slate-50/50 dark:bg-slate-800/20 border border-dashed border-slate-200 dark:border-slate-800">
-              <Users className="w-8 h-8 text-slate-400 mb-2" />
+            <div className="h-full flex flex-col items-center justify-center text-center p-3 rounded-xl bg-slate-50/50 dark:bg-slate-800/20 border border-dashed border-slate-200 dark:border-slate-800">
+              <Users className="w-7 h-7 text-slate-400 mb-1.5" />
               <p className="text-xs font-bold text-slate-700 dark:text-slate-300">
                 No patient activity yet
               </p>
@@ -204,10 +204,10 @@ export function PatientActivityCard() {
               </p>
             </div>
           ) : (
-            <ResponsiveContainer width="100%" height={220}>
+            <ResponsiveContainer width="100%" height={190}>
               <AreaChart
                 data={activeData}
-                margin={{ top: 12, right: 10, left: -22, bottom: 0 }}
+                margin={{ top: 8, right: 10, left: -22, bottom: 0 }}
               >
                 <defs>
                   <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
@@ -284,7 +284,7 @@ export function PatientActivityCard() {
       </div>
 
       {/* Footer Navigation Link */}
-      <div className="pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-xs">
+      <div className="pt-2 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-xs">
         <span className="text-slate-500 text-[11px]">
           Today highlighted with active pulse
         </span>
