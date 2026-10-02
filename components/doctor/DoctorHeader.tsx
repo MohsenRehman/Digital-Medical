@@ -89,7 +89,7 @@ export default function DoctorHeader() {
 
   // Compute breadcrumb/title from pathname
   const getPageTitle = () => {
-    if (pathname === "/doctor") return "Clinical Dashboard";
+    if (pathname === "/doctor") return "Doctor Dashboard";
     if (pathname.startsWith("/doctor/queue")) return "Live Patient Queue";
     if (pathname.startsWith("/doctor/appointments")) return "Appointments Schedule";
     if (pathname.startsWith("/doctor/patients")) return "Patient Registry";
@@ -127,12 +127,12 @@ export default function DoctorHeader() {
         </div>
 
         {/* Center: Global Patient Search Bar */}
-        <div ref={searchRef} className="flex-1 max-w-lg relative hidden lg:block">
+        <div ref={searchRef} className="flex-1 max-w-lg relative hidden md:block">
           <div className="relative">
             <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
-              placeholder="Search patient by name, phone or patient ID..."
+              placeholder="Search patient by name, phone or ID..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onFocus={() => setSearchFocused(true)}

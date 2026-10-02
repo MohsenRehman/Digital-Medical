@@ -10,12 +10,9 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { useDoctor } from "@/app/context/DoctorContext";
-import { useNavigationLoading } from "@/components/doctor/loading/NavigationProgress";
-import { LoadingSpinner } from "@/components/doctor/loading/LoadingSpinner";
 
 export default function DoctorKpiCards() {
   const { appointments, waitingQueue, queue, isLoaded } = useDoctor();
-  const { navigatingHref, startNavigation } = useNavigationLoading();
 
   // Compute live aggregates with realistic fallbacks adhering to clinical schedule
   const todayApts = appointments.filter((a) => a.scheduledAt === "2026-09-24");
@@ -88,73 +85,57 @@ export default function DoctorKpiCards() {
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-4.5">
       {kpis.map((kpi) => {
         const Icon = kpi.icon;
-        const isTargetLoading = navigatingHref === kpi.href;
 
         return (
           <Link
             key={kpi.title}
             href={kpi.href}
-            onClick={() => startNavigation(kpi.href)}
             aria-label={kpi.ariaLabel}
-            aria-busy={isTargetLoading}
-            className={`group relative block p-5 rounded-2xl bg-white dark:bg-slate-900 border ${
-              isTargetLoading
-                ? "border-sky-500 ring-2 ring-sky-500/20 shadow-md"
-                : `${kpi.border} ${kpi.hoverBorder} shadow-xs hover:shadow-md`
-            } transition-all duration-200 hover:-translate-y-1 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900`}
+            className={`group relative flex flex-col justify-between p-4 sm:px-4.5 sm:py-3.5 md:px-5 md:py-4 rounded-2xl bg-white dark:bg-slate-900 border ${kpi.border} ${kpi.hoverBorder} shadow-xs hover:shadow-md transition-all duration-200 hover:-translate-y-0.5 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900 min-h-[150px] sm:min-h-[154px] md:min-h-[158px]`}
           >
-            {/* Top row: Label and Icon */}
-            <div className="flex items-center justify-between gap-2 mb-3">
-              <span className="text-xs font-bold tracking-wider text-slate-500 dark:text-slate-400 uppercase truncate">
-                {kpi.title}
-              </span>
-              <div
-                className={`p-2.5 rounded-xl ${kpi.accentBg} group-hover:scale-105 transition-transform flex-shrink-0`}
-              >
-                {isTargetLoading ? (
-                  <LoadingSpinner size="sm" color="#0284c7" label="Loading route..." />
-                ) : (
-                  <Icon className={`w-5 h-5 ${kpi.accentText}`} />
-                )}
-              </div>
-            </div>
-
-            {/* Metric Value: Skeleton or Real Value */}
-            <div className="flex items-baseline gap-2">
-              {!isLoaded ? (
-                <div className="h-9 w-20 bg-slate-200 dark:bg-slate-700 rounded-lg animate-pulse my-0.5" />
-              ) : (
-                <span className="text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">
-                  {kpi.value}
+            {/* Upper Content: Title Row + Value & Description */}
+            <div>
+              {/* Top row: Label and Icon */}
+              <div className="flex items-center justify-between gap-2 mb-2">
+                <span className="text-[11px] font-bold tracking-wider text-slate-500 dark:text-slate-400 uppercase truncate">
+                  {kpi.title}
                 </span>
-              )}
-              <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${kpi.pillBg}`}>
-                {kpi.pillText}
-              </span>
-            </div>
+                <div
+                  className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl ${kpi.accentBg} flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform`}
+                >
+                  <Icon className={`w-4.5 h-4.5 ${kpi.accentText}`} />
+                </div>
+              </div>
 
-            {/* Description */}
-            <p className="text-xs font-medium text-slate-600 dark:text-slate-300 mt-2 truncate">
-              {kpi.description}
-            </p>
+              {/* Metric Value: Skeleton or Real Value */}
+              <div className="flex items-baseline gap-2">
+                {!isLoaded ? (
+                  <div className="h-8 w-16 bg-slate-200 dark:bg-slate-700 rounded-lg animate-pulse" />
+                ) : (
+                  <span className="text-2xl sm:text-[28px] md:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-none group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">
+                    {kpi.value}
+                  </span>
+                )}
+                <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full leading-none ${kpi.pillBg}`}>
+                  {kpi.pillText}
+                </span>
+              </div>
+
+              {/* Description */}
+              <p className="text-xs text-slate-600 dark:text-slate-300 mt-1 truncate">
+                {kpi.description}
+              </p>
+            </div>
 
             {/* Hover / Active Action Indicator */}
             <div
-              className={`mt-3 pt-2.5 border-t border-slate-100 dark:border-slate-800 text-[11px] font-semibold flex items-center justify-between transition-colors ${
-                isTargetLoading
-                  ? "text-sky-600 dark:text-sky-400"
-                  : "text-slate-400 group-hover:text-sky-600 dark:group-hover:text-sky-400"
-              }`}
+              className="mt-2.5 pt-2 border-t border-slate-100 dark:border-slate-800 text-[11px] font-semibold flex items-center justify-between text-slate-400 group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors"
             >
-              <span>{isTargetLoading ? "Opening view..." : "View details"}</span>
-              {isTargetLoading ? (
-                <LoadingSpinner size="xs" color="#0284c7" />
-              ) : (
-                <ArrowRight className="w-3.5 h-3.5 transform group-hover:translate-x-1 transition-transform" />
-              )}
+              <span>View details</span>
+              <ArrowRight className="w-3.5 h-3.5 transform group-hover:translate-x-1 transition-transform" />
             </div>
           </Link>
         );
