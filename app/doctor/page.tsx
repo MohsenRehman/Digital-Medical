@@ -12,7 +12,7 @@ export default function DoctorDashboardOverview() {
       {/* ────────────────────────────────────────
           KPI CARDS
       ──────────────────────────────────────── */}
-      <section aria-label="KPI Cards" className="pb-3.5 border-b border-slate-200/80 dark:border-slate-800/80">
+      <section aria-label="KPI Cards">
         <DoctorKpiCards />
       </section>
 
