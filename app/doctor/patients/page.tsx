@@ -18,11 +18,19 @@ import {
 } from "lucide-react";
 import { useDoctor } from "@/app/context/DoctorContext";
 import { PatientProfile } from "@/lib/types/doctor";
+import { LoadingSpinner } from "@/components/doctor/loading/LoadingSpinner";
 
 export default function DoctorPatientsPage() {
   const { patients, activeClinic } = useDoctor();
   const [searchQuery, setSearchQuery] = useState("");
   const [allergyFilter, setAllergyFilter] = useState("all");
+  const [isSearching, setIsSearching] = useState(false);
+
+  const handleSearchChange = (value: string) => {
+    setSearchQuery(value);
+    setIsSearching(true);
+    setTimeout(() => setIsSearching(false), 150);
+  };
 
   const filteredPatients = useMemo(() => {
     return patients.filter((patient) => {
@@ -58,7 +66,7 @@ export default function DoctorPatientsPage() {
 
         <div className="flex items-center gap-2">
           <span className="text-xs font-semibold px-3 py-1.5 rounded-xl bg-sky-50 dark:bg-sky-950/60 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-800">
-            {patients.length} Registered Patients
+            {filteredPatients.length} of {patients.length} Patients
           </span>
         </div>
       </div>
@@ -71,9 +79,12 @@ export default function DoctorPatientsPage() {
             type="text"
             placeholder="Search by name, phone (03XX), ID (PAT-000123)..."
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-3 py-2 text-xs rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-sky-500"
+            onChange={(e) => handleSearchChange(e.target.value)}
+            className="w-full pl-9 pr-9 py-2 text-xs rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-sky-500"
           />
+          <div className="absolute right-3 top-1/2 -translate-y-1/2">
+            {isSearching && <LoadingSpinner size="xs" />}
+          </div>
         </div>
 
         <div className="flex items-center gap-2 w-full md:w-auto">
@@ -90,11 +101,37 @@ export default function DoctorPatientsPage() {
 
       {/* Patient Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {filteredPatients.map((patient) => (
-          <div
-            key={patient.id}
-            className="p-5 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs hover:border-sky-300 dark:hover:border-slate-700 transition-all flex flex-col justify-between"
-          >
+        {filteredPatients.length === 0 ? (
+          <div className="col-span-full p-12 text-center bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col items-center justify-center gap-3">
+            <div className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400">
+              <Users className="w-6 h-6" />
+            </div>
+            <div>
+              <h3 className="text-base font-bold text-slate-800 dark:text-slate-200">No patients found</h3>
+              <p className="text-xs text-slate-500 mt-1 max-w-sm">
+                {searchQuery
+                  ? `No registered patients match your search term "${searchQuery}".`
+                  : "No patients match the selected filter criteria."}
+              </p>
+            </div>
+            {(searchQuery || allergyFilter !== "all") && (
+              <button
+                onClick={() => {
+                  setSearchQuery("");
+                  setAllergyFilter("all");
+                }}
+                className="mt-1 px-4 py-2 rounded-xl text-xs font-semibold bg-sky-50 dark:bg-sky-950/60 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-800 hover:bg-sky-100 transition-colors"
+              >
+                Clear Search & Filters
+              </button>
+            )}
+          </div>
+        ) : (
+          filteredPatients.map((patient) => (
+            <div
+              key={patient.id}
+              className="p-5 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs hover:border-sky-300 dark:hover:border-slate-700 transition-all flex flex-col justify-between"
+            >
             <div className="space-y-3">
               <div className="flex items-start justify-between">
                 <div>
@@ -170,7 +207,8 @@ export default function DoctorPatientsPage() {
               </Link>
             </div>
           </div>
-        ))}
+        ))
+      )}
       </div>
     </div>
   );

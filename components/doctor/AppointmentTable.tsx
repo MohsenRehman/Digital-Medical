@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { useDoctor } from "@/app/context/DoctorContext";
 import { DoctorAppointment, AppointmentStatus } from "@/lib/types/doctor";
+import { LoadingSpinner } from "@/components/doctor/loading/LoadingSpinner";
 
 interface AppointmentTableProps {
   showAllAppointments?: boolean;
@@ -33,6 +34,7 @@ export default function AppointmentTable({ showAllAppointments = false, limit }:
   const [searchFilter, setSearchFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [typeFilter, setTypeFilter] = useState<string>("all");
+  const [startingAptId, setStartingAptId] = useState<string | null>(null);
 
   const statusConfig: Record<
     AppointmentStatus,
@@ -118,6 +120,8 @@ export default function AppointmentTable({ showAllAppointments = false, limit }:
   const displayedList = limit ? filteredAppointments.slice(0, limit) : filteredAppointments;
 
   const handleStartConsultation = (appointmentId: string) => {
+    if (startingAptId) return;
+    setStartingAptId(appointmentId);
     updateAppointmentStatus(appointmentId, "in_progress");
     router.push(`/doctor/consultations/${appointmentId}`);
   };
@@ -195,10 +199,26 @@ export default function AppointmentTable({ showAllAppointments = false, limit }:
             {displayedList.length === 0 ? (
               <tr>
                 <td colSpan={6} className="py-12 text-center text-slate-400">
-                  <div className="flex flex-col items-center justify-center gap-1">
+                  <div className="flex flex-col items-center justify-center gap-1.5">
                     <CalendarDays className="w-8 h-8 text-slate-300 dark:text-slate-700" />
-                    <p className="font-semibold text-slate-600 dark:text-slate-300">No appointments found</p>
-                    <p className="text-[11px] text-slate-400">Try adjusting your filters or date selection</p>
+                    <p className="font-semibold text-slate-700 dark:text-slate-300">No appointments found</p>
+                    <p className="text-[11px] text-slate-400">
+                      {searchFilter || statusFilter !== "all" || typeFilter !== "all"
+                        ? "No appointments match your active search or filter criteria."
+                        : "No appointments scheduled for this date."}
+                    </p>
+                    {(searchFilter || statusFilter !== "all" || typeFilter !== "all") && (
+                      <button
+                        onClick={() => {
+                          setSearchFilter("");
+                          setStatusFilter("all");
+                          setTypeFilter("all");
+                        }}
+                        className="mt-2 px-3 py-1 text-xs text-sky-600 dark:text-sky-400 font-semibold border border-sky-200 dark:border-sky-800 rounded-lg hover:bg-sky-50 dark:hover:bg-sky-950/50"
+                      >
+                        Reset Filters
+                      </button>
+                    )}
                   </div>
                 </td>
               </tr>
@@ -276,10 +296,20 @@ export default function AppointmentTable({ showAllAppointments = false, limit }:
                         {apt.status === "waiting" || apt.status === "confirmed" ? (
                           <button
                             onClick={() => handleStartConsultation(apt.id)}
-                            className="px-3 py-1 rounded-lg bg-sky-600 hover:bg-sky-700 text-white font-semibold text-xs flex items-center gap-1 shadow-xs transition-colors"
+                            disabled={startingAptId !== null}
+                            className="px-3 py-1 rounded-lg bg-sky-600 hover:bg-sky-700 disabled:opacity-60 text-white font-semibold text-xs flex items-center gap-1 shadow-xs transition-colors"
                           >
-                            <Play className="w-3 h-3 fill-current" />
-                            <span>Start</span>
+                            {startingAptId === apt.id ? (
+                              <>
+                                <LoadingSpinner size="xs" color="text-white" />
+                                <span>Starting...</span>
+                              </>
+                            ) : (
+                              <>
+                                <Play className="w-3 h-3 fill-current" />
+                                <span>Start</span>
+                              </>
+                            )}
                           </button>
                         ) : apt.status === "in_progress" ? (
                           <Link

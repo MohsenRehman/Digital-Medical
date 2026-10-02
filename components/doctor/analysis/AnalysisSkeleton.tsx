@@ -10,9 +10,9 @@ export function AnalysisSkeleton() {
       role="status"
     >
       {/* Two Column Cards Skeleton */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 md:gap-6">
-        {/* Left: Patient Activity Card Skeleton */}
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-5 md:p-6 shadow-xs space-y-4">
+      <div className="grid grid-cols-1 lg:grid-cols-10 gap-4 md:gap-5">
+        {/* Left: Patient Activity Card Skeleton (70%) */}
+        <div className="lg:col-span-7 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-5 md:p-6 shadow-xs space-y-4">
           <div className="flex items-center justify-between">
             <div className="space-y-2">
               <div className="h-4 w-36 bg-slate-200 dark:bg-slate-800 rounded-md" />
@@ -27,8 +27,8 @@ export function AnalysisSkeleton() {
           </div>
         </div>
 
-        {/* Right: Appointment Performance Card Skeleton */}
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-5 md:p-6 shadow-xs space-y-4">
+        {/* Right: Appointment Performance Card Skeleton (30%) */}
+        <div className="lg:col-span-3 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-5 md:p-6 shadow-xs space-y-4">
           <div className="flex items-center justify-between">
             <div className="space-y-2">
               <div className="h-4 w-48 bg-slate-200 dark:bg-slate-800 rounded-md" />
@@ -46,10 +46,12 @@ export function AnalysisSkeleton() {
               </div>
             ))}
           </div>
-          <div className="grid grid-cols-3 gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
-            <div className="h-10 bg-slate-100/70 dark:bg-slate-800/40 rounded-xl" />
-            <div className="h-10 bg-slate-100/70 dark:bg-slate-800/40 rounded-xl" />
-            <div className="h-10 bg-slate-100/70 dark:bg-slate-800/40 rounded-xl" />
+          <div className="space-y-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+            <div className="h-12 bg-slate-100/70 dark:bg-slate-800/40 rounded-xl" />
+            <div className="grid grid-cols-2 gap-2">
+              <div className="h-10 bg-slate-100/70 dark:bg-slate-800/40 rounded-xl" />
+              <div className="h-10 bg-slate-100/70 dark:bg-slate-800/40 rounded-xl" />
+            </div>
           </div>
         </div>
       </div>

@@ -19,12 +19,12 @@ function AnalysisContent() {
 
   return (
     <div className="space-y-4 md:space-y-5">
-      {/* 2-Column Responsive Layout: Patient Activity (Left) & Appointment Performance (Right) */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-5">
-        <div className="h-full">
+      {/* 2-Column Responsive Layout: Patient Activity (70% Left) & Appointment Performance (30% Right) */}
+      <div className="grid grid-cols-1 lg:grid-cols-10 gap-4 md:gap-5">
+        <div className="h-full lg:col-span-7">
           <PatientActivityCard />
         </div>
-        <div className="h-full">
+        <div className="h-full lg:col-span-3">
           <AppointmentPerformanceCard />
         </div>
       </div>

@@ -79,6 +79,11 @@ interface DoctorContextType {
 
   // Analytics
   analytics: DoctorAnalyticsSummary;
+
+  // Sidebar Layout State
+  sidebarCollapsed: boolean;
+  setSidebarCollapsed: (collapsed: boolean | ((prev: boolean) => boolean)) => void;
+  toggleSidebarCollapsed: () => void;
 }
 
 const DoctorContext = createContext<DoctorContextType | undefined>(undefined);
@@ -99,6 +104,32 @@ export function DoctorProvider({ children }: { children: React.ReactNode }) {
   const [notifications, setNotifications] = useState<DoctorNotificationItem[]>(base.notifications);
   const [analytics, setAnalytics] = useState<DoctorAnalyticsSummary>(base.analytics);
   const [reviews, setReviews] = useState<DoctorReview[]>(() => DoctorService.getReviews());
+
+  // Persistent Doctor Sidebar state (desktop collapsed / expanded)
+  const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(false);
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("dm_doctor_sidebar_collapsed");
+      if (saved === "true") {
+        setSidebarCollapsed(true);
+      }
+    } catch (e) {
+      // ignore
+    }
+  }, []);
+
+  const toggleSidebarCollapsed = useCallback(() => {
+    setSidebarCollapsed((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem("dm_doctor_sidebar_collapsed", String(next));
+      } catch (e) {
+        // ignore
+      }
+      return next;
+    });
+  }, []);
 
   const refreshAll = useCallback(() => {
     setDoctor(DoctorService.getProfile());
@@ -298,6 +329,9 @@ export function DoctorProvider({ children }: { children: React.ReactNode }) {
         markNotificationRead,
         markAllNotificationsRead,
         analytics,
+        sidebarCollapsed,
+        setSidebarCollapsed,
+        toggleSidebarCollapsed,
       }}
     >
       {children}

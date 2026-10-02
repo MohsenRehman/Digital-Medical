@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -16,11 +16,15 @@ import {
   CheckCircle2,
   SkipForward,
   UserX,
+  RefreshCw,
 } from "lucide-react";
 import { useDoctor } from "@/app/context/DoctorContext";
+import { LoadingSpinner } from "@/components/doctor/loading/LoadingSpinner";
+import { useDoctorToast } from "@/components/doctor/loading/DoctorToast";
 
 export default function LiveQueueCard() {
   const router = useRouter();
+  const { showToast } = useDoctorToast();
   const {
     currentQueuePatient,
     waitingQueue,
@@ -30,9 +34,40 @@ export default function LiveQueueCard() {
     markQueueNoShow,
   } = useDoctor();
 
+  const [isCallingNext, setIsCallingNext] = useState(false);
+  const [actionInProgressId, setActionInProgressId] = useState<string | null>(null);
+
+  const handleCallNext = () => {
+    if (isCallingNext) return;
+    setIsCallingNext(true);
+    callNextPatient();
+    showToast("Calling next patient into consultation room...", "info");
+    setTimeout(() => {
+      setIsCallingNext(false);
+    }, 450);
+  };
+
   const handleStartConsultation = (queueId: string, appointmentId: string) => {
+    if (actionInProgressId) return;
+    setActionInProgressId(queueId);
     startConsultationFromQueue(queueId);
     router.push(`/doctor/consultations/${appointmentId}`);
+  };
+
+  const handleSkip = (queueId: string) => {
+    if (actionInProgressId) return;
+    setActionInProgressId(`skip-${queueId}`);
+    skipQueuePatient(queueId);
+    showToast("Patient deferred to later in queue", "info");
+    setTimeout(() => setActionInProgressId(null), 300);
+  };
+
+  const handleNoShow = (queueId: string) => {
+    if (actionInProgressId) return;
+    setActionInProgressId(`noshow-${queueId}`);
+    markQueueNoShow(queueId);
+    showToast("Patient marked as No Show", "warning");
+    setTimeout(() => setActionInProgressId(null), 300);
   };
 
   const handleOpenCurrent = () => {
@@ -54,8 +89,8 @@ export default function LiveQueueCard() {
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-base md:text-lg font-bold text-slate-900 dark:text-white">
-                  LIVE PATIENT QUEUE
+                <h2 className="text-base md:text-lg font-bold text-slate-900 dark:text-white uppercase tracking-tight">
+                  WAITING QUEUE / CURRENT PATIENTS
                 </h2>
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
@@ -70,12 +105,21 @@ export default function LiveQueueCard() {
 
           <div className="flex items-center gap-2">
             <button
-              onClick={callNextPatient}
-              disabled={waitingQueue.length === 0}
+              onClick={handleCallNext}
+              disabled={waitingQueue.length === 0 || isCallingNext}
               className="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 disabled:bg-slate-200 dark:disabled:bg-slate-800 disabled:text-slate-400 text-white font-semibold text-xs flex items-center gap-1.5 shadow-sm transition-all active:scale-95"
             >
-              <Play className="w-3.5 h-3.5 fill-current" />
-              <span>Call Next Patient</span>
+              {isCallingNext ? (
+                <>
+                  <LoadingSpinner size="xs" color="text-white" />
+                  <span>Calling...</span>
+                </>
+              ) : (
+                <>
+                  <Play className="w-3.5 h-3.5 fill-current" />
+                  <span>Call Next Patient</span>
+                </>
+              )}
             </button>
             <Link
               href="/doctor/queue"
@@ -241,24 +285,44 @@ export default function LiveQueueCard() {
                   <div className="flex items-center gap-1.5 flex-shrink-0">
                     <button
                       onClick={() => handleStartConsultation(entry.id, entry.appointmentId)}
-                      className="px-3 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-700 text-white font-semibold text-xs flex items-center gap-1 transition-colors shadow-xs"
+                      disabled={actionInProgressId !== null}
+                      className="px-3 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-700 disabled:opacity-60 text-white font-semibold text-xs flex items-center gap-1 transition-colors shadow-xs"
                     >
-                      <Play className="w-3 h-3 fill-current" />
-                      <span>Start</span>
+                      {actionInProgressId === entry.id ? (
+                        <>
+                          <LoadingSpinner size="xs" color="text-white" />
+                          <span>Starting...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Play className="w-3 h-3 fill-current" />
+                          <span>Start</span>
+                        </>
+                      )}
                     </button>
                     <button
-                      onClick={() => skipQueuePatient(entry.id)}
+                      onClick={() => handleSkip(entry.id)}
+                      disabled={actionInProgressId !== null}
                       title="Move patient back in queue"
-                      className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
+                      className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-50"
                     >
-                      <SkipForward className="w-3.5 h-3.5" />
+                      {actionInProgressId === `skip-${entry.id}` ? (
+                        <LoadingSpinner size="xs" />
+                      ) : (
+                        <SkipForward className="w-3.5 h-3.5" />
+                      )}
                     </button>
                     <button
-                      onClick={() => markQueueNoShow(entry.id)}
+                      onClick={() => handleNoShow(entry.id)}
+                      disabled={actionInProgressId !== null}
                       title="Mark as No Show"
-                      className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30"
+                      className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 disabled:opacity-50"
                     >
-                      <UserX className="w-3.5 h-3.5" />
+                      {actionInProgressId === `noshow-${entry.id}` ? (
+                        <LoadingSpinner size="xs" />
+                      ) : (
+                        <UserX className="w-3.5 h-3.5" />
+                      )}
                     </button>
                   </div>
                 </div>
