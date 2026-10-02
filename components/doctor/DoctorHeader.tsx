@@ -112,8 +112,8 @@ export default function DoctorHeader() {
   };
 
   return (
-    <header className="sticky top-0 z-20 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 transition-colors">
-      <div className="px-4 md:px-8 py-3 flex items-center justify-between gap-4">
+    <header className="sticky top-0 z-20 h-[70px] bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 transition-colors flex items-center">
+      <div className="w-full px-4 md:px-8 flex items-center justify-between gap-4">
         {/* Left: Page Title / Breadcrumb (with margin on mobile for hamburger button) */}
         <div className="flex flex-col min-w-0 pl-10 md:pl-0">
           <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400 flex items-center gap-1">

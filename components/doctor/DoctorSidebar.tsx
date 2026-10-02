@@ -213,7 +213,7 @@ export default function DoctorSidebar() {
       {/* 1. Header / Branding / Collapse Toggle Area */}
       {sidebarCollapsed ? (
         // COLLAPSED HEADER
-        <div className="p-3 border-b border-slate-200 dark:border-slate-800 flex flex-col items-center justify-center gap-2 h-20">
+        <div className="p-2 border-b border-slate-200 dark:border-slate-800 flex flex-col items-center justify-center gap-1.5 h-[70px]">
           <Link
             href="/doctor"
             aria-label="Digital Medical - Doctor Workspace"
@@ -253,7 +253,7 @@ export default function DoctorSidebar() {
         </div>
       ) : (
         // EXPANDED HEADER
-        <div className="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between gap-2 h-20">
+        <div className="px-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between gap-2 h-[70px]">
           <Link href="/doctor" className="flex items-center gap-2.5 min-w-0 group outline-none focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 active:outline-none border-0">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-600 to-teal-500 flex items-center justify-center text-white font-bold shadow-md shadow-sky-500/20 group-hover:scale-105 transition-transform flex-shrink-0">
               <Radio className="w-5 h-5 animate-pulse" />
@@ -545,7 +545,7 @@ export default function DoctorSidebar() {
   // ----------------------------------------------------
   const mobileSidebarContent = (
     <div className="flex flex-col h-full bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 select-none">
-      <div className="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+      <div className="px-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between h-[70px]">
         <Link
           href="/doctor"
           onClick={() => setMobileOpen(false)}
@@ -642,7 +642,7 @@ export default function DoctorSidebar() {
   return (
     <>
       {/* Mobile Floating Menu Button */}
-      <div className="md:hidden fixed top-3 left-3 z-40">
+      <div className="md:hidden fixed top-3.5 left-3 z-40">
         <button
           onClick={() => setMobileOpen(true)}
           className="p-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-md text-slate-700 dark:text-slate-200 hover:text-sky-600 cursor-pointer outline-none focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 active:outline-none"
