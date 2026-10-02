@@ -186,9 +186,16 @@ export default function DoctorPublicProfilePreviewPage() {
           {/* Core Info */}
           <div className="space-y-2 flex-1">
             <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">
-                {doctor.displayName || doctor.name}
-              </h2>
+              <div className="flex items-center gap-2">
+                <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">
+                  {doctor.displayName || doctor.name}
+                </h2>
+                <img
+                  src="/images/varified-badge.png"
+                  alt="Verified Doctor"
+                  className="w-5 h-5 sm:w-6 sm:h-6 object-contain inline-block flex-shrink-0"
+                />
+              </div>
               {doctor.verificationStatus === "verified" ? (
                 <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-sky-50 dark:bg-sky-950 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-800 flex items-center gap-1.5">
                   <ShieldCheck className="w-3.5 h-3.5 text-sky-600" />

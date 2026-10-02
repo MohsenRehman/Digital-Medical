@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import { BarChart3 } from "lucide-react";
 import { useDoctor } from "@/app/context/DoctorContext";
 import { PatientActivityCard } from "./PatientActivityCard";
 import { AppointmentPerformanceCard } from "./AppointmentPerformanceCard";
@@ -18,13 +17,13 @@ function AnalysisContent() {
   }
 
   return (
-    <div className="space-y-4 md:space-y-5">
-      {/* 2-Column Responsive Layout: Patient Activity (70% Left) & Appointment Performance (30% Right) */}
-      <div className="grid grid-cols-1 lg:grid-cols-10 gap-4 md:gap-5">
-        <div className="h-full lg:col-span-7">
+    <div className="space-y-3 md:space-y-3.5">
+      {/* 2-Column Responsive Layout: Patient Activity (Left) & Appointment Performance (Right) */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 md:gap-3.5 items-stretch">
+        <div className="h-full">
           <PatientActivityCard />
         </div>
-        <div className="h-full lg:col-span-3">
+        <div className="h-full">
           <AppointmentPerformanceCard />
         </div>
       </div>
@@ -39,24 +38,7 @@ export default function DoctorAnalysisSection() {
   const { refreshAppointments } = useDoctor();
 
   return (
-    <section aria-labelledby="doctor-analysis-heading" className="space-y-3.5">
-      {/* Section Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <div className="flex items-center gap-2">
-            <h2
-              id="doctor-analysis-heading"
-              className="text-lg md:text-xl font-bold tracking-tight text-slate-900 dark:text-white"
-            >
-              Analysis
-            </h2>
-          </div>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            Your recent patient and consultation activity
-          </p>
-        </div>
-      </div>
-
+    <section aria-label="Clinical Analysis">
       {/* Error Boundary Protected Content */}
       <AnalysisErrorBoundary onReset={refreshAppointments}>
         <AnalysisContent />

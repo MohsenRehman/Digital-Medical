@@ -378,12 +378,16 @@ export default function DoctorHeader() {
                 }`}
               />
             </div>
-            <div className="hidden xl:block text-left text-xs">
-              <div className="flex items-center gap-1">
-                <span className="font-bold text-slate-900 dark:text-white truncate max-w-[120px]">
+            <div className="hidden sm:block text-left text-xs">
+              <div className="flex items-center gap-1.5">
+                <span className="font-bold text-slate-900 dark:text-white truncate max-w-[130px] lg:max-w-none">
                   {doctor.name}
                 </span>
-                <ShieldCheck className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400" />
+                <img
+                  src="/images/varified-badge.png"
+                  alt="Verified Doctor"
+                  className="w-3.5 h-3.5 object-contain inline-block flex-shrink-0"
+                />
               </div>
               <p className="text-[11px] text-slate-400">{doctor.specialty}</p>
             </div>
