@@ -74,9 +74,8 @@ export default function Sidebar({
 
       {/* Main Sidebar Panel */}
       <aside
-        className={`fixed top-0 bottom-0 left-0 z-50 w-72 bg-[#0B1426] text-slate-300 flex flex-col border-r border-slate-800/80 shadow-2xl transition-transform duration-300 ease-in-out lg:translate-x-0 ${
-          isOpenMobile ? "translate-x-0" : "-translate-x-full"
-        }`}
+        className={`fixed top-0 bottom-0 left-0 z-50 w-72 bg-[#0B1426] text-slate-300 flex flex-col border-r border-slate-800/80 shadow-2xl transition-transform duration-300 ease-in-out lg:translate-x-0 ${isOpenMobile ? "translate-x-0" : "-translate-x-full"
+          }`}
       >
         {/* Brand Header */}
         <div className="px-6 py-5 border-b border-slate-800/80 flex items-center justify-between">
@@ -133,19 +132,17 @@ export default function Sidebar({
                   onTabChange(item.id);
                   onCloseMobile();
                 }}
-                className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-150 cursor-pointer ${
-                  isActive
+                className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-150 cursor-pointer ${isActive
                     ? "bg-teal-500/15 text-teal-400 border border-teal-500/30 shadow-xs font-bold"
                     : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"
-                }`}
+                  }`}
               >
                 <div className="flex items-center gap-3">
                   <div
-                    className={`w-7 h-7 rounded-lg flex items-center justify-center transition-colors ${
-                      isActive
+                    className={`w-7 h-7 rounded-lg flex items-center justify-center transition-colors ${isActive
                         ? "bg-teal-500 text-white shadow-xs shadow-teal-500/30"
                         : "bg-slate-800/80 text-slate-400"
-                    }`}
+                      }`}
                   >
                     <Icon className="w-4 h-4" />
                   </div>
@@ -154,11 +151,10 @@ export default function Sidebar({
 
                 {item.badge !== undefined && (
                   <span
-                    className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                      isActive
+                    className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${isActive
                         ? "bg-teal-400 text-slate-900"
                         : "bg-slate-800 text-teal-300 border border-slate-700"
-                    }`}
+                      }`}
                   >
                     {item.badge}
                   </span>

@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useDoctor } from "@/app/context/DoctorContext";
-import { PatientActivityCard } from "./PatientActivityCard";
+import { DoctorRevenueCard } from "./PatientActivityCard";
 import { AppointmentPerformanceCard } from "./AppointmentPerformanceCard";
 import { QuickClinicalInsights } from "./QuickClinicalInsights";
 import { AnalysisSkeleton } from "./AnalysisSkeleton";
@@ -18,10 +18,10 @@ function AnalysisContent() {
 
   return (
     <div className="space-y-3 md:space-y-3.5">
-      {/* 2-Column Responsive Layout: Patient Activity (Left) & Appointment Performance (Right) */}
+      {/* 2-Column Responsive Layout: Revenue Analytics (Left) & Appointment Performance (Right) */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 md:gap-3.5 items-stretch">
         <div className="h-full">
-          <PatientActivityCard />
+          <DoctorRevenueCard />
         </div>
         <div className="h-full">
           <AppointmentPerformanceCard />
