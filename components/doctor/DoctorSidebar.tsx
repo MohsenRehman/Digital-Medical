@@ -22,10 +22,8 @@ import {
   Radio,
   PanelLeftClose,
   PanelLeftOpen,
-  Loader2,
 } from "lucide-react";
 import { useDoctor } from "@/app/context/DoctorContext";
-import { useNavigationLoading } from "@/components/doctor/loading/NavigationProgress";
 import { DoctorAvailabilityStatus } from "@/lib/types/doctor";
 
 interface NavItem {
@@ -57,8 +55,6 @@ export default function DoctorSidebar() {
     sidebarCollapsed,
     toggleSidebarCollapsed,
   } = useDoctor();
-
-  const { navigatingHref, startNavigation } = useNavigationLoading();
 
   const [mobileOpen, setMobileOpen] = useState(false);
   const [statusDropdownOpen, setStatusDropdownOpen] = useState(false);
@@ -304,17 +300,12 @@ export default function DoctorSidebar() {
                 const isActive =
                   pathname === item.href ||
                   (item.href !== "/doctor" && pathname.startsWith(item.href));
-                const isTargetLoading =
-                  navigatingHref === item.href && pathname !== item.href;
 
                 return sidebarCollapsed ? (
                   // COLLAPSED ITEM: Centered Icon Only
                   <Link
                     key={item.href}
                     href={item.href}
-                    onClick={() => {
-                      startNavigation(item.href);
-                    }}
                     onMouseEnter={(e) => {
                       const rect = e.currentTarget.getBoundingClientRect();
                       showTooltip(item.name, rect.top + rect.height / 2, item.badge);
@@ -345,15 +336,8 @@ export default function DoctorSidebar() {
                       }`}
                     />
 
-                    {/* Collapsed loading indicator */}
-                    {isTargetLoading && (
-                      <span className="absolute inset-0 flex items-center justify-center bg-sky-600/90 rounded-xl text-white">
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                      </span>
-                    )}
-
                     {/* Badge notification dot */}
-                    {item.badge && !isTargetLoading && !isActive && (
+                    {item.badge && !isActive && (
                       <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-sky-500 ring-2 ring-white dark:ring-slate-900" />
                     )}
                   </Link>
@@ -362,9 +346,6 @@ export default function DoctorSidebar() {
                   <Link
                     key={item.href}
                     href={item.href}
-                    onClick={() => {
-                      startNavigation(item.href);
-                    }}
                     aria-current={isActive ? "page" : undefined}
                     className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-all duration-150 group cursor-pointer outline-none focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 active:outline-none border-0 ${
                       isActive
@@ -383,24 +364,20 @@ export default function DoctorSidebar() {
                       <span className="truncate">{item.name}</span>
                     </div>
 
-                    <div className="flex items-center gap-1.5 flex-shrink-0">
-                      {isTargetLoading ? (
-                        <Loader2 className="w-3.5 h-3.5 animate-spin text-sky-400" />
-                      ) : (
-                        item.badge && (
-                          <span
-                            suppressHydrationWarning
-                            className={`text-[10px] px-2 py-0.5 font-bold rounded-full transition-colors ${
-                              isActive
-                                ? "bg-white/20 text-white"
-                                : "bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 group-active:bg-white/20 group-active:text-white"
-                            }`}
-                          >
-                            {item.badge}
-                          </span>
-                        )
-                      )}
-                    </div>
+                    {item.badge && (
+                      <div className="flex items-center gap-1.5 flex-shrink-0">
+                        <span
+                          suppressHydrationWarning
+                          className={`text-[10px] px-2 py-0.5 font-bold rounded-full transition-colors ${
+                            isActive
+                              ? "bg-white/20 text-white"
+                              : "bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 group-active:bg-white/20 group-active:text-white"
+                          }`}
+                        >
+                          {item.badge}
+                        </span>
+                      </div>
+                    )}
                   </Link>
                 );
               })}
@@ -591,7 +568,6 @@ export default function DoctorSidebar() {
                     href={item.href}
                     onClick={() => {
                       setMobileOpen(false);
-                      startNavigation(item.href);
                     }}
                     className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-all outline-none focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 active:outline-none border-0 ${
                       isActive
