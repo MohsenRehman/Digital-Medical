@@ -802,4 +802,15 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
-
+/* ── Remove browser focus/click outline and black borders from sidebar links and buttons ── */
+aside a,
+aside button,
+aside a:focus,
+aside a:focus-visible,
+aside a:active,
+aside button:focus,
+aside button:focus-visible,
+aside button:active {
+  outline: none !important;
+  -webkit-tap-highlight-color: transparent !important;
+}
