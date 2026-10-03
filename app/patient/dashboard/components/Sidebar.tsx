@@ -74,11 +74,12 @@ export default function Sidebar({
 
       {/* Main Sidebar Panel */}
       <aside
-        className={`fixed top-0 bottom-0 left-0 z-50 w-72 bg-[#0B1426] text-slate-300 flex flex-col border-r border-slate-800/80 shadow-2xl transition-transform duration-300 ease-in-out lg:translate-x-0 ${isOpenMobile ? "translate-x-0" : "-translate-x-full"
-          }`}
+        className={`fixed top-0 bottom-0 left-0 z-50 w-72 bg-[#0B1426] text-slate-300 flex flex-col border-r border-slate-800/80 shadow-2xl transition-transform duration-300 ease-in-out lg:translate-x-0 ${
+          isOpenMobile ? "translate-x-0" : "-translate-x-full"
+        }`}
       >
         {/* Brand Header */}
-        <div className="px-6 py-5 border-b border-slate-800/80 flex items-center justify-between">
+        <div className="px-6 py-4 border-b border-slate-800/80 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3 group">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-teal-500 to-cyan-400 flex items-center justify-center text-white shadow-lg shadow-teal-500/25 group-hover:scale-105 transition-transform">
               <HeartPulse className="w-5 h-5 animate-pulse" />
@@ -104,7 +105,7 @@ export default function Sidebar({
         </div>
 
         {/* Quick Website Switcher Link */}
-        <div className="px-4 pt-3 pb-1">
+        <div className="px-4 pt-2 pb-0.5">
           <Link
             href="/"
             className="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium text-slate-400 hover:text-teal-300 hover:bg-slate-800/40 transition-colors"
@@ -118,8 +119,8 @@ export default function Sidebar({
         </div>
 
         {/* Navigation List */}
-        <div className="flex-1 px-3 py-2 overflow-y-auto space-y-1">
-          <div className="px-3 py-1.5 text-[10px] font-bold text-slate-500 tracking-wider uppercase">
+        <div className="flex-1 px-3 py-1 overflow-hidden space-y-0.5">
+          <div className="px-3 py-1 text-[10px] font-bold text-slate-500 tracking-wider uppercase">
             Patient Desk
           </div>
           {navItems.map((item) => {
@@ -132,29 +133,32 @@ export default function Sidebar({
                   onTabChange(item.id);
                   onCloseMobile();
                 }}
-                className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-150 cursor-pointer ${isActive
+                className={`w-full flex items-center justify-between px-3.5 py-2 rounded-xl text-xs font-semibold transition-all duration-150 cursor-pointer ${
+                  isActive
                     ? "bg-teal-500/15 text-teal-400 border border-teal-500/30 shadow-xs font-bold"
                     : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"
-                  }`}
+                }`}
               >
                 <div className="flex items-center gap-3">
                   <div
-                    className={`w-7 h-7 rounded-lg flex items-center justify-center transition-colors ${isActive
+                    className={`w-6 h-6 rounded-lg flex items-center justify-center transition-colors ${
+                      isActive
                         ? "bg-teal-500 text-white shadow-xs shadow-teal-500/30"
                         : "bg-slate-800/80 text-slate-400"
-                      }`}
+                    }`}
                   >
-                    <Icon className="w-4 h-4" />
+                    <Icon className="w-3.5 h-3.5" />
                   </div>
                   <span>{item.label}</span>
                 </div>
 
                 {item.badge !== undefined && (
                   <span
-                    className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${isActive
+                    className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                      isActive
                         ? "bg-teal-400 text-slate-900"
                         : "bg-slate-800 text-teal-300 border border-slate-700"
-                      }`}
+                    }`}
                   >
                     {item.badge}
                   </span>
