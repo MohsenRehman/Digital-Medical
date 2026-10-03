@@ -9,9 +9,9 @@ export function AnalysisSkeleton() {
       className="space-y-5 animate-pulse"
       role="status"
     >
-      {/* 2-Column Responsive Cards Skeleton: Patient Activity (Left) & Appointment Performance (Right) */}
+      {/* 2-Column Responsive Cards Skeleton: Revenue Analytics (Left) & Appointment Performance (Right) */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 md:gap-3.5">
-        {/* Left: Patient Activity Card Skeleton */}
+        {/* Left: Revenue Analytics Card Skeleton */}
         <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/80 dark:border-slate-800 p-3.5 sm:p-4 md:p-4.5 shadow-2xs space-y-4">
           <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800/80">
             <div className="space-y-1.5">
