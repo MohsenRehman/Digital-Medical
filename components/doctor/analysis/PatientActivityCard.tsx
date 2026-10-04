@@ -11,7 +11,6 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { animate } from "framer-motion";
-import { CircleDollarSign } from "lucide-react";
 import { useDoctor } from "@/app/context/DoctorContext";
 
 export type RevenueTimeRange = "today" | "weekly" | "monthly" | "yearly";
@@ -269,17 +268,9 @@ export function DoctorRevenueCard() {
         {/* Top Header: Title, PKR Badge & Time Filter (Styled identically to Appointment Performance Card) */}
         <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-2 pb-2.5 border-b border-slate-100 dark:border-slate-800/80">
           <div>
-            <div className="flex items-center gap-2">
-              <span className="p-1 rounded-md bg-sky-50 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400">
-                <CircleDollarSign className="w-3.5 h-3.5" />
-              </span>
-              <h2 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider">
-                REVENUE ANALYTICS
-              </h2>
-              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-sky-100/80 dark:bg-sky-900/40 text-sky-700 dark:text-sky-300">
-                PKR
-              </span>
-            </div>
+            <h2 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider">
+              REVENUE ANALYTICS
+            </h2>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
               {subtitleText}
             </p>

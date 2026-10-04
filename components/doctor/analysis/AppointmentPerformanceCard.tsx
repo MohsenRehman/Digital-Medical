@@ -10,7 +10,6 @@ import {
 } from "recharts";
 import { animate } from "framer-motion";
 import {
-  PieChart as PieChartIcon,
   AlertCircle,
   RotateCcw,
   ArrowRight,
@@ -446,14 +445,9 @@ export function AppointmentPerformanceCard() {
       {/* Top Header: Title & Time Range Switcher */}
       <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-2 pb-2.5 border-b border-slate-100 dark:border-slate-800/80">
         <div>
-          <div className="flex items-center gap-2">
-            <span className="p-1 rounded-md bg-sky-50 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400">
-              <PieChartIcon className="w-3.5 h-3.5" />
-            </span>
-            <h3 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider">
-              APPOINTMENT PERFORMANCE
-            </h3>
-          </div>
+          <h3 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider">
+            APPOINTMENT PERFORMANCE
+          </h3>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
             {subtitleText}
           </p>

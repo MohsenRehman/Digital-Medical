@@ -55,6 +55,7 @@ export default function PatientLoginModal({ isOpen, onClose }: PatientLoginModal
   const [doctorPassword, setDoctorPassword] = useState("");
   const [showDoctorPassword, setShowDoctorPassword] = useState(false);
   const [isDoctorSubmitting, setIsDoctorSubmitting] = useState(false);
+  const [existingDoctor, setExistingDoctor] = useState<{ name?: string; email?: string } | null>(null);
 
   // Admin Login States
   const [adminEmail, setAdminEmail] = useState("");
@@ -85,6 +86,13 @@ export default function PatientLoginModal({ isOpen, onClose }: PatientLoginModal
       setAdminPassword("");
       setDoctorEmail("");
       setDoctorPassword("");
+      try {
+        const raw = localStorage.getItem("dm_doctor_session");
+        if (raw) setExistingDoctor(JSON.parse(raw));
+        else setExistingDoctor(null);
+      } catch {
+        setExistingDoctor(null);
+      }
       if (patientUser?.phone) {
         setPhone(patientUser.phone);
       }
@@ -660,6 +668,49 @@ export default function PatientLoginModal({ isOpen, onClose }: PatientLoginModal
                   Clinical Desk access for <strong>Registered Doctors &amp; Specialists</strong>. Access live patient queue, digital consultations, and e-prescriptions.
                 </p>
               </div>
+
+              {/* Active Doctor Session Banner if already logged in */}
+              {existingDoctor && (
+                <div className="p-3 rounded-xl bg-cyan-50/90 dark:bg-cyan-950/60 border border-cyan-200 dark:border-cyan-800 flex items-center justify-between gap-3 shadow-2xs">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-cyan-600 to-sky-500 text-white flex items-center justify-center text-xs font-bold shrink-0">
+                      <Stethoscope className="w-4 h-4" />
+                    </div>
+                    <div className="min-w-0">
+                      <div className="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">
+                        Active: {existingDoctor.name || "Doctor Desk"}
+                      </div>
+                      <div className="text-[10px] text-cyan-600 dark:text-cyan-400 font-mono truncate">
+                        {existingDoctor.email}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onClose();
+                        router.push("/doctor");
+                      }}
+                      className="px-2.5 py-1 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white text-[11px] font-bold transition-colors cursor-pointer shadow-xs"
+                    >
+                      Open Desk
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        try {
+                          localStorage.removeItem("dm_doctor_session");
+                        } catch {}
+                        setExistingDoctor(null);
+                      }}
+                      className="px-2 py-1 rounded-lg border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 text-[11px] font-semibold transition-colors cursor-pointer"
+                    >
+                      Sign Out
+                    </button>
+                  </div>
+                </div>
+              )}
 
               {errorMsg && (
                 <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-900 text-xs text-rose-600 dark:text-rose-300 font-semibold text-center">
