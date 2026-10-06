@@ -16,6 +16,7 @@ import {
   User,
   ArrowRight,
   ExternalLink,
+  LogOut,
 } from "lucide-react";
 import { useDoctor } from "@/app/context/DoctorContext";
 import { PatientProfile } from "@/lib/types/doctor";
@@ -86,6 +87,18 @@ export default function DoctorHeader() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  const handleLogout = () => {
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.removeItem("dm_doctor_session");
+        localStorage.removeItem("dm_doctor_id");
+      } catch (e) {
+        // ignore
+      }
+      window.location.href = "/";
+    }
+  };
 
   // Compute breadcrumb/title from pathname
   const getPageTitle = () => {
@@ -361,10 +374,12 @@ export default function DoctorHeader() {
             )}
           </div>
 
-          {/* Quick Doctor Profile link */}
+          {/* Quick Doctor Profile link (Photo Only) */}
           <Link
             href="/doctor/settings"
-            className="flex items-center gap-2.5 p-1 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            title={`${doctor.name} (${doctor.specialty})`}
+            aria-label={`${doctor.name} profile settings`}
+            className="p-0.5 rounded-full hover:ring-2 hover:ring-sky-500/50 transition-all flex items-center justify-center flex-shrink-0"
           >
             <div className="relative">
               <img
@@ -373,25 +388,23 @@ export default function DoctorHeader() {
                 className="w-8 h-8 rounded-full object-cover border border-slate-200 dark:border-slate-700"
               />
               <span
-                className={`absolute bottom-0 right-0 w-2 h-2 rounded-full border border-white dark:border-slate-900 ${
+                className={`absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-white dark:border-slate-900 ${
                   statusColorMap[doctorStatus] || "bg-emerald-500"
                 }`}
               />
             </div>
-            <div className="hidden sm:block text-left text-xs">
-              <div className="flex items-center gap-1.5">
-                <span className="font-bold text-slate-900 dark:text-white truncate max-w-[130px] lg:max-w-none">
-                  {doctor.name}
-                </span>
-                <img
-                  src="/images/varified-badge.png"
-                  alt="Verified Doctor"
-                  className="w-3.5 h-3.5 object-contain inline-block flex-shrink-0"
-                />
-              </div>
-              <p className="text-[11px] text-slate-400">{doctor.specialty}</p>
-            </div>
           </Link>
+
+          {/* Top Right Logout Button (Icon Only) */}
+          <button
+            type="button"
+            onClick={handleLogout}
+            aria-label="Logout"
+            title="Logout"
+            className="p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 border border-slate-200 dark:border-slate-800 hover:border-red-200 dark:hover:border-red-900/60 transition-all cursor-pointer group flex-shrink-0 flex items-center justify-center"
+          >
+            <LogOut className="w-4 h-4 text-slate-500 group-hover:text-red-600 transition-colors" />
+          </button>
         </div>
       </div>
     </header>

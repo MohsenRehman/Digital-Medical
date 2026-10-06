@@ -51,6 +51,12 @@ export default function Step3PatientDetails({
   const [healthConcern, setHealthConcern] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [entitlementError, setEntitlementError] = useState<{
+    code: string;
+    title: string;
+    subMessage: string;
+    upgradeRequired: boolean;
+  } | null>(null);
 
   const handleForChange = (type: "self" | "other") => {
     setAppointmentFor(type);
@@ -61,7 +67,7 @@ export default function Step3PatientDetails({
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!patientName.trim()) {
       setError("Please enter the patient's full name.");
@@ -70,32 +76,98 @@ export default function Step3PatientDetails({
 
     setIsSubmitting(true);
     setError("");
+    setEntitlementError(null);
 
     const numericFee = typeof doctor.fee === "number"
       ? doctor.fee
       : parseInt(String(doctor.fee || "2000").replace(/[^0-9]/g, ""), 10) || 2000;
 
-    const draft: BookingDraft = {
-      doctorId: doctor.id,
-      doctorName: doctor.name,
-      doctorSpecialty: doctor.specialty,
-      doctorImage: doctor.image,
-      clinicName: doctor.location || "Digital Medical Specialist Clinic",
-      clinicLocation: "450 Lexington Ave, New York / Lahore Health Hub",
-      consultationFee: numericFee,
-      date,
-      timeSlot,
-      phone: verifiedPhone,
-      relation: appointmentFor === "self" ? "self" : selectedRelation,
-      patientName: patientName.trim(),
-      patientAge: patientAge ? Number(patientAge) : undefined,
-      patientGender,
-      notes: healthConcern.trim() || undefined,
-    };
+    // Doctor identity resolution for entitlement check
+    const targetDoctorId =
+      doctor.id === "doc-3" || doctor.name.toLowerCase().includes("tariq")
+        ? "doc-tariq-01"
+        : doctor.id;
 
-    setTimeout(() => {
+    try {
+      // BACKEND SOURCE OF TRUTH: Call protected public appointment booking API
+      const response = await fetch(`/api/public/doctors/${encodeURIComponent(targetDoctorId)}/appointments`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          patientName: patientName.trim(),
+          phone: verifiedPhone,
+          date,
+          timeSlot,
+          fee: numericFee,
+          source: "public_online",
+        }),
+      });
+
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok || !data.success) {
+        setIsSubmitting(false);
+
+        if (data.code === "BOOKING_LIMIT_REACHED") {
+          setEntitlementError({
+            code: "BOOKING_LIMIT_REACHED",
+            title: "Your monthly online booking limit has been reached.",
+            subMessage: "50 of 50 online bookings used. Upgrade to Pro to receive unlimited online bookings.",
+            upgradeRequired: true,
+          });
+          return;
+        }
+
+        if (data.code === "SUBSCRIPTION_CANCELLED") {
+          setEntitlementError({
+            code: "SUBSCRIPTION_CANCELLED",
+            title: "Doctor subscription is currently cancelled.",
+            subMessage: "Online bookings are currently unavailable for this clinic.",
+            upgradeRequired: true,
+          });
+          return;
+        }
+
+        if (data.code === "SUBSCRIPTION_EXPIRED") {
+          setEntitlementError({
+            code: "SUBSCRIPTION_EXPIRED",
+            title: "Doctor subscription has expired.",
+            subMessage: "Patients cannot book new online appointments until the doctor renews their plan.",
+            upgradeRequired: true,
+          });
+          return;
+        }
+
+        setError(data.message || "Failed to schedule appointment. Please try again.");
+        return;
+      }
+
+      // Entitlement approved and slot consumed!
+      const draft: BookingDraft = {
+        doctorId: targetDoctorId,
+        doctorName: doctor.name,
+        doctorSpecialty: doctor.specialty,
+        doctorImage: doctor.image,
+        clinicName: doctor.location || "Digital Medical Specialist Clinic",
+        clinicLocation: "450 Lexington Ave, New York / Lahore Health Hub",
+        consultationFee: numericFee,
+        date,
+        timeSlot,
+        phone: verifiedPhone,
+        relation: appointmentFor === "self" ? "self" : selectedRelation,
+        patientName: patientName.trim(),
+        patientAge: patientAge ? Number(patientAge) : undefined,
+        patientGender,
+        notes: healthConcern.trim() || undefined,
+      };
+
       onConfirm(draft);
-    }, 600);
+    } catch (err) {
+      console.error("Booking API error:", err);
+      setError("Network connection issue. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -236,6 +308,39 @@ export default function Step3PatientDetails({
       </div>
 
       {error && <p className="text-xs text-rose-500 font-semibold text-center">{error}</p>}
+
+      {/* Subscription Entitlement Limit Error Banner */}
+      {entitlementError && (
+        <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border-2 border-amber-300 dark:border-amber-800 text-amber-900 dark:text-amber-200 text-xs space-y-3 animate-fadeIn shadow-sm">
+          <div className="flex items-start gap-3">
+            <div className="p-1.5 rounded-xl bg-amber-200 dark:bg-amber-800/80 text-amber-900 dark:text-amber-100 flex-shrink-0">
+              <ShieldCheck className="w-4 h-4 text-amber-700 dark:text-amber-300" />
+            </div>
+            <div className="space-y-1 flex-1">
+              <h4 className="font-bold text-sm text-amber-950 dark:text-amber-100">
+                {entitlementError.title}
+              </h4>
+              <p className="text-xs text-amber-800 dark:text-amber-300/90 leading-relaxed font-medium">
+                {entitlementError.subMessage}
+              </p>
+            </div>
+          </div>
+          <div className="pt-1 flex items-center justify-between border-t border-amber-200/60 dark:border-amber-800/60">
+            <span className="text-[11px] text-amber-700 dark:text-amber-400">
+              Doctor Practice Tier: <strong>50/50 Limit Reached</strong>
+            </span>
+            <a
+              href="/doctor/subscription"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs shadow-xs transition-colors"
+            >
+              <span>Upgrade Plan</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </a>
+          </div>
+        </div>
+      )}
 
       {/* Appointment Summary Box */}
       <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700 text-xs flex items-center justify-between">
