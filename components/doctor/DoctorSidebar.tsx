@@ -22,9 +22,11 @@ import {
   Radio,
   PanelLeftClose,
   PanelLeftOpen,
+  CreditCard,
 } from "lucide-react";
 import { useDoctor } from "@/app/context/DoctorContext";
 import { DoctorAvailabilityStatus } from "@/lib/types/doctor";
+import DoctorSidebarPlanCard from "@/components/doctor/subscription/DoctorSidebarPlanCard";
 
 interface NavItem {
   name: string;
@@ -168,6 +170,11 @@ export default function DoctorSidebar() {
           href: "/doctor/notifications",
           icon: Bell,
           badge: unreadNotificationsCount > 0 ? `${unreadNotificationsCount}` : undefined,
+        },
+        {
+          name: "Subscription & Plans",
+          href: "/doctor/subscription",
+          icon: CreditCard,
         },
         {
           name: "Settings & Profile",
@@ -386,6 +393,15 @@ export default function DoctorSidebar() {
         ))}
       </div>
 
+      {/* Plan Card Section */}
+      <div className={`border-t border-slate-200/80 dark:border-slate-800/80 flex-shrink-0 ${sidebarCollapsed ? "py-2 px-1" : "py-2.5 px-1 bg-slate-50/40 dark:bg-slate-900/40"}`}>
+        <DoctorSidebarPlanCard
+          collapsed={sidebarCollapsed}
+          onShowTooltip={showTooltip}
+          onHideTooltip={hideTooltip}
+        />
+      </div>
+
       {/* 3. Bottom Controls: Status dropdown & Logout */}
       <div className={`border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 ${sidebarCollapsed ? "p-2 space-y-2" : "p-3 space-y-2"}`}>
         {/* Availability status dropdown */}
@@ -462,39 +478,6 @@ export default function DoctorSidebar() {
             </div>
           )}
         </div>
-
-        {/* Doctor portal exit/logout */}
-        {sidebarCollapsed ? (
-          // COLLAPSED LOGOUT
-          <button
-            type="button"
-            onClick={handleLogout}
-            onMouseEnter={(e) => {
-              const rect = e.currentTarget.getBoundingClientRect();
-              showTooltip("Exit Workspace", rect.top + rect.height / 2);
-            }}
-            onMouseLeave={hideTooltip}
-            onFocus={(e) => {
-              const rect = e.currentTarget.getBoundingClientRect();
-              setHoveredTooltip({ text: "Exit Workspace", top: rect.top + rect.height / 2 });
-            }}
-            onBlur={hideTooltip}
-            aria-label="Exit Workspace"
-            className="w-10 h-10 mx-auto flex items-center justify-center rounded-xl text-slate-600 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors cursor-pointer outline-none focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 active:outline-none border-0"
-          >
-            <LogOut className="w-4 h-4" />
-          </button>
-        ) : (
-          // EXPANDED LOGOUT
-          <button
-            type="button"
-            onClick={handleLogout}
-            className="flex items-center justify-center gap-2 w-full py-2 px-3 text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 rounded-xl hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors cursor-pointer outline-none focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 active:outline-none border-0"
-          >
-            <LogOut className="w-3.5 h-3.5" />
-            <span>Exit Workspace</span>
-          </button>
-        )}
       </div>
 
       {/* 4. Collapsed Hover Tooltip Floating Element */}
@@ -601,6 +584,11 @@ export default function DoctorSidebar() {
         ))}
       </div>
 
+      {/* Mobile Drawer Plan Card */}
+      <div className="p-2 border-t border-slate-200 dark:border-slate-800 bg-slate-50/40 dark:bg-slate-900/40 flex-shrink-0">
+        <DoctorSidebarPlanCard collapsed={false} />
+      </div>
+
       {/* Mobile Drawer Bottom */}
       <div className="p-3 border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 space-y-2">
         <button
@@ -609,7 +597,7 @@ export default function DoctorSidebar() {
           className="flex items-center justify-center gap-2 w-full py-2 px-3 text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 rounded-xl hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors cursor-pointer outline-none focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 active:outline-none border-0"
         >
           <LogOut className="w-3.5 h-3.5" />
-          <span>Exit Workspace</span>
+          <span>Logout</span>
         </button>
       </div>
     </div>
