@@ -7,6 +7,7 @@ import React, {
   useEffect,
   useCallback,
   useRef,
+  Suspense,
 } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 
@@ -24,13 +25,22 @@ const NavigationContext = createContext<NavigationContextType>({
   finishNavigation: () => {},
 });
 
+function SearchParamsWatcher({ onParamsChange }: { onParamsChange: () => void }) {
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    onParamsChange();
+  }, [searchParams, onParamsChange]);
+
+  return null;
+}
+
 export function NavigationProvider({
   children,
 }: {
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
 
   const [isNavigating, setIsNavigating] = useState(false);
   const [navigatingHref, setNavigatingHref] = useState<string | null>(null);
@@ -42,7 +52,7 @@ export function NavigationProvider({
 
   const startNavigation = useCallback((href: string) => {
     // If clicking same route, skip
-    if (href === window.location.pathname + window.location.search) {
+    if (typeof window !== "undefined" && href === window.location.pathname + window.location.search) {
       return;
     }
 
@@ -79,10 +89,10 @@ export function NavigationProvider({
     }, 300);
   }, []);
 
-  // When pathname or searchParams change, navigation finished
+  // When pathname changes, navigation finished
   useEffect(() => {
     finishNavigation();
-  }, [pathname, searchParams, finishNavigation]);
+  }, [pathname, finishNavigation]);
 
   // Global link click interceptor for internal doctor links
   useEffect(() => {
@@ -117,6 +127,10 @@ export function NavigationProvider({
         finishNavigation,
       }}
     >
+      <Suspense fallback={null}>
+        <SearchParamsWatcher onParamsChange={finishNavigation} />
+      </Suspense>
+
       {/* 2.5px Global Top Progress Bar */}
       {visible && (
         <div
