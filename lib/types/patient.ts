@@ -36,6 +36,7 @@ export interface AppointmentRecord {
   patientUserId: string;
   patientPhone: string;
   bookedByRelation: AppointmentRelation;
+  familyMemberId?: string;
   patientName: string;
   patientAge?: number;
   patientGender?: GenderType;
@@ -66,6 +67,7 @@ export interface BookingDraft {
   timeSlot: string;
   phone: string;
   relation: AppointmentRelation;
+  familyMemberId?: string;
   patientName: string;
   patientAge?: number;
   patientGender?: GenderType;
