@@ -1,54 +1,420 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import {
   FileText,
-  Calendar,
-  Stethoscope,
-  Building2,
-  ShieldCheck,
-  User,
   Search,
-  Download,
-  Eye,
-  Activity,
   Plus,
   Info,
+  X,
+  ChevronDown,
+  Building2,
+  User,
+  Calendar,
+  Pill,
+  Activity,
+  Clock,
+  Filter,
+  SlidersHorizontal,
 } from "lucide-react";
 import { FamilyMemberRecord, PatientUser } from "@/lib/types/patient";
+import { MedicalRecord } from "./types";
 
+// ---------------------------------------------------------------------------
+// Props
+// ---------------------------------------------------------------------------
 interface MedicalRecordsSectionProps {
   patientUser: PatientUser | null;
   familyMembers: FamilyMemberRecord[];
   onOpenBooking: () => void;
+  /** Injected by the Doctor module once it is live. Keep [] until then. */
+  medicalRecords?: MedicalRecord[];
 }
 
+// ---------------------------------------------------------------------------
+// Small helpers
+// ---------------------------------------------------------------------------
+/** Extract a 4-digit year from an ISO visitDate string */
+function getYear(isoDate: string): string {
+  return isoDate.slice(0, 4);
+}
+
+/** Format "2025-03-14" → "14 Mar 2025" */
+function formatDate(isoDate: string): string {
+  try {
+    return new Date(isoDate).toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+  } catch {
+    return isoDate;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Custom compact select component (matches existing dashboard style)
+// ---------------------------------------------------------------------------
+interface SelectProps {
+  value: string;
+  onChange: (val: string) => void;
+  options: { value: string; label: string }[];
+  className?: string;
+}
+function DashSelect({ value, onChange, options, className = "" }: SelectProps) {
+  return (
+    <div className={`relative ${className}`}>
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full appearance-none pl-3 pr-8 py-2 rounded-xl text-xs font-semibold
+          bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700
+          text-slate-900 dark:text-white
+          focus:outline-none focus:ring-2 focus:ring-teal-500/30 focus:border-teal-500
+          cursor-pointer transition-colors"
+      >
+        {options.map((o) => (
+          <option key={o.value} value={o.value}>
+            {o.label}
+          </option>
+        ))}
+      </select>
+      <ChevronDown className="w-3.5 h-3.5 absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Filter chip
+// ---------------------------------------------------------------------------
+interface ChipProps {
+  label: string;
+  onRemove: () => void;
+}
+function FilterChip({ label, onRemove }: ChipProps) {
+  return (
+    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold
+      bg-teal-50 dark:bg-teal-950/60 text-teal-700 dark:text-teal-300
+      border border-teal-200 dark:border-teal-800">
+      {label}
+      <button
+        onClick={onRemove}
+        className="ml-0.5 text-teal-500 hover:text-teal-700 dark:hover:text-teal-200 cursor-pointer"
+        aria-label={`Remove ${label} filter`}
+      >
+        <X className="w-3 h-3" />
+      </button>
+    </span>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Record card (rendered when records are present)
+// ---------------------------------------------------------------------------
+interface RecordCardProps {
+  record: MedicalRecord;
+}
+function RecordCard({ record }: RecordCardProps) {
+  const [expanded, setExpanded] = useState(false);
+  const visitLabel = record.visitDateLabel || formatDate(record.visitDate);
+
+  return (
+    <div className="rounded-3xl bg-white dark:bg-[#0c1424] border border-slate-200/80 dark:border-slate-800 shadow-xs hover:border-teal-400/40 transition-all overflow-hidden">
+      {/* Card header row */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-5">
+        {/* Left: Doctor + Clinic */}
+        <div className="flex items-start gap-3.5">
+          <div className="w-11 h-11 rounded-2xl bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 flex items-center justify-center flex-shrink-0 shadow-xs">
+            <FileText className="w-5 h-5" />
+          </div>
+          <div className="space-y-0.5 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white">{record.doctorName}</h3>
+              {record.doctorSpecialty && (
+                <span className="text-[10px] font-bold text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-950/50 px-2 py-0.5 rounded-full">
+                  {record.doctorSpecialty}
+                </span>
+              )}
+            </div>
+            <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
+              <Building2 className="w-3.5 h-3.5 flex-shrink-0" />
+              <span className="truncate">{record.clinicName}</span>
+            </div>
+            <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
+              <User className="w-3.5 h-3.5 flex-shrink-0 text-purple-500" />
+              <span className="font-semibold text-slate-700 dark:text-slate-300">{record.patientName}</span>
+              <span className="capitalize text-purple-600 dark:text-purple-400">({record.relation})</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Right: Date + badges */}
+        <div className="flex flex-col items-start sm:items-end gap-1.5 flex-shrink-0">
+          <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700 dark:text-slate-200">
+            <Calendar className="w-3.5 h-3.5 text-teal-500" />
+            <span>{visitLabel}</span>
+          </div>
+          <div className="flex items-center gap-1.5 flex-wrap">
+            {record.hasPrescription && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-violet-50 dark:bg-violet-950/50 text-violet-700 dark:text-violet-300 border border-violet-200 dark:border-violet-800">
+                <Pill className="w-2.5 h-2.5" />
+                Rx
+              </span>
+            )}
+            {record.hasLabReport && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-50 dark:bg-sky-950/50 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-800">
+                <Activity className="w-2.5 h-2.5" />
+                Lab
+              </span>
+            )}
+            {record.followUpAdvised && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
+                <Clock className="w-2.5 h-2.5" />
+                Follow-up
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Symptoms / Diagnosis summary strip */}
+      {(record.symptoms || record.diagnosis) && (
+        <div className="mx-5 mb-4 p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-700/60 space-y-1.5">
+          {record.symptoms && (
+            <div className="flex gap-2 text-xs">
+              <span className="font-bold text-slate-500 dark:text-slate-400 w-20 flex-shrink-0">Symptoms</span>
+              <span className="text-slate-700 dark:text-slate-300">{record.symptoms}</span>
+            </div>
+          )}
+          {record.diagnosis && (
+            <div className="flex gap-2 text-xs">
+              <span className="font-bold text-slate-500 dark:text-slate-400 w-20 flex-shrink-0">Diagnosis</span>
+              <span className="text-slate-700 dark:text-slate-300 font-semibold">{record.diagnosis}</span>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Expand / collapse for notes */}
+      {record.notes && (
+        <div className="border-t border-slate-100 dark:border-slate-800">
+          <button
+            onClick={() => setExpanded((p) => !p)}
+            className="w-full flex items-center justify-between px-5 py-2.5 text-[11px] font-semibold text-slate-500 dark:text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 transition-colors cursor-pointer"
+          >
+            <span>Clinical Notes</span>
+            <ChevronDown className={`w-3.5 h-3.5 transition-transform ${expanded ? "rotate-180" : ""}`} />
+          </button>
+          {expanded && (
+            <div className="px-5 pb-4 text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+              {record.notes}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* View full record CTA */}
+      <div className="px-5 pb-4 flex justify-end">
+        <button className="text-[11px] font-bold text-teal-600 dark:text-teal-400 hover:underline cursor-pointer">
+          View Full Record →
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Main section
+// ---------------------------------------------------------------------------
 export default function MedicalRecordsSection({
   patientUser,
   familyMembers,
   onOpenBooking,
+  medicalRecords = [],
 }: MedicalRecordsSectionProps) {
   const primaryName = patientUser?.name || "Muhammad Ahmed";
-  const [selectedProfile, setSelectedProfile] = useState("all");
+
+  // ── Filter state ──────────────────────────────────────────────────────────
+  const [profileFilter, setProfileFilter] = useState("all");
+  const [yearFilter, setYearFilter] = useState("all");
+  const [clinicFilter, setClinicFilter] = useState("all");
+  const [doctorFilter, setDoctorFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
+  // Custom date range (reserved for future date-picker integration)
+  const [customFrom, setCustomFrom] = useState("");
+  const [customTo, setCustomTo] = useState("");
+  const showCustomRange = yearFilter === "custom";
 
-  const profileOptions = useMemo(() => {
+  // ── Derived option lists (computed from actual record data) ───────────────
+
+  // Patient profile options
+  const profileOptions = useMemo(() => [
+    { value: "all", label: "All Patient Records" },
+    { value: "self", label: `${primaryName} — Self` },
+    ...familyMembers.map((m) => ({
+      value: m.id,
+      label: `${m.name} — ${m.relation.charAt(0).toUpperCase() + m.relation.slice(1)}`,
+    })),
+  ], [primaryName, familyMembers]);
+
+  // Years present in actual records
+  const yearOptions = useMemo(() => {
+    const years = Array.from(new Set(medicalRecords.map((r) => getYear(r.visitDate)))).sort(
+      (a, b) => Number(b) - Number(a),
+    );
     return [
-      { id: "all", name: "All Patient Records" },
-      { id: primaryName.toLowerCase(), name: `${primaryName} (Self)` },
-      ...familyMembers.map((m) => ({
-        id: m.name.toLowerCase(),
-        name: `${m.name} (${m.relation})`,
-      })),
+      { value: "all", label: "All Time" },
+      ...years.map((y) => ({ value: y, label: y })),
+      { value: "custom", label: "Custom Range" },
     ];
-  }, [primaryName, familyMembers]);
+  }, [medicalRecords]);
 
-  // Future-ready medical records structure (Empty in current stage until Doctor module integrates)
-  const medicalRecords: any[] = [];
+  // Clinics present in records (filtered by current profile selection)
+  const profileFilteredRecords = useMemo(() => {
+    if (profileFilter === "all") return medicalRecords;
+    if (profileFilter === "self") {
+      return medicalRecords.filter(
+        (r) => r.relation === "self" || r.patientName.toLowerCase() === primaryName.toLowerCase(),
+      );
+    }
+    const member = familyMembers.find((m) => m.id === profileFilter);
+    if (!member) return medicalRecords;
+    return medicalRecords.filter(
+      (r) => r.patientName.toLowerCase() === member.name.toLowerCase(),
+    );
+  }, [medicalRecords, profileFilter, primaryName, familyMembers]);
 
+  const clinicOptions = useMemo(() => {
+    const clinics = Array.from(new Set(profileFilteredRecords.map((r) => r.clinicName))).sort();
+    return [
+      { value: "all", label: "All Clinics" },
+      ...clinics.map((c) => ({ value: c, label: c })),
+    ];
+  }, [profileFilteredRecords]);
+
+  // Doctors filtered by currently selected clinic
+  const doctorOptions = useMemo(() => {
+    const base =
+      clinicFilter === "all"
+        ? profileFilteredRecords
+        : profileFilteredRecords.filter((r) => r.clinicName === clinicFilter);
+    const doctors = Array.from(new Set(base.map((r) => r.doctorName))).sort();
+    return [
+      { value: "all", label: "All Doctors" },
+      ...doctors.map((d) => ({ value: d, label: d })),
+    ];
+  }, [profileFilteredRecords, clinicFilter]);
+
+  // ── Dependent filter reset (clinic→doctor) ────────────────────────────────
+  const handleClinicChange = useCallback(
+    (val: string) => {
+      setClinicFilter(val);
+      // Reset doctor if it no longer belongs to the newly selected clinic
+      if (val !== "all" && doctorFilter !== "all") {
+        const doctorStillValid = profileFilteredRecords.some(
+          (r) => r.clinicName === val && r.doctorName === doctorFilter,
+        );
+        if (!doctorStillValid) setDoctorFilter("all");
+      }
+    },
+    [doctorFilter, profileFilteredRecords],
+  );
+
+  // ── Final filtered records ────────────────────────────────────────────────
+  const filteredRecords = useMemo(() => {
+    return profileFilteredRecords.filter((r) => {
+      // Year filter
+      if (yearFilter !== "all" && yearFilter !== "custom") {
+        if (getYear(r.visitDate) !== yearFilter) return false;
+      }
+      if (yearFilter === "custom") {
+        if (customFrom && r.visitDate < customFrom) return false;
+        if (customTo && r.visitDate > customTo) return false;
+      }
+
+      // Clinic filter
+      if (clinicFilter !== "all" && r.clinicName !== clinicFilter) return false;
+
+      // Doctor filter
+      if (doctorFilter !== "all" && r.doctorName !== doctorFilter) return false;
+
+      // Full-text search
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase();
+        const haystack = [
+          r.symptoms,
+          r.diagnosis,
+          r.notes,
+          r.doctorName,
+          r.clinicName,
+          r.patientName,
+        ]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase();
+        if (!haystack.includes(q)) return false;
+      }
+
+      return true;
+    });
+    // Sort most-recent first
+  }, [profileFilteredRecords, yearFilter, clinicFilter, doctorFilter, searchQuery, customFrom, customTo])
+    .slice()
+    .sort((a, b) => b.visitDate.localeCompare(a.visitDate));
+
+  // ── Active chips ──────────────────────────────────────────────────────────
+  const activeChips: { key: string; label: string; onRemove: () => void }[] = [];
+
+  if (yearFilter !== "all") {
+    activeChips.push({
+      key: "year",
+      label: yearFilter === "custom" ? "Custom Range" : yearFilter,
+      onRemove: () => { setYearFilter("all"); setCustomFrom(""); setCustomTo(""); },
+    });
+  }
+  if (clinicFilter !== "all") {
+    activeChips.push({
+      key: "clinic",
+      label: clinicFilter,
+      onRemove: () => { setClinicFilter("all"); setDoctorFilter("all"); },
+    });
+  }
+  if (doctorFilter !== "all") {
+    activeChips.push({
+      key: "doctor",
+      label: doctorFilter,
+      onRemove: () => setDoctorFilter("all"),
+    });
+  }
+  if (searchQuery.trim()) {
+    activeChips.push({
+      key: "search",
+      label: `"${searchQuery.trim()}"`,
+      onRemove: () => setSearchQuery(""),
+    });
+  }
+
+  const hasActiveFilters = activeChips.length > 0;
+
+  const clearAllFilters = () => {
+    setYearFilter("all");
+    setClinicFilter("all");
+    setDoctorFilter("all");
+    setSearchQuery("");
+    setCustomFrom("");
+    setCustomTo("");
+  };
+
+  // ── Empty-state logic ─────────────────────────────────────────────────────
+  const totalRecords = medicalRecords.length;
+  const noRecordsAtAll = totalRecords === 0;
+  const hasRecordsButNoMatch = !noRecordsAtAll && filteredRecords.length === 0;
+
+  // ── Render ────────────────────────────────────────────────────────────────
   return (
     <div className="space-y-6 animate-fadeInUp">
-      {/* Header */}
+
+      {/* ── Header ── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-200 dark:border-slate-800 gap-4">
         <div>
           <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 text-xs font-bold mb-1">
@@ -72,39 +438,134 @@ export default function MedicalRecordsSection({
         </button>
       </div>
 
-      {/* Filter and Profile Selection */}
-      <div className="p-4 rounded-3xl bg-white dark:bg-[#0c1424] border border-slate-200/80 dark:border-slate-800 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
-            Patient Profile:
-          </span>
-          <select
-            value={selectedProfile}
-            onChange={(e) => setSelectedProfile(e.target.value)}
-            className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white"
-          >
-            {profileOptions.map((opt) => (
-              <option key={opt.id} value={opt.id}>
-                {opt.name}
-              </option>
-            ))}
-          </select>
+      {/* ── Filter Panel ── */}
+      <div className="p-4 rounded-3xl bg-white dark:bg-[#0c1424] border border-slate-200/80 dark:border-slate-800 shadow-xs space-y-3">
+
+        {/* Row 1: Dropdowns */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
+          {/* Patient Profile */}
+          <div className="space-y-1">
+            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider pl-1">
+              Patient Profile
+            </label>
+            <DashSelect
+              value={profileFilter}
+              onChange={(val) => {
+                setProfileFilter(val);
+                // Reset downstream filters when profile changes
+                setClinicFilter("all");
+                setDoctorFilter("all");
+              }}
+              options={profileOptions}
+            />
+          </div>
+
+          {/* Year / Date */}
+          <div className="space-y-1">
+            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider pl-1">
+              Year / Date
+            </label>
+            <DashSelect
+              value={yearFilter}
+              onChange={setYearFilter}
+              options={yearOptions}
+            />
+          </div>
+
+          {/* Clinic */}
+          <div className="space-y-1">
+            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider pl-1">
+              Clinic
+            </label>
+            <DashSelect
+              value={clinicFilter}
+              onChange={handleClinicChange}
+              options={clinicOptions}
+            />
+          </div>
+
+          {/* Doctor */}
+          <div className="space-y-1">
+            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider pl-1">
+              Doctor
+            </label>
+            <DashSelect
+              value={doctorFilter}
+              onChange={setDoctorFilter}
+              options={doctorOptions}
+            />
+          </div>
         </div>
 
-        <div className="relative flex-1 max-w-sm">
-          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+        {/* Custom date range row (only when "Custom Range" is selected) */}
+        {showCustomRange && (
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 pt-1">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider whitespace-nowrap">
+              Date Range
+            </span>
+            <div className="flex items-center gap-2 flex-wrap">
+              <input
+                type="date"
+                value={customFrom}
+                onChange={(e) => setCustomFrom(e.target.value)}
+                className="px-3 py-1.5 rounded-xl text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500/30"
+              />
+              <span className="text-xs text-slate-400 font-semibold">to</span>
+              <input
+                type="date"
+                value={customTo}
+                onChange={(e) => setCustomTo(e.target.value)}
+                className="px-3 py-1.5 rounded-xl text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500/30"
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Row 2: Search */}
+        <div className="relative">
+          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search symptoms, doctor, diagnosis..."
-            className="w-full pl-9 pr-3.5 py-1.5 text-xs rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white"
+            placeholder="Search symptoms, diagnosis, medicines, doctor, clinic..."
+            className="w-full pl-9 pr-3.5 py-2 text-xs rounded-xl
+              bg-slate-50 dark:bg-slate-800/50
+              border border-slate-200 dark:border-slate-700
+              text-slate-900 dark:text-white placeholder:text-slate-400
+              focus:outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20
+              transition-colors"
           />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery("")}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
         </div>
+
+        {/* Active filter chips */}
+        {hasActiveFilters && (
+          <div className="flex items-center gap-2 flex-wrap pt-0.5">
+            <SlidersHorizontal className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
+            {activeChips.map((chip) => (
+              <FilterChip key={chip.key} label={chip.label} onRemove={chip.onRemove} />
+            ))}
+            <button
+              onClick={clearAllFilters}
+              className="text-[11px] font-bold text-rose-500 hover:text-rose-600 dark:hover:text-rose-400 underline underline-offset-2 cursor-pointer"
+            >
+              Clear All
+            </button>
+          </div>
+        )}
       </div>
 
-      {/* Future-Ready Integration Clean State */}
-      {medicalRecords.length === 0 ? (
+      {/* ── Results area ── */}
+      {noRecordsAtAll ? (
+        /* Empty state A — no records exist yet */
         <div className="p-12 text-center rounded-3xl bg-white dark:bg-[#0c1424] border border-slate-200/80 dark:border-slate-800 shadow-xs">
           <div className="w-14 h-14 rounded-2xl bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center mx-auto mb-3 shadow-xs">
             <FileText className="w-7 h-7" />
@@ -113,17 +574,58 @@ export default function MedicalRecordsSection({
             No medical records available yet
           </h3>
           <p className="mt-1 text-xs text-slate-500 dark:text-slate-400 max-w-md mx-auto leading-relaxed">
-            Your clinical history, physician notes, and laboratory findings will appear here in real-time as attending doctors complete your clinic visits.
+            Your clinical history, physician notes, and laboratory findings will appear here in
+            real-time as attending doctors complete your clinic visits.
           </p>
 
           <div className="mt-6 inline-flex items-center gap-2 p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/80 text-[11px] text-slate-600 dark:text-slate-300 text-left max-w-md">
             <Info className="w-4 h-4 text-teal-500 flex-shrink-0" />
             <span>
-              <strong>Ready for Doctor Module:</strong> After attending appointments at Digital Medical clinics, your certified doctor will electronically sign clinical charts directly to this tab.
+              <strong>Ready for Doctor Module:</strong> After attending appointments at Digital
+              Medical clinics, your certified doctor will electronically sign clinical charts
+              directly to this tab.
             </span>
           </div>
         </div>
-      ) : null}
+      ) : hasRecordsButNoMatch ? (
+        /* Empty state B — records exist but current filters match nothing */
+        <div className="p-10 text-center rounded-3xl bg-white dark:bg-[#0c1424] border border-slate-200/80 dark:border-slate-800 shadow-xs">
+          <div className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center mx-auto mb-3">
+            <Filter className="w-6 h-6" />
+          </div>
+          <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+            No records found for these filters
+          </h3>
+          <p className="mt-1 text-xs text-slate-500 dark:text-slate-400 max-w-xs mx-auto">
+            Try changing the year, clinic, doctor, or search term.
+          </p>
+          <button
+            onClick={clearAllFilters}
+            className="mt-4 px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 text-white text-xs font-bold transition-all shadow-sm cursor-pointer"
+          >
+            Clear Filters
+          </button>
+        </div>
+      ) : (
+        /* Records list */
+        <>
+          {/* Result count */}
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+              <span className="text-slate-800 dark:text-white font-bold">{filteredRecords.length}</span>
+              {" "}
+              {filteredRecords.length === 1 ? "record" : "records"} found
+            </p>
+          </div>
+
+          {/* Record cards */}
+          <div className="space-y-4">
+            {filteredRecords.map((record) => (
+              <RecordCard key={record.id} record={record} />
+            ))}
+          </div>
+        </>
+      )}
     </div>
   );
 }
