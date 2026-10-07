@@ -60,7 +60,7 @@ export default function PendingRegistrations() {
       initial="hidden"
       animate="visible"
       variants={containerVariants}
-      className="bg-white dark:bg-[#131315] rounded-2xl border border-slate-200 dark:border-zinc-800 shadow-sm overflow-hidden relative"
+      className="bg-white/60 dark:bg-[#131315]/60 backdrop-blur-xl rounded-[20px] shadow-[0_2px_10px_-3px_rgba(6,81,237,0.05)] border border-white/50 dark:border-zinc-800 overflow-hidden relative"
     >
       <AnimatePresence>
         {notification && (

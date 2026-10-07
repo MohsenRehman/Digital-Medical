@@ -113,7 +113,7 @@ export default function Sidebar() {
   return (
     <>
       {/* Desktop Sidebar */}
-      <aside className="w-64 bg-white dark:bg-[#09090b] border-r border-slate-200 dark:border-zinc-800 flex-col h-full hidden md:flex transition-all shrink-0">
+      <aside className="w-64 bg-white/40 dark:bg-[#09090b]/40 backdrop-blur-xl border-r border-white/40 dark:border-zinc-800/50 flex-col h-full hidden md:flex transition-all shrink-0">
         {sidebarContent}
       </aside>
 
@@ -133,7 +133,7 @@ export default function Sidebar() {
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="fixed inset-y-0 left-0 w-72 max-w-[80vw] bg-white dark:bg-[#09090b] shadow-2xl z-50 flex flex-col md:hidden"
+              className="fixed inset-y-0 left-0 w-72 max-w-[80vw] bg-white/80 dark:bg-[#09090b]/80 backdrop-blur-2xl shadow-2xl z-50 flex flex-col md:hidden border-r border-white/50 dark:border-zinc-800"
             >
               {sidebarContent}
             </motion.aside>

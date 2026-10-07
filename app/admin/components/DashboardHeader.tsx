@@ -55,7 +55,7 @@ export default function DashboardHeader() {
   }
 
   return (
-    <header className="h-20 bg-white/80 dark:bg-[#09090b]/80 backdrop-blur-md border-b border-slate-200 dark:border-zinc-800 flex items-center justify-between px-4 sm:px-6 shrink-0 z-10 relative transition-colors duration-200">
+    <header className="h-20 bg-white/40 dark:bg-[#09090b]/40 backdrop-blur-xl border-b border-white/40 dark:border-zinc-800/50 flex items-center justify-between px-4 sm:px-6 shrink-0 z-10 relative transition-colors duration-200">
       <div className="flex items-center flex-1 gap-3 sm:gap-0">
         {/* Mobile Menu Toggle */}
         <button

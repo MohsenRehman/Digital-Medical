@@ -66,7 +66,7 @@ export default function ClinicOverview() {
   const tooltipText = isDark ? "#fafafa" : "#1e293b";
 
   return (
-    <div className="bg-white dark:bg-[#131315] rounded-2xl border border-slate-200 dark:border-zinc-800 shadow-sm overflow-hidden flex flex-col h-[450px]">
+    <div className="bg-white/60 dark:bg-[#131315]/60 backdrop-blur-xl rounded-[20px] shadow-[0_2px_10px_-3px_rgba(6,81,237,0.05)] border border-white/50 dark:border-zinc-800 overflow-hidden flex flex-col h-[450px]">
       <div className="p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <h3 className="text-lg font-bold text-slate-800 dark:text-zinc-50">Clinic Overview</h3>
 

@@ -97,7 +97,7 @@ export default function RecentActivity() {
   };
 
   return (
-    <div className="bg-white dark:bg-[#131315] rounded-2xl border border-slate-200 dark:border-zinc-800 shadow-sm overflow-hidden flex flex-col h-[450px]">
+    <div className="bg-white/60 dark:bg-[#131315]/60 backdrop-blur-xl rounded-[20px] shadow-[0_2px_10px_-3px_rgba(6,81,237,0.05)] border border-white/50 dark:border-zinc-800 overflow-hidden flex flex-col h-[450px]">
       <div className="p-6 border-b border-slate-200 dark:border-zinc-800 flex items-center justify-between shrink-0">
         <h3 className="text-lg font-bold text-slate-800 dark:text-zinc-50">Recent Activities</h3>
         <Link href="/admin/reports" className="group relative inline-flex items-center justify-center gap-1.5 rounded-full bg-[#0084d1] dark:bg-zinc-800 px-4 py-1.5 text-xs font-bold text-white dark:text-zinc-200 shadow-sm hover:bg-[#0073b6] dark:hover:bg-zinc-700 transition-all duration-300 border border-transparent dark:border-zinc-700 dark:hover:border-zinc-600"><span>View All</span><span className="transition-transform duration-300 group-hover:translate-x-1">&rarr;</span></Link>

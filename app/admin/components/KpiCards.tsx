@@ -96,7 +96,7 @@ export default function KpiCards() {
           variants={itemVariants}
           whileHover={{ y: -4, transition: { duration: 0.2 } }}
           key={i}
-          className="bg-white dark:bg-[#131315] p-5 rounded-2xl border border-slate-200 dark:border-zinc-800 flex flex-col justify-between hover:border-slate-300 dark:hover:border-zinc-700 transition-colors cursor-default"
+          className="bg-white/60 dark:bg-[#131315]/60 backdrop-blur-xl p-5 rounded-[20px] shadow-[0_2px_10px_-3px_rgba(6,81,237,0.05)] border border-white/50 dark:border-zinc-800 flex flex-col justify-between hover:bg-white/80 dark:hover:bg-[#131315]/80 hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:hover:shadow-[0_8px_30px_rgb(255,255,255,0.02)] transition-all duration-300 cursor-default"
         >
           <div className="flex items-center justify-between mb-6">
             <div className={clsx("w-10 h-10 rounded-xl flex items-center justify-center", card.bgColor)}>

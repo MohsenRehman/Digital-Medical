@@ -12,7 +12,7 @@ export default function AdminLayout({
   return (
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem={true}>
       <SearchProvider>
-        <div className="flex h-screen bg-[#f8fafc] dark:bg-[#09090b] text-slate-900 dark:text-zinc-50 overflow-hidden selection:bg-emerald-500/30">
+        <div className="flex h-screen bg-gradient-to-br from-[#e0f4ff] via-[#f0f9ff] to-[#e8f6ff] dark:from-[#09090b] dark:via-[#09090b] dark:to-[#121214] text-slate-900 dark:text-zinc-50 overflow-hidden selection:bg-emerald-500/30">
           <Sidebar />
           <div className="flex-1 flex flex-col h-screen overflow-hidden">
             <DashboardHeader />
