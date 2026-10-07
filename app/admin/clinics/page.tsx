@@ -2,17 +2,54 @@
 
 import React, { useState } from "react";
 import { clinics } from "../data/mockData";
-import { Building2, Search, Filter } from "lucide-react";
+import { Building2, Search, Filter, Eye, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import clsx from "clsx";
 import { motion, AnimatePresence } from "framer-motion";
 
+import { useSearch } from "../components/SearchContext";
+
 export default function ClinicsPage() {
-  const [searchTerm, setSearchTerm] = useState("");
+  const { searchTerm, setSearchTerm } = useSearch();
   const [statusFilter, setStatusFilter] = useState("All");
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  
+  const [clinicsData, setClinicsData] = useState(clinics);
+  const [newClinicData, setNewClinicData] = useState({
+    clinic: "",
+    location: "",
+    email: "",
+    plan: "Professional" as any,
+    status: "Active" as any,
+  });
 
-  const filteredClinics = clinics.filter(c => {
+  const handleSaveClinic = () => {
+    const newEntry = {
+      id: `ORG-${Math.floor(Math.random() * 10000)}`,
+      clinic: newClinicData.clinic,
+      location: newClinicData.location,
+      email: newClinicData.email,
+      plan: newClinicData.plan,
+      status: newClinicData.status,
+      doctors: 0,
+      patients: 0,
+      staff: 0
+    };
+    
+    setClinicsData(prev => [newEntry, ...prev]);
+    setIsAddModalOpen(false);
+    
+    // Reset form
+    setNewClinicData({
+      clinic: "",
+      location: "",
+      email: "",
+      plan: "Professional",
+      status: "Active",
+    });
+  };
+
+  const filteredClinics = clinicsData.filter(c => {
     const matchesSearch = c.clinic.toLowerCase().includes(searchTerm.toLowerCase()) || 
                           c.location.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === "All" || c.status === statusFilter;
@@ -42,36 +79,33 @@ export default function ClinicsPage() {
       variants={containerVariants}
     >
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          {/* Removed title as requested */}
+        <div className="w-full md:hidden relative">
+          <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          <input 
+            type="text" 
+            placeholder="Search by name or location..." 
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
+            className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#0084d1] dark:focus:ring-emerald-500"
+          />
         </div>
         <motion.button 
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={() => setIsAddModalOpen(true)}
-          className="bg-[#059669] hover:bg-[#047857] text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+          className="bg-[#0084d1] hover:bg-[#0073b6] dark:bg-emerald-500 dark:hover:bg-emerald-400 text-white dark:text-zinc-950 px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm"
         >
           + Add New Clinic
         </motion.button>
       </div>
 
       <motion.div variants={itemVariants} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
-        <div className="p-4 border-b border-gray-100 dark:border-gray-700 flex flex-col sm:flex-row gap-4 justify-between">
-          <div className="relative flex-1 max-w-md">
-            <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-            <input 
-              type="text" 
-              placeholder="Search by name or location..." 
-              value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
-              className="pl-10 pr-4 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg w-full text-sm focus:outline-none focus:ring-2 focus:ring-[#059669]"
-            />
-          </div>
+        <div className="p-4 border-b border-gray-100 dark:border-gray-700 flex flex-col sm:flex-row gap-4 justify-end">
           <div className="flex gap-2">
             <select 
               value={statusFilter}
               onChange={e => setStatusFilter(e.target.value)}
-              className="px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#059669]"
+              className="px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#0084d1] dark:focus:ring-emerald-500"
             >
               <option value="All">All Status</option>
               <option value="Active">Active</option>
@@ -105,7 +139,7 @@ export default function ClinicsPage() {
                   className="hover:bg-gray-50 dark:bg-gray-800 transition-colors"
                 >
                   <td className="px-6 py-4 font-medium text-gray-800 dark:text-gray-100">
-                    <Link href={`/admin/clinics/${clinic.id}`} className="hover:text-[#0ea5e9]">
+                    <Link href={`/admin/clinics/${clinic.id}`} className="hover:text-[#0084d1] dark:text-emerald-500">
                       {clinic.clinic}
                     </Link>
                   </td>
@@ -115,11 +149,11 @@ export default function ClinicsPage() {
                   <td className="px-6 py-4 text-gray-600 dark:text-gray-300">{clinic.plan}</td>
                   <td className="px-6 py-4">
                     <span className={clsx(
-                      "inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium",
+                      "inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border",
                       {
-                        "bg-emerald-100 text-emerald-800": clinic.status === "Active",
-                        "bg-[#f8f9fa] dark:bg-gray-900mber-100 text-amber-800": clinic.status === "Pending",
-                        "bg-red-100 text-red-800": clinic.status === "Suspended",
+                        "bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-500 dark:border-emerald-500/20": clinic.status === "Active",
+                        "bg-amber-50 text-amber-600 border-amber-200 dark:bg-amber-500/10 dark:text-amber-500 dark:border-amber-500/20": clinic.status === "Pending",
+                        "bg-red-50 text-red-600 border-red-200 dark:bg-red-500/10 dark:text-red-500 dark:border-red-500/20": clinic.status === "Suspended",
                       }
                     )}>
                       {clinic.status}
@@ -127,8 +161,16 @@ export default function ClinicsPage() {
                   </td>
                   <td className="px-6 py-4 text-right">
                     <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="inline-block">
-                      <Link href={`/admin/clinics/${clinic.id}`} className="text-sm font-medium text-[#0ea5e9] hover:underline">
-                        View Details
+                      <Link 
+                        href={`/admin/clinics/${clinic.id}`} 
+                        className="group relative inline-flex items-center justify-center gap-2 rounded-full bg-[#0084d1] dark:bg-zinc-800 px-4 py-2 text-xs font-semibold text-white dark:text-zinc-200 shadow-sm hover:bg-[#0073b6] dark:hover:bg-zinc-700 transition-all duration-300 border border-transparent dark:border-zinc-700 dark:hover:border-zinc-600"
+                      >
+                        <Eye size={14} />
+                        <span>View Details</span>
+                        <ArrowRight 
+                          size={14} 
+                          className="transition-transform duration-300 group-hover:translate-x-1" 
+                        />
                       </Link>
                     </motion.div>
                   </td>
@@ -169,32 +211,58 @@ export default function ClinicsPage() {
               <div className="p-6 space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Clinic Name</label>
-                    <input type="text" className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#059669]" placeholder="Enter clinic name" />
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Clinic Name</label>
+                    <input 
+                      type="text" 
+                      value={newClinicData.clinic}
+                      onChange={e => setNewClinicData({...newClinicData, clinic: e.target.value})}
+                      className="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-[#0084d1] dark:focus:ring-emerald-500" 
+                      placeholder="Enter clinic name" 
+                    />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">City/Location</label>
-                    <input type="text" className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#059669]" placeholder="Enter location" />
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">City/Location</label>
+                    <input 
+                      type="text" 
+                      value={newClinicData.location}
+                      onChange={e => setNewClinicData({...newClinicData, location: e.target.value})}
+                      className="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-[#0084d1] dark:focus:ring-emerald-500" 
+                      placeholder="Enter location" 
+                    />
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
-                  <input type="email" className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#059669]" placeholder="clinic@example.com" />
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email Address</label>
+                  <input 
+                    type="email" 
+                    value={newClinicData.email}
+                    onChange={e => setNewClinicData({...newClinicData, email: e.target.value})}
+                    className="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-[#0084d1] dark:focus:ring-emerald-500" 
+                    placeholder="clinic@example.com" 
+                  />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Subscription Plan</label>
-                    <select className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#059669]">
-                      <option>Professional</option>
-                      <option>Enterprise</option>
-                      <option>Basic</option>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Subscription Plan</label>
+                    <select 
+                      value={newClinicData.plan}
+                      onChange={e => setNewClinicData({...newClinicData, plan: e.target.value as any})}
+                      className="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-[#0084d1] dark:focus:ring-emerald-500"
+                    >
+                      <option value="Professional">Professional</option>
+                      <option value="Enterprise">Enterprise</option>
+                      <option value="Basic">Basic</option>
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Initial Status</label>
-                    <select className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#059669]">
-                      <option>Active</option>
-                      <option>Pending</option>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Initial Status</label>
+                    <select 
+                      value={newClinicData.status}
+                      onChange={e => setNewClinicData({...newClinicData, status: e.target.value as any})}
+                      className="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-[#0084d1] dark:focus:ring-emerald-500"
+                    >
+                      <option value="Active">Active</option>
+                      <option value="Pending">Pending</option>
                     </select>
                   </div>
                 </div>
@@ -203,14 +271,15 @@ export default function ClinicsPage() {
                 <motion.button
                   whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
                   onClick={() => setIsAddModalOpen(false)}
-                  className="px-4 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-200 transition-colors"
+                  className="px-4 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
                 >
                   Cancel
                 </motion.button>
                 <motion.button
                   whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
-                  onClick={() => setIsAddModalOpen(false)}
-                  className="px-4 py-2 rounded-lg text-sm font-medium text-white bg-[#059669] hover:bg-[#047857] transition-colors"
+                  onClick={handleSaveClinic}
+                  className="px-4 py-2 rounded-lg text-sm font-medium text-white dark:text-zinc-950 bg-[#0084d1] hover:bg-[#0073b6] dark:bg-emerald-500 dark:hover:bg-emerald-400 transition-colors shadow-sm disabled:opacity-50"
+                  disabled={!newClinicData.clinic || !newClinicData.location}
                 >
                   Save Clinic
                 </motion.button>

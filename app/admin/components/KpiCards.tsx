@@ -49,38 +49,38 @@ export default function KpiCards() {
     {
       title: "Total Clinics",
       value: "128",
-      icon: <Building2 className="text-blue-500" size={24} />,
-      bgColor: "bg-blue-50",
+      icon: <Building2 className="text-[#0084d1] dark:text-zinc-400" size={20} />,
+      bgColor: "bg-[#0084d1]/10 dark:bg-zinc-800/50",
     },
     {
       title: "Active Clinics",
       value: "104",
-      icon: <CheckCircle2 className="text-emerald-500" size={24} />,
-      bgColor: "bg-emerald-50",
+      icon: <CheckCircle2 className="text-[#0084d1] dark:text-emerald-500" size={20} />,
+      bgColor: "bg-emerald-50 dark:bg-emerald-500/10",
     },
     {
       title: "Pending Clinics",
       value: "16",
-      icon: <Clock className="text-amber-500" size={24} />,
-      bgColor: "bg-[#f8f9fa] dark:bg-gray-900mber-50",
+      icon: <Clock className="text-amber-600 dark:text-amber-500" size={20} />,
+      bgColor: "bg-amber-50 dark:bg-amber-500/10",
     },
     {
       title: "Suspended Clinics",
       value: "8",
-      icon: <Ban className="text-red-500" size={24} />,
-      bgColor: "bg-red-50",
+      icon: <Ban className="text-red-600 dark:text-red-500" size={20} />,
+      bgColor: "bg-red-50 dark:bg-red-500/10",
     },
     {
       title: "Active Subscriptions",
       value: "96",
-      icon: <ShieldCheck className="text-indigo-500" size={24} />,
-      bgColor: "bg-indigo-50",
+      icon: <ShieldCheck className="text-indigo-600 dark:text-indigo-400" size={20} />,
+      bgColor: "bg-indigo-50 dark:bg-indigo-500/10",
     },
     {
       title: "Pending Payments",
       value: "12",
-      icon: <CreditCard className="text-orange-500" size={24} />,
-      bgColor: "bg-orange-50",
+      icon: <CreditCard className="text-orange-600 dark:text-orange-400" size={20} />,
+      bgColor: "bg-orange-50 dark:bg-orange-500/10",
     },
   ];
 
@@ -89,23 +89,23 @@ export default function KpiCards() {
       variants={containerVariants}
       initial="hidden"
       animate="show"
-      className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4"
+      className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-5"
     >
       {cards.map((card, i) => (
         <motion.div
           variants={itemVariants}
           whileHover={{ y: -4, transition: { duration: 0.2 } }}
           key={i}
-          className="bg-white dark:bg-gray-800 p-5 rounded-xl border border-gray-100 dark:border-gray-700 flex flex-col justify-between hover:shadow-md transition-shadow cursor-default"
+          className="bg-white dark:bg-[#131315] p-5 rounded-2xl border border-slate-200 dark:border-zinc-800 flex flex-col justify-between hover:border-slate-300 dark:hover:border-zinc-700 transition-colors cursor-default"
         >
-          <div className="flex items-center justify-between mb-4">
-            <div className={clsx("w-12 h-12 rounded-xl flex items-center justify-center", card.bgColor)}>
+          <div className="flex items-center justify-between mb-6">
+            <div className={clsx("w-10 h-10 rounded-xl flex items-center justify-center", card.bgColor)}>
               {card.icon}
             </div>
           </div>
           <div>
-            <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{card.title}</p>
-            <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mt-1">
+            <p className="text-sm font-medium text-slate-500 dark:text-zinc-400">{card.title}</p>
+            <h3 className="text-3xl font-semibold text-slate-800 dark:text-zinc-50 mt-2 tracking-tight">
               <AnimatedNumber value={card.value} />
             </h3>
           </div>

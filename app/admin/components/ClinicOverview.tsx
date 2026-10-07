@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import { useTheme } from "next-themes";
+import React, { useState, useEffect, useMemo } from "react";
 import {
-  BarChart,
-  Bar,
+  AreaChart,
+  Area,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -33,17 +34,47 @@ export default function ClinicOverview() {
   const { searchTerm } = useSearch();
   const [statusFilter, setStatusFilter] = useState("All");
   const [planFilter, setPlanFilter] = useState("All Plans");
+  const { theme, resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const chartData = useMemo(() => {
+    let multiplier = 1;
+    if (statusFilter === "Active") multiplier *= 0.8;
+    else if (statusFilter === "Pending") multiplier *= 0.15;
+    else if (statusFilter === "Suspended") multiplier *= 0.05;
+
+    if (planFilter === "Basic") multiplier *= 0.4;
+    else if (planFilter === "Professional") multiplier *= 0.5;
+    else if (planFilter === "Enterprise") multiplier *= 0.1;
+
+    return barChartData.map(item => ({
+      ...item,
+      "Total Clinics": Math.max(1, Math.round(item["Total Clinics"] * multiplier))
+    }));
+  }, [statusFilter, planFilter]);
+
+  const isDark = mounted && (theme === 'dark' || resolvedTheme === 'dark');
+  const barColor = isDark ? "#10b981" : "#0084d1";
+  const gridColor = isDark ? "#27272a" : "#f1f5f9";
+  const textColor = isDark ? "#a1a1aa" : "#64748b";
+  const tooltipBg = isDark ? "#18181b" : "#ffffff";
+  const tooltipBorder = isDark ? "#27272a" : "#e2e8f0";
+  const tooltipText = isDark ? "#fafafa" : "#1e293b";
 
   return (
-    <div className="bg-white dark:bg-[#1a1a1a] rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden flex flex-col h-[450px]">
+    <div className="bg-white dark:bg-[#131315] rounded-2xl border border-slate-200 dark:border-zinc-800 shadow-sm overflow-hidden flex flex-col h-[450px]">
       <div className="p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100">Clinic Overview</h3>
+        <h3 className="text-lg font-bold text-slate-800 dark:text-zinc-50">Clinic Overview</h3>
 
         <div className="flex items-center gap-3">
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-[#3b82f6] text-gray-700 dark:text-gray-200"
+            className="text-sm bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-slate-300 dark:focus:ring-zinc-700 text-slate-700 dark:text-zinc-200"
           >
             <option value="All">All Status</option>
             <option value="Active">Active</option>
@@ -53,7 +84,7 @@ export default function ClinicOverview() {
           <select
             value={planFilter}
             onChange={(e) => setPlanFilter(e.target.value)}
-            className="text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-[#3b82f6] text-gray-700 dark:text-gray-200"
+            className="text-sm bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-slate-300 dark:focus:ring-zinc-700 text-slate-700 dark:text-zinc-200"
           >
             <option value="All Plans">All Plans</option>
             <option value="Basic">Basic</option>
@@ -63,41 +94,54 @@ export default function ClinicOverview() {
         </div>
       </div>
 
-      <div className="flex-1 px-6 pb-6 w-full mt-2 relative">
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={barChartData} margin={{ top: 20, right: 20, left: -20, bottom: 0 }} barSize={32}>
-            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
+      <div className="flex-1 px-6 pb-6 w-full mt-2 relative focus:outline-none" style={{ outline: 'none', border: 'none' }}>
+        <ResponsiveContainer width="100%" height="100%" className="focus:outline-none" style={{ outline: 'none', border: 'none' }}>
+          <AreaChart data={chartData} margin={{ top: 20, right: 20, left: -20, bottom: 0 }} style={{ border: 'none', outline: 'none' }}>
+            <defs>
+              <linearGradient id="colorClinics" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor={barColor} stopOpacity={0.3}/>
+                <stop offset="95%" stopColor={barColor} stopOpacity={0}/>
+              </linearGradient>
+            </defs>
+            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={gridColor} />
             <XAxis 
               dataKey="name" 
               axisLine={false} 
               tickLine={false} 
-              tick={{ fill: '#6b7280', fontSize: 12 }} 
+              tick={{ fill: textColor, fontSize: 12 }} 
               dy={10} 
             />
             <YAxis 
               axisLine={false} 
               tickLine={false} 
-              tick={{ fill: '#6b7280', fontSize: 12 }} 
+              tick={{ fill: textColor, fontSize: 12 }} 
               dx={-10}
             />
             <Tooltip
-              cursor={{ fill: "transparent" }}
               contentStyle={{
-                backgroundColor: "#fff",
-                border: "1px solid #e5e7eb",
-                borderRadius: "8px",
-                color: "#374151",
+                backgroundColor: tooltipBg,
+                border: `1px solid ${tooltipBorder}`,
+                borderRadius: "12px",
+                color: tooltipText,
+                boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
               }}
-              itemStyle={{ color: "#374151" }}
+              itemStyle={{ color: tooltipText }}
             />
             <Legend 
               verticalAlign="top" 
               align="right" 
               iconType="circle" 
-              wrapperStyle={{ top: -10, right: 20, fontSize: "12px", color: "#6b7280" }}
+              wrapperStyle={{ top: -10, right: 20, fontSize: "12px", color: textColor }}
             />
-            <Bar dataKey="Total Clinics" fill="#3b82f6" radius={[4, 4, 0, 0]} />
-          </BarChart>
+            <Area 
+              type="monotone" 
+              dataKey="Total Clinics" 
+              stroke={barColor} 
+              strokeWidth={3}
+              fillOpacity={1} 
+              fill="url(#colorClinics)" 
+            />
+          </AreaChart>
         </ResponsiveContainer>
       </div>
     </div>
