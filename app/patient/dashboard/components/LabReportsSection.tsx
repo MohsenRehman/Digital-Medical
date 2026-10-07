@@ -14,6 +14,7 @@ import {
   Plus,
 } from "lucide-react";
 import { FamilyMemberRecord, PatientUser } from "@/lib/types/patient";
+import CustomSelect from "./CustomSelect";
 
 interface LabReportsSectionProps {
   patientUser: PatientUser | null;
@@ -74,17 +75,12 @@ export default function LabReportsSection({
           <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
             Profile:
           </span>
-          <select
+          <CustomSelect
             value={selectedProfile}
-            onChange={(e) => setSelectedProfile(e.target.value)}
-            className="px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 focus:outline-hidden focus:border-sky-500 transition-colors"
-          >
-            {profileOptions.map((opt) => (
-              <option key={opt.id} value={opt.id}>
-                {opt.name}
-              </option>
-            ))}
-          </select>
+            onChange={setSelectedProfile}
+            options={profileOptions}
+            className="min-w-[200px]"
+          />
         </div>
 
         <span className="text-xs text-slate-400 font-mono">0 pending lab orders</span>

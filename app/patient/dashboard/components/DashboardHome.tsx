@@ -24,6 +24,7 @@ import {
   Sparkles,
   ChevronRight,
   TrendingUp,
+  CreditCard,
 } from "lucide-react";
 import { AppointmentRecord, FamilyMemberRecord, PatientUser } from "@/lib/types/patient";
 import { DashboardTab, ActivityItem } from "./types";
@@ -236,7 +237,7 @@ export default function DashboardHome({
       <section aria-label="Upcoming Consultations and Quick Actions">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-5">
           {/* Prominent Upcoming Appointment Card */}
-          <div className="lg:col-span-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xs flex flex-col justify-between overflow-hidden">
+          <div className="lg:col-span-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xs flex flex-col overflow-hidden">
             {/* Header */}
             <div className="p-3.5 sm:p-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2">
               <div className="flex items-center gap-2">
@@ -256,7 +257,7 @@ export default function DashboardHome({
             </div>
 
             {nearestUpcoming ? (
-              <div className="p-4 sm:p-5 space-y-3.5">
+              <div className="p-4 sm:p-5 flex-1 flex flex-col justify-between gap-3.5 sm:gap-4">
                 {/* Spotlight Box */}
                 <div className="p-3.5 sm:p-4 rounded-xl bg-gradient-to-r from-sky-50/50 via-slate-50/40 to-indigo-50/30 dark:from-sky-950/20 dark:via-slate-900 dark:to-indigo-950/20 border border-slate-200/80 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   {/* Doctor Info */}
@@ -310,8 +311,90 @@ export default function DashboardHome({
                   </div>
                 </div>
 
+                {/* Secondary Section: If multiple appointments exist, preview next ones. If only 1, show prep & fee summary */}
+                {upcomingAppointments.length > 1 ? (
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-[11px] font-semibold text-slate-500 dark:text-slate-400">
+                      <span className="flex items-center gap-1.5">
+                        <CalendarDays className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400" />
+                        <span>Next in queue</span>
+                      </span>
+                      <button
+                        onClick={() => onTabChange("appointments")}
+                        className="text-sky-600 dark:text-sky-400 hover:underline"
+                      >
+                        All ({upcomingAppointments.length})
+                      </button>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                      {upcomingAppointments.slice(1, 3).map((apt) => (
+                        <div
+                          key={apt.id}
+                          onClick={() => onViewAppointmentDetail(apt)}
+                          className="p-2.5 rounded-xl border border-slate-200/70 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 hover:bg-slate-100/90 dark:hover:bg-slate-800/80 transition-colors flex items-center justify-between gap-2 cursor-pointer group"
+                        >
+                          <div className="min-w-0">
+                            <p className="text-xs font-bold text-slate-900 dark:text-white truncate">
+                              {apt.doctorName}
+                            </p>
+                            <p className="text-[10px] text-sky-600 dark:text-sky-400 font-medium truncate">
+                              {apt.doctorSpecialty}
+                            </p>
+                            <div className="flex items-center gap-1.5 text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
+                              <Clock className="w-3 h-3 text-slate-400" />
+                              <span>{apt.date} • {apt.timeSlot}</span>
+                            </div>
+                          </div>
+                          <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                            <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-bold">
+                              {apt.bookingRef}
+                            </span>
+                            <ChevronRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-sky-600 group-hover:translate-x-0.5 transition-all" />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 p-2.5 rounded-xl bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/70 dark:border-slate-800 text-xs">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <div className="w-7 h-7 rounded-lg bg-sky-100 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400 flex items-center justify-center flex-shrink-0">
+                        <CreditCard className="w-3.5 h-3.5" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-[10px] text-slate-400 font-medium">Consultation Fee</p>
+                        <p className="font-bold text-slate-800 dark:text-slate-200 truncate">
+                          Rs. {nearestUpcoming.consultationFee.toLocaleString()} • {nearestUpcoming.paymentMethod === "online_paid" ? "Paid" : "Pay at Clinic"}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 min-w-0">
+                      <div className="w-7 h-7 rounded-lg bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center flex-shrink-0">
+                        <MapPin className="w-3.5 h-3.5" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-[10px] text-slate-400 font-medium">Location</p>
+                        <p className="font-bold text-slate-800 dark:text-slate-200 truncate">
+                          {nearestUpcoming.clinicLocation}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 min-w-0">
+                      <div className="w-7 h-7 rounded-lg bg-indigo-100 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center flex-shrink-0">
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-[10px] text-slate-400 font-medium">Visit Prep</p>
+                        <p className="font-bold text-slate-800 dark:text-slate-200 truncate">
+                          Arrive 15m early with CNIC
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {/* Patient Identity & Action Buttons */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2 border-t border-slate-100 dark:border-slate-800/80">
                   <div className="flex items-center gap-2 text-xs">
                     <span className="text-slate-500 dark:text-slate-400">Patient:</span>
                     <span className="font-bold text-slate-900 dark:text-white">

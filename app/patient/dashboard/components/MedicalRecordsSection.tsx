@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { FamilyMemberRecord, PatientUser } from "@/lib/types/patient";
 import { MedicalRecord } from "./types";
+import CustomSelect from "./CustomSelect";
 
 // ---------------------------------------------------------------------------
 // Props
@@ -63,24 +64,12 @@ interface SelectProps {
 }
 function DashSelect({ value, onChange, options, className = "" }: SelectProps) {
   return (
-    <div className={`relative ${className}`}>
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="w-full appearance-none pl-3 pr-8 py-2 rounded-xl text-xs font-semibold
-          bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700
-          text-slate-900 dark:text-white
-          focus:outline-none focus:ring-2 focus:ring-sky-500/30 focus:border-sky-500
-          cursor-pointer transition-colors"
-      >
-        {options.map((o) => (
-          <option key={o.value} value={o.value}>
-            {o.label}
-          </option>
-        ))}
-      </select>
-      <ChevronDown className="w-3.5 h-3.5 absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
-    </div>
+    <CustomSelect
+      value={value}
+      onChange={onChange}
+      options={options}
+      className={`w-full ${className}`}
+    />
   );
 }
 

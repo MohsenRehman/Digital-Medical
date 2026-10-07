@@ -26,6 +26,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { PatientUser, GenderType } from "@/lib/types/patient";
+import CustomSelect from "./CustomSelect";
 
 interface ProfileSettingsSectionProps {
   patientUser: PatientUser | null;
@@ -678,16 +679,19 @@ export default function ProfileSettingsSection({
                     >
                       Gender <span className="text-rose-500">*</span>
                     </label>
-                    <select
+                    <CustomSelect
                       id="edit-gender"
                       value={editGender}
-                      onChange={(e) => setEditGender(e.target.value as GenderType)}
-                      className="w-full h-10 px-3.5 rounded-xl text-xs bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-sky-500/30 focus:border-sky-500 transition-all cursor-pointer"
-                    >
-                      <option value="male">Male</option>
-                      <option value="female">Female</option>
-                      <option value="other">Other</option>
-                    </select>
+                      onChange={(val) => setEditGender(val as GenderType)}
+                      options={[
+                        { value: "male", label: "Male" },
+                        { value: "female", label: "Female" },
+                        { value: "other", label: "Other" },
+                      ]}
+                      size="md"
+                      className="w-full"
+                      buttonClassName="!bg-white dark:!bg-slate-800"
+                    />
                   </div>
                 </div>
 

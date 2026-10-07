@@ -15,6 +15,7 @@ import {
   Plus,
 } from "lucide-react";
 import { FamilyMemberRecord, PatientUser } from "@/lib/types/patient";
+import CustomSelect from "./CustomSelect";
 
 interface PrescriptionsSectionProps {
   patientUser: PatientUser | null;
@@ -76,17 +77,12 @@ export default function PrescriptionsSection({
           <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
             Profile:
           </span>
-          <select
+          <CustomSelect
             value={selectedProfile}
-            onChange={(e) => setSelectedProfile(e.target.value)}
-            className="px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-sky-500"
-          >
-            {profileOptions.map((opt) => (
-              <option key={opt.id} value={opt.id}>
-                {opt.name}
-              </option>
-            ))}
-          </select>
+            onChange={setSelectedProfile}
+            options={profileOptions}
+            className="min-w-[200px]"
+          />
         </div>
 
         <span className="text-xs text-slate-400 font-mono">0 active e-prescriptions</span>

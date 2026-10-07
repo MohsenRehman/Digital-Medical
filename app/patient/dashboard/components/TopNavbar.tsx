@@ -160,31 +160,28 @@ export default function TopNavbar({
       }`}
     >
       <div className="relative w-full px-2.5 sm:px-4 md:px-8 flex items-center justify-between gap-2 sm:gap-4">
-        {/* Mobile Left: Menu Toggle Button only */}
-        <div className="flex items-center md:hidden flex-shrink-0">
+        {/* Left Section: Mobile Menu + Title & Desktop Title */}
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+          {/* Mobile Hamburger Menu Toggle Button */}
           <button
             onClick={onToggleSidebar}
-            className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors flex items-center justify-center cursor-pointer outline-none"
+            className="md:hidden w-8 h-8 sm:w-9 sm:h-9 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors flex items-center justify-center cursor-pointer outline-none flex-shrink-0"
             aria-label="Toggle navigation menu"
           >
-            <Menu className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
+            <Menu className="w-5 h-5" />
           </button>
-        </div>
 
-        {/* Desktop Left: Breadcrumb / Section Title */}
-        <div className="hidden md:flex items-center gap-3 min-w-0">
-          <div className="flex flex-col min-w-0">
+          {/* Mobile Title (placed on the left next to hamburger icon with larger size) */}
+          <h1 className="md:hidden text-base sm:text-lg font-bold tracking-tight text-slate-900 dark:text-white truncate">
+            {getMobileTitle(activeTab)}
+          </h1>
+
+          {/* Desktop Left: Breadcrumb / Section Title */}
+          <div className="hidden md:flex flex-col min-w-0">
             <h1 className="text-base sm:text-lg md:text-xl font-bold tracking-tight text-slate-900 dark:text-white truncate leading-tight">
               {getPageTitle(activeTab)}
             </h1>
           </div>
-        </div>
-
-        {/* Mobile Center: Visually and perfectly centered across the entire navbar */}
-        <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 flex items-center justify-center md:hidden pointer-events-none max-w-[calc(100%-195px)] sm:max-w-[calc(100%-230px)] px-1">
-          <h1 className="text-xs sm:text-sm font-semibold tracking-tight text-slate-900 dark:text-white truncate pointer-events-auto select-none">
-            {getMobileTitle(activeTab)}
-          </h1>
         </div>
 
         {/* Desktop Center: Search Bar */}

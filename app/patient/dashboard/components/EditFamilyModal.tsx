@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { X, Edit3, Users } from "lucide-react";
 import { AppointmentRelation, GenderType, FamilyMemberRecord } from "@/lib/types/patient";
+import CustomSelect from "./CustomSelect";
 
 interface EditFamilyModalProps {
   isOpen: boolean;
@@ -159,15 +160,16 @@ export default function EditFamilyModal({
               <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                 Gender
               </label>
-              <select
+              <CustomSelect
                 value={gender}
-                onChange={(e) => setGender(e.target.value as GenderType)}
-                className="w-full px-3.5 py-2.5 rounded-xl text-xs bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-sky-500/30 focus:border-sky-500"
-              >
-                <option value="male">Male</option>
-                <option value="female">Female</option>
-                <option value="other">Other</option>
-              </select>
+                onChange={(val) => setGender(val as GenderType)}
+                options={[
+                  { value: "male", label: "Male" },
+                  { value: "female", label: "Female" },
+                  { value: "other", label: "Other" },
+                ]}
+                className="w-full"
+              />
             </div>
           </div>
 

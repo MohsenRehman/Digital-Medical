@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { X, UserPlus, ShieldCheck, Heart, Users } from "lucide-react";
 import { AppointmentRelation, GenderType } from "@/lib/types/patient";
+import CustomSelect from "./CustomSelect";
 
 interface AddFamilyModalProps {
   isOpen: boolean;
@@ -150,15 +151,16 @@ export default function AddFamilyModal({ isOpen, onClose, onAdd }: AddFamilyModa
               <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
                 Gender
               </label>
-              <select
+              <CustomSelect
                 value={gender}
-                onChange={(e) => setGender(e.target.value as GenderType)}
-                className="w-full px-3 py-2 rounded-lg text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-hidden focus:border-sky-500 transition-colors"
-              >
-                <option value="male">Male</option>
-                <option value="female">Female</option>
-                <option value="other">Other</option>
-              </select>
+                onChange={(val) => setGender(val as GenderType)}
+                options={[
+                  { value: "male", label: "Male" },
+                  { value: "female", label: "Female" },
+                  { value: "other", label: "Other" },
+                ]}
+                className="w-full"
+              />
             </div>
           </div>
 
