@@ -6,20 +6,21 @@ import { motion } from "framer-motion";
 
 export default function BillingSummary() {
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm p-6 flex flex-col h-full">
+    <div className="bg-white/60 dark:bg-[#131315]/60 backdrop-blur-xl rounded-[20px] shadow-[0_2px_10px_-3px_rgba(6,81,237,0.05)] border border-white/50 dark:border-zinc-800 p-6 flex flex-col h-full">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100">Billing Summary</h3>
-          <p className="text-sm text-gray-500 dark:text-gray-400">Platform billing status</p>
+          <h3 className="text-lg font-bold text-slate-800 dark:text-zinc-50">Billing Summary</h3>
+          <p className="text-sm text-slate-500 dark:text-zinc-400">Platform billing status</p>
         </div>
-        <Link href="/admin/billing" className="text-sm font-medium text-[#0ea5e9] hover:text-[#0284c7] transition-colors hover:underline">
-          View All &rarr;
+        <Link href="/admin/billing" className="group relative inline-flex items-center justify-center gap-1.5 rounded-full bg-[#0084d1] dark:bg-zinc-800 px-4 py-1.5 text-xs font-bold text-white dark:text-zinc-200 shadow-sm hover:bg-[#0073b6] dark:hover:bg-zinc-700 transition-all duration-300 border border-transparent dark:border-zinc-700 dark:hover:border-zinc-600">
+          <span>View All</span>
+          <span className="transition-transform duration-300 group-hover:translate-x-1">&rarr;</span>
         </Link>
       </div>
 
-      <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-5 mb-6 text-center border border-gray-100 dark:border-gray-700">
-        <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Total Outstanding</p>
-        <h2 className="text-3xl font-bold text-gray-800 dark:text-gray-100">{billingSummary.outstanding}</h2>
+      <div className="bg-slate-50 dark:bg-zinc-900/50 rounded-2xl p-6 mb-6 text-center border border-slate-200 dark:border-zinc-800">
+        <p className="text-sm text-slate-500 dark:text-zinc-400 mb-1 font-medium">Total Outstanding</p>
+        <h2 className="text-4xl font-bold text-slate-800 dark:text-zinc-50 tracking-tight">{billingSummary.outstanding}</h2>
       </div>
 
       <motion.div 
@@ -35,42 +36,42 @@ export default function BillingSummary() {
         }}
       >
         <motion.div 
-          className="flex items-center justify-between p-3 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg shadow-sm hover:shadow-md transition-shadow"
+          className="flex items-center justify-between p-4 bg-slate-50 dark:bg-zinc-900/30 border border-slate-200 dark:border-zinc-800 rounded-xl hover:border-zinc-700 transition-colors"
           variants={{ hidden: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0 } }}
         >
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center">
-              <CheckCircle2 className="text-emerald-600" size={16} />
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20">
+              <CheckCircle2 className="text-emerald-500" size={18} />
             </div>
-            <span className="text-sm font-medium text-gray-700">Paid Payments</span>
+            <span className="text-sm font-medium text-slate-700 dark:text-zinc-200">Paid Payments</span>
           </div>
-          <span className="text-base font-bold text-gray-800 dark:text-gray-100">{billingSummary.paidPayments}</span>
+          <span className="text-base font-semibold text-slate-800 dark:text-zinc-50">{billingSummary.paidPayments}</span>
         </motion.div>
 
         <motion.div 
-          className="flex items-center justify-between p-3 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg shadow-sm hover:shadow-md transition-shadow"
+          className="flex items-center justify-between p-4 bg-slate-50 dark:bg-zinc-900/30 border border-slate-200 dark:border-zinc-800 rounded-xl hover:border-zinc-700 transition-colors"
           variants={{ hidden: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0 } }}
         >
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-[#f8f9fa] dark:bg-gray-900mber-100 flex items-center justify-center">
-              <Clock className="text-amber-600" size={16} />
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center border border-amber-500/20">
+              <Clock className="text-amber-500" size={18} />
             </div>
-            <span className="text-sm font-medium text-gray-700">Pending Payments</span>
+            <span className="text-sm font-medium text-slate-700 dark:text-zinc-200">Pending Payments</span>
           </div>
-          <span className="text-base font-bold text-gray-800 dark:text-gray-100">{billingSummary.pendingPayments}</span>
+          <span className="text-base font-semibold text-slate-800 dark:text-zinc-50">{billingSummary.pendingPayments}</span>
         </motion.div>
 
         <motion.div 
-          className="flex items-center justify-between p-3 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg shadow-sm hover:shadow-md transition-shadow"
+          className="flex items-center justify-between p-4 bg-slate-50 dark:bg-zinc-900/30 border border-slate-200 dark:border-zinc-800 rounded-xl hover:border-zinc-700 transition-colors"
           variants={{ hidden: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0 } }}
         >
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center">
-              <XCircle className="text-red-600" size={16} />
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center border border-red-500/20">
+              <XCircle className="text-red-500" size={18} />
             </div>
-            <span className="text-sm font-medium text-gray-700">Failed Payments</span>
+            <span className="text-sm font-medium text-slate-700 dark:text-zinc-200">Failed Payments</span>
           </div>
-          <span className="text-base font-bold text-gray-800 dark:text-gray-100">{billingSummary.failedPayments}</span>
+          <span className="text-base font-semibold text-slate-800 dark:text-zinc-50">{billingSummary.failedPayments}</span>
         </motion.div>
       </motion.div>
     </div>

@@ -814,3 +814,6 @@ aside button:active {
   outline: none !important;
   -webkit-tap-highlight-color: transparent !important;
 }
+
+svg.recharts-surface { border: none !important; outline: none !important; }
+.recharts-wrapper { border: none !important; outline: none !important; }

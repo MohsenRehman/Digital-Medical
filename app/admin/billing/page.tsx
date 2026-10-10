@@ -6,8 +6,10 @@ import { Search, Receipt, DollarSign, XCircle, Clock } from "lucide-react";
 import clsx from "clsx";
 import { motion } from "framer-motion";
 
+import { useSearch } from "../components/SearchContext";
+
 export default function BillingPage() {
-  const [searchTerm, setSearchTerm] = useState("");
+  const { searchTerm } = useSearch();
   const [statusFilter, setStatusFilter] = useState("All");
 
   const filteredPayments = payments.filter(p => {
@@ -19,9 +21,18 @@ export default function BillingPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        {/* Removed title as requested */}
-      </div>
+              <div className="w-full md:hidden">
+          <div className="relative">
+            <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <input 
+              type="text" 
+              placeholder="Search by invoice ID or clinic..." 
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+              className="pl-10 pr-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg w-full text-sm focus:outline-none focus:ring-2 focus:ring-[#0084d1] dark:focus:ring-emerald-500 shadow-sm"
+            />
+          </div>
+        </div>
 
       <motion.div 
         initial="hidden"
@@ -102,22 +113,12 @@ export default function BillingPage() {
       </motion.div>
 
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
-        <div className="p-4 border-b border-gray-100 dark:border-gray-700 flex flex-col sm:flex-row gap-4 justify-between">
-          <div className="relative flex-1 max-w-md">
-            <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-            <input 
-              type="text" 
-              placeholder="Search by invoice ID or clinic..." 
-              value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
-              className="pl-10 pr-4 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg w-full text-sm focus:outline-none focus:ring-2 focus:ring-[#059669]"
-            />
-          </div>
+        <div className="p-4 border-b border-gray-100 dark:border-gray-700 flex flex-col sm:flex-row gap-4 justify-end">
           <div className="flex gap-2">
             <select 
               value={statusFilter}
               onChange={e => setStatusFilter(e.target.value)}
-              className="px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#059669]"
+              className="px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#0084d1] dark:focus:ring-emerald-500"
             >
               <option value="All">All Status</option>
               <option value="Paid">Paid</option>
@@ -161,7 +162,7 @@ export default function BillingPage() {
                   }}
                   className="hover:bg-gray-50 dark:bg-gray-800 transition-colors cursor-pointer group"
                 >
-                  <td className="px-6 py-4 font-medium text-gray-800 dark:text-gray-100 group-hover:text-[#0ea5e9]">
+                  <td className="px-6 py-4 font-medium text-gray-800 dark:text-gray-100 group-hover:text-[#0084d1] dark:text-emerald-500">
                     {payment.invoiceId}
                   </td>
                   <td className="px-6 py-4 text-gray-800 dark:text-gray-100 font-medium">{payment.clinic}</td>
