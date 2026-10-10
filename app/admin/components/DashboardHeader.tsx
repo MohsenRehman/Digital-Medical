@@ -1,67 +1,129 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { Search, Bell, Sun, Moon, User } from "lucide-react";
+import React, { useState, useEffect, useRef } from "react";
+import { useRouter, usePathname } from "next/navigation";
+import { Search, Bell, Sun, Moon, User, Menu } from "lucide-react";
 import { useSearch } from "./SearchContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "next-themes";
 
 export default function DashboardHeader() {
   const router = useRouter();
-  const { searchTerm, setSearchTerm } = useSearch();
+  const pathname = usePathname();
+  const { searchTerm, setSearchTerm, isMobileMenuOpen, setIsMobileMenuOpen } = useSearch();
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
-  const { theme, setTheme } = useTheme();
+  const { theme, setTheme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowProfileDropdown(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  let pageTitle = "Dashboard";
+  let searchPlaceholder = "Search clinics, doctors, patients...";
+  
+  if (pathname?.includes('/admin/billing')) {
+    searchPlaceholder = "Search by invoice ID or clinic...";
+    pageTitle = "Billing & Payments";
+  } else if (pathname?.includes('/admin/clinics')) {
+    searchPlaceholder = "Search by name or location...";
+    pageTitle = "Organizations";
+  } else if (pathname?.includes('/admin/doctors')) {
+    searchPlaceholder = "Search by name, specialization, or clinic...";
+    pageTitle = "Doctors";
+  } else if (pathname?.includes('/admin/patients')) {
+    searchPlaceholder = "Search by name, clinic, or doctor...";
+    pageTitle = "Patients";
+  } else if (pathname?.includes('/admin/appointments')) {
+    searchPlaceholder = "Search by patient, doctor, or clinic...";
+    pageTitle = "Appointments";
+  } else if (pathname?.includes('/admin/reports')) {
+    pageTitle = "Reports";
+  } else if (pathname?.includes('/admin/settings')) {
+    pageTitle = "Settings";
+  }
+
   return (
-    <header className="h-20 bg-white dark:bg-gray-800 dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700 dark:border-gray-700 flex items-center justify-between px-6 shrink-0 z-10 relative transition-colors duration-200">
-      {/* Search */}
-      <div className="flex-1 max-w-md relative">
-        <Search
-          size={20}
-          className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-        />
-        <input
-          type="text"
-          placeholder="Search clinics, doctors, patients..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full pl-10 pr-4 py-2.5 bg-[#f3f4f6] dark:bg-gray-700 dark:text-white border-none rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-[#059669] transition-shadow"
-        />
+    <header className="h-20 bg-white/40 dark:bg-[#09090b]/40 backdrop-blur-xl border-b border-white/40 dark:border-zinc-800/50 flex items-center justify-between px-4 sm:px-6 shrink-0 z-10 relative transition-colors duration-200">
+      <div className="flex items-center flex-1 gap-3 sm:gap-0">
+        {/* Mobile Menu Toggle */}
+        <button
+          onClick={() => setIsMobileMenuOpen(true)}
+          className="md:hidden p-2 -ml-2 text-slate-600 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-lg transition-colors shrink-0"
+        >
+          <Menu size={24} />
+        </button>
+
+        {/* Mobile Page Title */}
+        <h1 className="md:hidden text-lg font-bold text-slate-800 dark:text-zinc-100 truncate">
+          {pageTitle}
+        </h1>
+
+        {/* Search (Desktop Only) */}
+        <div className="hidden md:block flex-1 w-full">
+          {(pathname?.includes('/admin/settings') || pathname?.includes('/admin/reports')) ? (
+            <div className="w-full"></div>
+          ) : (
+            <div className="max-w-md relative">
+              <Search
+                size={18}
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-zinc-500"
+              />
+              <input
+                type="text"
+                placeholder={searchPlaceholder}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-11 pr-4 py-2.5 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl text-sm text-slate-900 dark:text-zinc-200 placeholder:text-slate-500 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-slate-300 dark:focus:ring-zinc-700 transition-all"
+              />
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Right Actions */}
-      <div className="flex items-center gap-6">
-        <button className="relative text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors">
-          <Bell size={22} />
-          <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full border-2 border-white dark:border-gray-800">
+      <div className="flex items-center gap-2 sm:gap-5">
+        <button className="relative text-slate-500 dark:text-zinc-400 hover:text-slate-700 dark:hover:text-zinc-200 transition-colors">
+          <Bell size={20} />
+          <span className="absolute -top-1 -right-1 bg-emerald-500 text-white dark:text-zinc-950 text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full border-2 border-white dark:border-[#09090b]">
             3
           </span>
         </button>
+
         {mounted && (
           <button 
-            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-            className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+            onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
+            className="text-slate-500 dark:text-zinc-400 hover:text-slate-700 dark:hover:text-zinc-200 transition-colors"
           >
-            {theme === 'dark' ? <Sun size={22} /> : <Moon size={22} />}
+            {resolvedTheme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
           </button>
         )}
 
-        <div className="relative">
+        <div className="relative" ref={dropdownRef}>
           <div 
             onClick={() => setShowProfileDropdown(!showProfileDropdown)}
-            className="flex items-center gap-3 pl-4 border-l border-gray-200 dark:border-gray-700 cursor-pointer"
+            className="flex items-center gap-3 pl-5 border-l border-slate-200 dark:border-zinc-800 cursor-pointer"
           >
-            <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-600">
-              <User size={20} />
+            <div className="w-9 h-9 rounded-full bg-slate-100 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 flex items-center justify-center text-slate-600 dark:text-zinc-300 overflow-hidden shrink-0">
+              {mounted && localStorage.getItem('adminProfileImage') ? (
+                <img src={localStorage.getItem('adminProfileImage')!} alt="Admin" className="w-full h-full object-cover" />
+              ) : (
+                <User size={18} />
+              )}
             </div>
             <div className="hidden sm:block">
-              <p className="text-sm font-semibold text-gray-700">Admin</p>
+              <p className="text-sm font-medium text-slate-700 dark:text-zinc-200">Admin</p>
             </div>
           </div>
 
@@ -73,26 +135,26 @@ export default function DashboardHeader() {
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 5, scale: 0.97 }}
                 transition={{ duration: 0.15, ease: "easeOut" }}
-                className="absolute right-0 mt-4 w-64 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 overflow-hidden z-50 origin-top-right"
+                className="absolute right-0 mt-4 w-64 bg-zinc-900 rounded-xl shadow-xl border border-zinc-800 overflow-hidden z-50 origin-top-right"
               >
-                <div className="p-4 border-b border-gray-100 dark:border-gray-700 flex items-center gap-3 bg-gray-50 dark:bg-gray-800">
-                  <div className="w-12 h-12 rounded-full bg-slate-200 flex items-center justify-center text-slate-600 shrink-0">
-                    <User size={24} />
+                <div className="p-4 border-b border-zinc-800 flex items-center gap-3 bg-zinc-900/50">
+                  <div className="w-11 h-11 rounded-full bg-zinc-800 flex items-center justify-center text-zinc-400 shrink-0">
+                    <User size={20} />
                   </div>
                   <div>
-                    <p className="text-base font-bold text-gray-800 dark:text-gray-100">Super Admin</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">admin@digitalmedical.com</p>
+                    <p className="text-sm font-medium text-zinc-100">Super Admin</p>
+                    <p className="text-xs text-zinc-500">admin@digitalmedical.com</p>
                   </div>
                 </div>
               <div className="p-2">
-                <a href="/admin/settings" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:bg-gray-700 rounded-lg transition-colors">
+                <a href="/admin/settings" className="block px-4 py-2 text-sm text-zinc-300 hover:bg-zinc-800 hover:text-zinc-100 rounded-lg transition-colors">
                   Profile Settings
                 </a>
-                <a href="/admin/settings" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:bg-gray-700 rounded-lg transition-colors">
+                <a href="/admin/settings" className="block px-4 py-2 text-sm text-zinc-300 hover:bg-zinc-800 hover:text-zinc-100 rounded-lg transition-colors">
                   Account Preferences
                 </a>
               </div>
-              <div className="p-2 border-t border-gray-100 dark:border-gray-700">
+              <div className="p-2 border-t border-zinc-800">
                 <button 
                   onClick={() => {
                     try {
@@ -102,7 +164,7 @@ export default function DashboardHeader() {
                     }
                     router.push("/");
                   }}
-                  className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors font-medium cursor-pointer"
+                  className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-red-500/10 hover:text-red-300 rounded-lg transition-colors font-medium cursor-pointer"
                 >
                   Log Out
                 </button>

@@ -31,15 +31,15 @@ export default function AllClinicsTable() {
   const closeDetails = () => setSelectedClinic(null);
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
-      <div className="p-6 border-b border-gray-100 dark:border-gray-700 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100">All Clinics</h3>
+    <div className="bg-white/60 dark:bg-[#131315]/60 backdrop-blur-xl rounded-[20px] shadow-[0_2px_10px_-3px_rgba(6,81,237,0.05)] border border-white/50 dark:border-zinc-800 overflow-hidden">
+      <div className="p-6 border-b border-slate-200 dark:border-zinc-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <h3 className="text-lg font-bold text-slate-800 dark:text-zinc-50">All Clinics</h3>
 
         <div className="flex items-center gap-3">
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="text-sm border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-[#0ea5e9]"
+            className="text-sm bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-zinc-700 text-slate-700 dark:text-zinc-200"
           >
             <option value="All">All Status</option>
             <option value="Active">Active</option>
@@ -49,7 +49,7 @@ export default function AllClinicsTable() {
           <select
             value={planFilter}
             onChange={(e) => setPlanFilter(e.target.value)}
-            className="text-sm border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-[#0ea5e9]"
+            className="text-sm bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-zinc-700 text-slate-700 dark:text-zinc-200"
           >
             <option value="All Plans">All Plans</option>
             <option value="Basic">Basic</option>
@@ -61,7 +61,7 @@ export default function AllClinicsTable() {
 
       <div className="overflow-x-auto">
         <table className="w-full text-left text-sm">
-          <thead className="bg-gray-50 dark:bg-gray-800 text-gray-500 dark:text-gray-400 font-medium border-b border-gray-100 dark:border-gray-700">
+          <thead className="bg-slate-50 dark:bg-zinc-900/50 text-slate-500 dark:text-zinc-400 font-medium border-b border-slate-200 dark:border-zinc-800">
             <tr>
               <th className="px-6 py-4">Clinic</th>
               <th className="px-6 py-4">Status</th>
@@ -72,7 +72,7 @@ export default function AllClinicsTable() {
             </tr>
           </thead>
           <motion.tbody 
-            className="divide-y divide-gray-100"
+            className="divide-y divide-zinc-800/50"
             initial="hidden"
             animate="show"
             variants={{
@@ -85,7 +85,7 @@ export default function AllClinicsTable() {
           >
             {filteredClinics.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
+                <td colSpan={6} className="px-6 py-8 text-center text-slate-800 dark:text-zinc-500">
                   No clinics found matching the criteria.
                 </td>
               </tr>
@@ -94,35 +94,35 @@ export default function AllClinicsTable() {
                 <motion.tr
                   key={clinic.id}
                   onClick={() => setSelectedClinic(clinic)}
-                  className="hover:bg-gray-50 dark:bg-gray-800 transition-colors cursor-pointer group"
+                  className="hover:bg-zinc-800/30 transition-colors cursor-pointer group"
                   variants={{
                     hidden: { opacity: 0, y: 10 },
                     show: { opacity: 1, y: 0 }
                   }}
                 >
-                  <td className="px-6 py-4 font-medium text-gray-800 dark:text-gray-100 group-hover:text-[#0ea5e9] transition-colors">
+                  <td className="px-6 py-4 font-medium text-slate-700 dark:text-zinc-200 group-hover:text-emerald-500 transition-colors">
                     {clinic.clinic}
                   </td>
                   <td className="px-6 py-4">
                     <span
                       className={clsx(
-                        "inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium",
+                        "inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border",
                         {
-                          "bg-emerald-100 text-emerald-800": clinic.status === "Active",
-                          "bg-[#f8f9fa] dark:bg-gray-900mber-100 text-amber-800": clinic.status === "Pending",
-                          "bg-red-100 text-red-800": clinic.status === "Suspended",
+                          "bg-emerald-500/10 text-emerald-500 border-emerald-500/20": clinic.status === "Active",
+                          "bg-amber-500/10 text-amber-500 border-amber-500/20": clinic.status === "Pending",
+                          "bg-red-500/10 text-red-500 border-red-500/20": clinic.status === "Suspended",
                         }
                       )}
                     >
                       {clinic.status}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-gray-600 dark:text-gray-300">{clinic.doctors}</td>
-                  <td className="px-6 py-4 text-gray-600 dark:text-gray-300">{clinic.staff}</td>
-                  <td className="px-6 py-4 text-gray-600 dark:text-gray-300">
+                  <td className="px-6 py-4 text-slate-500 dark:text-zinc-400">{clinic.doctors}</td>
+                  <td className="px-6 py-4 text-slate-500 dark:text-zinc-400">{clinic.staff}</td>
+                  <td className="px-6 py-4 text-slate-500 dark:text-zinc-400">
                     {clinic.patients.toLocaleString()}
                   </td>
-                  <td className="px-6 py-4 text-gray-600 dark:text-gray-300">{clinic.plan}</td>
+                  <td className="px-6 py-4 text-slate-500 dark:text-zinc-400">{clinic.plan}</td>
                 </motion.tr>
               ))
             )}
@@ -137,44 +137,44 @@ export default function AllClinicsTable() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
           >
             <motion.div 
               initial={{ scale: 0.97, opacity: 0, y: 10 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.97, opacity: 0, y: 10 }}
               transition={{ duration: 0.2, ease: "easeOut" }}
-              className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md overflow-hidden"
+              className="bg-white dark:bg-[#18181b] rounded-2xl shadow-xl w-full max-w-md overflow-hidden border border-slate-200 dark:border-zinc-800"
             >
-              <div className="p-6 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
-                <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">Clinic Details</h2>
-                <button onClick={closeDetails} className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
+              <div className="p-6 border-b border-slate-200 dark:border-zinc-800 flex items-center justify-between">
+                <h2 className="text-xl font-bold text-slate-800 dark:text-zinc-50">Clinic Details</h2>
+                <button onClick={closeDetails} className="text-slate-800 dark:text-zinc-500 hover:text-slate-600 dark:text-zinc-300 transition-colors">
                   <X size={20} />
                 </button>
               </div>
               <div className="p-6 space-y-6">
                 <div>
-                  <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-3 border-b border-gray-100 dark:border-gray-700 pb-2">
+                  <h4 className="text-sm font-semibold text-zinc-100 mb-3 border-b border-slate-200 dark:border-zinc-800 pb-2">
                     Clinic Information
                   </h4>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">Name</p>
-                      <p className="font-medium text-gray-800 dark:text-gray-100 text-sm">{selectedClinic.clinic}</p>
+                      <p className="text-xs text-slate-800 dark:text-zinc-500">Name</p>
+                      <p className="font-medium text-slate-700 dark:text-zinc-200 text-sm">{selectedClinic.clinic}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">Location</p>
-                      <p className="font-medium text-gray-800 dark:text-gray-100 text-sm">{selectedClinic.location}</p>
+                      <p className="text-xs text-slate-800 dark:text-zinc-500">Location</p>
+                      <p className="font-medium text-slate-700 dark:text-zinc-200 text-sm">{selectedClinic.location}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">Status</p>
+                      <p className="text-xs text-slate-800 dark:text-zinc-500">Status</p>
                       <span
                         className={clsx(
-                          "inline-flex items-center px-2 py-0.5 rounded text-xs font-medium mt-1",
+                          "inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold mt-1 border",
                           {
-                            "bg-emerald-100 text-emerald-800": selectedClinic.status === "Active",
-                            "bg-[#f8f9fa] dark:bg-gray-900mber-100 text-amber-800": selectedClinic.status === "Pending",
-                            "bg-red-100 text-red-800": selectedClinic.status === "Suspended",
+                            "bg-emerald-500/10 text-emerald-500 border-emerald-500/20": selectedClinic.status === "Active",
+                            "bg-amber-500/10 text-amber-500 border-amber-500/20": selectedClinic.status === "Pending",
+                            "bg-red-500/10 text-red-500 border-red-500/20": selectedClinic.status === "Suspended",
                           }
                         )}
                       >
@@ -185,60 +185,60 @@ export default function AllClinicsTable() {
                 </div>
 
                 <div>
-                  <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-3 border-b border-gray-100 dark:border-gray-700 pb-2">
+                  <h4 className="text-sm font-semibold text-zinc-100 mb-3 border-b border-slate-200 dark:border-zinc-800 pb-2">
                     Organization Overview
                   </h4>
                   <div className="grid grid-cols-3 gap-4">
                     <div>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">Doctors</p>
-                      <p className="font-medium text-gray-800 dark:text-gray-100">{selectedClinic.doctors}</p>
+                      <p className="text-xs text-slate-800 dark:text-zinc-500">Doctors</p>
+                      <p className="font-medium text-slate-700 dark:text-zinc-200">{selectedClinic.doctors}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">Staff</p>
-                      <p className="font-medium text-gray-800 dark:text-gray-100">{selectedClinic.staff}</p>
+                      <p className="text-xs text-slate-800 dark:text-zinc-500">Staff</p>
+                      <p className="font-medium text-slate-700 dark:text-zinc-200">{selectedClinic.staff}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">Patients</p>
-                      <p className="font-medium text-gray-800 dark:text-gray-100">{selectedClinic.patients.toLocaleString()}</p>
+                      <p className="text-xs text-slate-800 dark:text-zinc-500">Patients</p>
+                      <p className="font-medium text-slate-700 dark:text-zinc-200">{selectedClinic.patients.toLocaleString()}</p>
                     </div>
                   </div>
                 </div>
 
                 <div>
-                  <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-3 border-b border-gray-100 dark:border-gray-700 pb-2">
+                  <h4 className="text-sm font-semibold text-zinc-100 mb-3 border-b border-slate-200 dark:border-zinc-800 pb-2">
                     Subscription
                   </h4>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">Plan</p>
-                      <p className="font-medium text-gray-800 dark:text-gray-100 text-sm">{selectedClinic.plan}</p>
+                      <p className="text-xs text-slate-800 dark:text-zinc-500">Plan</p>
+                      <p className="font-medium text-slate-700 dark:text-zinc-200 text-sm">{selectedClinic.plan}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">Status</p>
-                      <p className="font-medium text-emerald-600 text-sm">Active</p>
+                      <p className="text-xs text-slate-800 dark:text-zinc-500">Status</p>
+                      <p className="font-medium text-emerald-500 text-sm">Active</p>
                     </div>
                   </div>
                 </div>
               </div>
 
-              <div className="p-6 bg-gray-50 dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700 flex gap-3 justify-end">
+              <div className="p-6 bg-slate-50 dark:bg-zinc-900/50 border-t border-slate-200 dark:border-zinc-800 flex gap-3 justify-end">
                 <motion.button
-                  whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+                  whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
                   onClick={closeDetails}
-                  className="px-4 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-200 transition-colors flex items-center gap-1.5"
+                  className="px-4 py-2 rounded-lg text-sm font-medium text-slate-600 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors flex items-center gap-1.5"
                 >
                   Cancel
                 </motion.button>
                 <motion.button
-                  whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
-                  className="px-4 py-2 rounded-lg text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 transition-colors flex items-center gap-1.5"
+                  whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
+                  className="px-4 py-2 rounded-lg text-sm font-medium text-red-500 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 transition-colors flex items-center gap-1.5"
                 >
                   <Ban size={16} />
                   Suspend
                 </motion.button>
                 <motion.button
-                  whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
-                  className="px-4 py-2 rounded-lg text-sm font-medium text-white bg-[#0ea5e9] hover:bg-[#0284c7] transition-colors flex items-center gap-1.5"
+                  whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
+                  className="px-4 py-2 rounded-lg text-sm font-medium text-white dark:text-zinc-950 bg-emerald-500 hover:bg-emerald-400 transition-colors flex items-center gap-1.5"
                 >
                   <Eye size={16} />
                   View

@@ -22,9 +22,11 @@ import {
   Radio,
   PanelLeftClose,
   PanelLeftOpen,
+  CreditCard,
 } from "lucide-react";
 import { useDoctor } from "@/app/context/DoctorContext";
 import { DoctorAvailabilityStatus } from "@/lib/types/doctor";
+import DoctorSidebarPlanCard from "@/components/doctor/subscription/DoctorSidebarPlanCard";
 
 interface NavItem {
   name: string;
@@ -47,6 +49,7 @@ interface TooltipData {
 export default function DoctorSidebar() {
   const pathname = usePathname();
   const {
+    doctor,
     doctorStatus,
     setDoctorStatus,
     waitingQueue,
@@ -57,8 +60,6 @@ export default function DoctorSidebar() {
   } = useDoctor();
 
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [statusDropdownOpen, setStatusDropdownOpen] = useState(false);
-  const statusRef = useRef<HTMLDivElement>(null);
 
   // Floating tooltip for collapsed mode
   const [hoveredTooltip, setHoveredTooltip] = useState<TooltipData | null>(null);
@@ -74,17 +75,6 @@ export default function DoctorSidebar() {
   const hideTooltip = useCallback(() => {
     if (tooltipTimerRef.current) clearTimeout(tooltipTimerRef.current);
     setHoveredTooltip(null);
-  }, []);
-
-  // Close status dropdown when clicking outside
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (statusRef.current && !statusRef.current.contains(event.target as Node)) {
-        setStatusDropdownOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   // Clear tooltip when pathname changes
@@ -168,6 +158,11 @@ export default function DoctorSidebar() {
           href: "/doctor/notifications",
           icon: Bell,
           badge: unreadNotificationsCount > 0 ? `${unreadNotificationsCount}` : undefined,
+        },
+        {
+          name: "Subscription & Plans",
+          href: "/doctor/subscription",
+          icon: CreditCard,
         },
         {
           name: "Settings & Profile",
@@ -386,114 +381,112 @@ export default function DoctorSidebar() {
         ))}
       </div>
 
-      {/* 3. Bottom Controls: Status dropdown & Logout */}
-      <div className={`border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 ${sidebarCollapsed ? "p-2 space-y-2" : "p-3 space-y-2"}`}>
-        {/* Availability status dropdown */}
-        <div ref={statusRef} className="relative">
-          {sidebarCollapsed ? (
-            // COLLAPSED STATUS BUTTON
-            <button
-              type="button"
-              onClick={() => setStatusDropdownOpen(!statusDropdownOpen)}
+      {/* Plan Card Section */}
+      <div className={`border-t border-slate-200/80 dark:border-slate-800/80 flex-shrink-0 ${sidebarCollapsed ? "py-2 px-1" : "py-2.5 px-1 bg-slate-50/40 dark:bg-slate-900/40"}`}>
+        <DoctorSidebarPlanCard
+          collapsed={sidebarCollapsed}
+          onShowTooltip={showTooltip}
+          onHideTooltip={hideTooltip}
+        />
+      </div>
+
+      {/* 3. Bottom Controls: Doctor Profile & Logout */}
+      <div className={`border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 ${sidebarCollapsed ? "p-2" : "p-3"}`}>
+        {sidebarCollapsed ? (
+          // COLLAPSED: Avatar Link + Logout Button
+          <div className="flex flex-col items-center gap-2">
+            <Link
+              href="/doctor/settings"
+              aria-label={`${doctor.name} - Profile & Settings`}
               onMouseEnter={(e) => {
                 const rect = e.currentTarget.getBoundingClientRect();
-                showTooltip(`Status: ${currentStatus.label}`, rect.top + rect.height / 2);
+                showTooltip(`${doctor.name} (${doctor.specialty})`, rect.top + rect.height / 2);
               }}
               onMouseLeave={hideTooltip}
               onFocus={(e) => {
                 const rect = e.currentTarget.getBoundingClientRect();
-                setHoveredTooltip({ text: `Status: ${currentStatus.label}`, top: rect.top + rect.height / 2 });
+                setHoveredTooltip({ text: `${doctor.name} (${doctor.specialty})`, top: rect.top + rect.height / 2 });
               }}
               onBlur={hideTooltip}
-              aria-label={`Status: ${currentStatus.label}`}
-              className="w-10 h-10 mx-auto flex items-center justify-center rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs hover:border-sky-400 transition-colors outline-none focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 active:outline-none cursor-pointer"
+              className="relative w-10 h-10 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 hover:border-sky-400 transition-colors flex items-center justify-center cursor-pointer outline-none focus:outline-none"
             >
-              <span className={`w-3 h-3 rounded-full ${currentStatus.color}`} />
-            </button>
-          ) : (
-            // EXPANDED STATUS BUTTON
+              <img
+                src={doctor.avatarUrl}
+                alt={doctor.name}
+                className="w-full h-full object-cover"
+              />
+              <span
+                className={`absolute bottom-0.5 right-0.5 w-2.5 h-2.5 rounded-full border-2 border-white dark:border-slate-900 ${
+                  currentStatus.color
+                }`}
+              />
+            </Link>
+
             <button
               type="button"
-              onClick={() => setStatusDropdownOpen(!statusDropdownOpen)}
-              className="w-full flex items-center justify-between px-3 py-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-left shadow-xs hover:border-sky-400 transition-colors outline-none focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 active:outline-none cursor-pointer"
+              onClick={handleLogout}
+              aria-label="Logout"
+              onMouseEnter={(e) => {
+                const rect = e.currentTarget.getBoundingClientRect();
+                showTooltip("Logout", rect.top + rect.height / 2);
+              }}
+              onMouseLeave={hideTooltip}
+              onFocus={(e) => {
+                const rect = e.currentTarget.getBoundingClientRect();
+                setHoveredTooltip({ text: "Logout", top: rect.top + rect.height / 2 });
+              }}
+              onBlur={hideTooltip}
+              className="w-10 h-10 rounded-xl flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors cursor-pointer outline-none focus:outline-none"
             >
-              <div className="flex items-center gap-2">
-                <span className={`w-2.5 h-2.5 rounded-full ${currentStatus.color}`} />
-                <span className="font-semibold text-slate-800 dark:text-slate-200">
-                  Status: {currentStatus.label}
-                </span>
-              </div>
-              <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+              <LogOut className="w-4 h-4" />
             </button>
-          )}
-
-          {/* Status Dropdown Popover */}
-          {statusDropdownOpen && (
-            <div
-              className={`absolute bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl p-1.5 z-50 space-y-1 ${
-                sidebarCollapsed
-                  ? "bottom-0 left-full ml-3 w-48"
-                  : "bottom-full mb-1 left-0 right-0"
-              }`}
-            >
-              {(["available", "in_consultation", "on_break", "offline"] as DoctorAvailabilityStatus[]).map(
-                (status) => {
-                  const cfg = statusConfig[status];
-                  return (
-                    <button
-                      key={status}
-                      type="button"
-                      onClick={() => {
-                        setDoctorStatus(status);
-                        setStatusDropdownOpen(false);
-                      }}
-                      className={`w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer outline-none focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 active:outline-none border-0 ${
-                        doctorStatus === status
-                          ? "bg-slate-100 dark:bg-slate-700 font-bold"
-                          : "hover:bg-slate-50 dark:hover:bg-slate-700/50"
-                      }`}
-                    >
-                      <span className={`w-2 h-2 rounded-full ${cfg.color}`} />
-                      <span>{cfg.label}</span>
-                    </button>
-                  );
-                }
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* Doctor portal exit/logout */}
-        {sidebarCollapsed ? (
-          // COLLAPSED LOGOUT
-          <button
-            type="button"
-            onClick={handleLogout}
-            onMouseEnter={(e) => {
-              const rect = e.currentTarget.getBoundingClientRect();
-              showTooltip("Exit Workspace", rect.top + rect.height / 2);
-            }}
-            onMouseLeave={hideTooltip}
-            onFocus={(e) => {
-              const rect = e.currentTarget.getBoundingClientRect();
-              setHoveredTooltip({ text: "Exit Workspace", top: rect.top + rect.height / 2 });
-            }}
-            onBlur={hideTooltip}
-            aria-label="Exit Workspace"
-            className="w-10 h-10 mx-auto flex items-center justify-center rounded-xl text-slate-600 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors cursor-pointer outline-none focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 active:outline-none border-0"
-          >
-            <LogOut className="w-4 h-4" />
-          </button>
+          </div>
         ) : (
-          // EXPANDED LOGOUT
-          <button
-            type="button"
-            onClick={handleLogout}
-            className="flex items-center justify-center gap-2 w-full py-2 px-3 text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 rounded-xl hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors cursor-pointer outline-none focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 active:outline-none border-0"
-          >
-            <LogOut className="w-3.5 h-3.5" />
-            <span>Exit Workspace</span>
-          </button>
+          // EXPANDED: Doctor Profile Card + Logout Button
+          <div className="flex items-center justify-between gap-2 p-1.5 rounded-2xl bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 shadow-2xs">
+            <Link
+              href="/doctor/settings"
+              className="flex items-center gap-2.5 min-w-0 flex-1 p-1 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors outline-none focus:outline-none group"
+            >
+              <div className="relative flex-shrink-0">
+                <img
+                  src={doctor.avatarUrl}
+                  alt={doctor.name}
+                  className="w-9 h-9 rounded-xl object-cover border border-slate-200 dark:border-slate-700"
+                />
+                <span
+                  className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-white dark:border-slate-900 ${
+                    currentStatus.color
+                  }`}
+                />
+              </div>
+              <div className="min-w-0 flex-1 text-left">
+                <div className="flex items-center gap-1">
+                  <span className="font-bold text-xs text-slate-900 dark:text-white truncate">
+                    {doctor.name}
+                  </span>
+                  <img
+                    src="/images/varified-badge.png"
+                    alt="Verified"
+                    className="w-3 h-3 object-contain flex-shrink-0"
+                  />
+                </div>
+                <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
+                  {doctor.specialty}
+                </p>
+              </div>
+            </Link>
+
+            <button
+              type="button"
+              onClick={handleLogout}
+              title="Logout"
+              aria-label="Logout"
+              className="p-2 rounded-xl text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors cursor-pointer flex-shrink-0 outline-none focus:outline-none"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
+          </div>
         )}
       </div>
 
@@ -601,16 +594,58 @@ export default function DoctorSidebar() {
         ))}
       </div>
 
-      {/* Mobile Drawer Bottom */}
-      <div className="p-3 border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 space-y-2">
-        <button
-          type="button"
-          onClick={handleLogout}
-          className="flex items-center justify-center gap-2 w-full py-2 px-3 text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 rounded-xl hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors cursor-pointer outline-none focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 active:outline-none border-0"
-        >
-          <LogOut className="w-3.5 h-3.5" />
-          <span>Exit Workspace</span>
-        </button>
+      {/* Mobile Drawer Plan Card */}
+      <div className="p-2 border-t border-slate-200 dark:border-slate-800 bg-slate-50/40 dark:bg-slate-900/40 flex-shrink-0">
+        <DoctorSidebarPlanCard collapsed={false} />
+      </div>
+
+      {/* Mobile Drawer Bottom: Doctor Profile & Logout */}
+      <div className="p-3 border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
+        <div className="flex items-center justify-between gap-2 p-1.5 rounded-2xl bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 shadow-2xs">
+          <Link
+            href="/doctor/settings"
+            onClick={() => setMobileOpen(false)}
+            className="flex items-center gap-2.5 min-w-0 flex-1 p-1 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
+          >
+            <div className="relative flex-shrink-0">
+              <img
+                src={doctor.avatarUrl}
+                alt={doctor.name}
+                className="w-9 h-9 rounded-xl object-cover border border-slate-200 dark:border-slate-700"
+              />
+              <span
+                className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-white dark:border-slate-900 ${
+                  currentStatus.color
+                }`}
+              />
+            </div>
+            <div className="min-w-0 flex-1 text-left">
+              <div className="flex items-center gap-1">
+                <span className="font-bold text-xs text-slate-900 dark:text-white truncate">
+                  {doctor.name}
+                </span>
+                <img
+                  src="/images/varified-badge.png"
+                  alt="Verified"
+                  className="w-3 h-3 object-contain flex-shrink-0"
+                />
+              </div>
+              <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
+                {doctor.specialty}
+              </p>
+            </div>
+          </Link>
+
+          <button
+            type="button"
+            onClick={handleLogout}
+            title="Logout"
+            aria-label="Logout"
+            className="p-2 rounded-xl text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors cursor-pointer flex-shrink-0"
+          >
+            <LogOut className="w-4 h-4" />
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -5,6 +5,7 @@ import { appointments } from "../data/mockData";
 import { Search, Calendar } from "lucide-react";
 import clsx from "clsx";
 import { motion } from "framer-motion";
+import { useSearch } from "../components/SearchContext";
 
 const container = {
   hidden: { opacity: 0 },
@@ -20,7 +21,7 @@ const item = {
 };
 
 export default function AppointmentsPage() {
-  const [searchTerm, setSearchTerm] = useState("");
+  const { searchTerm } = useSearch();
   const [statusFilter, setStatusFilter] = useState("All");
 
   const filteredAppointments = appointments.filter(a => {
@@ -55,22 +56,13 @@ export default function AppointmentsPage() {
       </motion.div>
 
       <motion.div variants={item} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
-        <div className="p-4 border-b border-gray-100 dark:border-gray-700 flex flex-col sm:flex-row gap-4 justify-between">
-          <div className="relative flex-1 max-w-md">
-            <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-            <input 
-              type="text" 
-              placeholder="Search by patient, doctor, or clinic..." 
-              value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
-              className="pl-10 pr-4 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg w-full text-sm focus:outline-none focus:ring-2 focus:ring-[#059669]"
-            />
-          </div>
+        <div className="p-4 border-b border-gray-100 dark:border-gray-700 flex flex-col sm:flex-row gap-4 justify-end">
+          
           <div className="flex gap-2">
             <select 
               value={statusFilter}
               onChange={e => setStatusFilter(e.target.value)}
-              className="px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#059669]"
+              className="px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#0084d1] dark:focus:ring-emerald-500"
             >
               <option value="All">All Status</option>
               <option value="Scheduled">Scheduled</option>
@@ -96,7 +88,7 @@ export default function AppointmentsPage() {
             <motion.tbody variants={container} initial="hidden" animate="show" className="divide-y divide-gray-100">
               {filteredAppointments.map(appointment => (
                 <motion.tr variants={item} key={appointment.id} className="hover:bg-gray-50 dark:bg-gray-800 transition-colors cursor-pointer group">
-                  <td className="px-6 py-4 font-medium text-gray-800 dark:text-gray-100 group-hover:text-[#0ea5e9]">
+                  <td className="px-6 py-4 font-medium text-gray-800 dark:text-gray-100 group-hover:text-[#0084d1] dark:text-emerald-500">
                     {appointment.patient}
                   </td>
                   <td className="px-6 py-4 text-gray-600 dark:text-gray-300">{appointment.doctor}</td>

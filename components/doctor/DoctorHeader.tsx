@@ -18,7 +18,7 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { useDoctor } from "@/app/context/DoctorContext";
-import { PatientProfile } from "@/lib/types/doctor";
+import { PatientProfile, DoctorAvailabilityStatus } from "@/lib/types/doctor";
 import { LoadingSpinner } from "@/components/doctor/loading/LoadingSpinner";
 import { useDoctorToast } from "@/components/doctor/loading/DoctorToast";
 
@@ -31,6 +31,7 @@ export default function DoctorHeader() {
     activeClinic,
     switchClinic,
     doctorStatus,
+    setDoctorStatus,
     searchPatients,
     notifications,
     unreadNotificationsCount,
@@ -53,6 +54,10 @@ export default function DoctorHeader() {
   // Notification dropdown state
   const [notifDropdownOpen, setNotifDropdownOpen] = useState(false);
   const notifRef = useRef<HTMLDivElement>(null);
+
+  // Availability status dropdown state
+  const [statusDropdownOpen, setStatusDropdownOpen] = useState(false);
+  const statusRef = useRef<HTMLDivElement>(null);
 
   // Handle global patient search with perceived loading feedback
   useEffect(() => {
@@ -82,6 +87,9 @@ export default function DoctorHeader() {
       if (notifRef.current && !notifRef.current.contains(event.target as Node)) {
         setNotifDropdownOpen(false);
       }
+      if (statusRef.current && !statusRef.current.contains(event.target as Node)) {
+        setStatusDropdownOpen(false);
+      }
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
@@ -104,12 +112,17 @@ export default function DoctorHeader() {
     return "Doctor Workspace";
   };
 
-  const statusColorMap = {
-    available: "bg-emerald-500",
-    in_consultation: "bg-amber-500",
-    on_break: "bg-blue-500",
-    offline: "bg-slate-400",
+  const statusConfig: Record<
+    DoctorAvailabilityStatus,
+    { label: string; color: string; bg: string }
+  > = {
+    available: { label: "Available", color: "bg-emerald-500", bg: "text-emerald-700 dark:text-emerald-300" },
+    in_consultation: { label: "In Consultation", color: "bg-amber-500", bg: "text-amber-700 dark:text-amber-300" },
+    on_break: { label: "On Break", color: "bg-blue-500", bg: "text-blue-700 dark:text-blue-300" },
+    offline: { label: "Offline", color: "bg-slate-400", bg: "text-slate-600 dark:text-slate-400" },
   };
+
+  const currentStatus = statusConfig[doctorStatus] || statusConfig.available;
 
   return (
     <header className="sticky top-0 z-20 h-[70px] bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 transition-colors flex items-center">
@@ -361,37 +374,54 @@ export default function DoctorHeader() {
             )}
           </div>
 
-          {/* Quick Doctor Profile link */}
-          <Link
-            href="/doctor/settings"
-            className="flex items-center gap-2.5 p-1 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-          >
-            <div className="relative">
-              <img
-                src={doctor.avatarUrl}
-                alt={doctor.name}
-                className="w-8 h-8 rounded-full object-cover border border-slate-200 dark:border-slate-700"
-              />
-              <span
-                className={`absolute bottom-0 right-0 w-2 h-2 rounded-full border border-white dark:border-slate-900 ${
-                  statusColorMap[doctorStatus] || "bg-emerald-500"
-                }`}
-              />
-            </div>
-            <div className="hidden sm:block text-left text-xs">
-              <div className="flex items-center gap-1.5">
-                <span className="font-bold text-slate-900 dark:text-white truncate max-w-[130px] lg:max-w-none">
-                  {doctor.name}
-                </span>
-                <img
-                  src="/images/varified-badge.png"
-                  alt="Verified Doctor"
-                  className="w-3.5 h-3.5 object-contain inline-block flex-shrink-0"
-                />
+          {/* Availability Status Dropdown (Top Navbar Right Corner) */}
+          <div ref={statusRef} className="relative">
+            <button
+              type="button"
+              onClick={() => setStatusDropdownOpen(!statusDropdownOpen)}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100/90 dark:bg-slate-800/90 hover:bg-slate-200/80 dark:hover:bg-slate-700/80 border border-slate-200 dark:border-slate-700/80 text-xs font-semibold text-slate-800 dark:text-slate-200 transition-all cursor-pointer shadow-2xs outline-none focus:outline-none"
+              aria-label={`Status: ${currentStatus.label}`}
+            >
+              <span className={`w-2.5 h-2.5 rounded-full ${currentStatus.color}`} />
+              <span className="hidden sm:inline text-slate-500 dark:text-slate-400 font-medium">Status:</span>
+              <span className="font-bold">{currentStatus.label}</span>
+              <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+            </button>
+
+            {statusDropdownOpen && (
+              <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl p-1.5 z-50 space-y-1 animate-popIn">
+                <div className="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                  Availability Status
+                </div>
+                {(["available", "in_consultation", "on_break", "offline"] as DoctorAvailabilityStatus[]).map(
+                  (status) => {
+                    const cfg = statusConfig[status];
+                    return (
+                      <button
+                        key={status}
+                        type="button"
+                        onClick={() => {
+                          setDoctorStatus(status);
+                          setStatusDropdownOpen(false);
+                        }}
+                        className={`w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium transition-colors cursor-pointer outline-none focus:outline-none border-0 ${
+                          doctorStatus === status
+                            ? "bg-slate-100 dark:bg-slate-800 font-bold text-slate-900 dark:text-white"
+                            : "hover:bg-slate-50 dark:hover:bg-slate-800/50 text-slate-700 dark:text-slate-300"
+                        }`}
+                      >
+                        <span className={`w-2 h-2 rounded-full ${cfg.color}`} />
+                        <span>{cfg.label}</span>
+                        {doctorStatus === status && (
+                          <CheckCircle2 className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400 ml-auto" />
+                        )}
+                      </button>
+                    );
+                  }
+                )}
               </div>
-              <p className="text-[11px] text-slate-400">{doctor.specialty}</p>
-            </div>
-          </Link>
+            )}
+          </div>
         </div>
       </div>
     </header>

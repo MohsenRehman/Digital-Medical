@@ -29,7 +29,7 @@ export default function ClinicDetailsPage({ params }: { params: { clinicId: stri
     return (
       <div className="text-center py-20">
         <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Clinic not found</h2>
-        <Link href="/admin/clinics" className="text-[#0ea5e9] mt-4 inline-block hover:underline">
+        <Link href="/admin/clinics" className="text-[#0084d1] dark:text-emerald-500 mt-4 inline-block hover:underline">
           ← Back to Clinics
         </Link>
       </div>

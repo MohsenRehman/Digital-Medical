@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { FileText, Download, Building2, CreditCard } from "lucide-react";
+import { FileText, Download, Building2, CreditCard, Eye, ArrowRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function ReportsPage() {
@@ -53,10 +53,11 @@ export default function ReportsPage() {
             </div>
             <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-2">{report.title}</h3>
             <p className="text-sm text-gray-500 dark:text-gray-400 flex-1 mb-6">{report.desc}</p>
-            
             <div className="pt-4 border-t border-gray-100 dark:border-gray-700 flex items-center justify-between mt-auto">
-              <button className="text-sm font-medium text-[#0ea5e9] group-hover:underline">
-                View Report
+              <button className="group/btn relative inline-flex items-center justify-center gap-1.5 rounded-full bg-[#0084d1] dark:bg-zinc-800 px-4 py-1.5 text-xs font-bold text-white dark:text-zinc-200 shadow-sm hover:bg-[#0073b6] dark:hover:bg-zinc-700 transition-all duration-300 border border-transparent dark:border-zinc-700 dark:hover:border-zinc-600">
+                <Eye size={14} />
+                <span>View Report</span>
+                <ArrowRight size={14} className="transition-transform duration-300 group-hover/btn:translate-x-1" />
               </button>
               <button 
                 onClick={(e) => {

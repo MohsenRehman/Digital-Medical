@@ -43,6 +43,7 @@ export default function PatientDashboardPage() {
     loginWithOtp,
     toggleWhatsAppReminder,
     addFamilyMember,
+    updateFamilyMember,
     removeFamilyMember,
     cancelAppointment,
     updateProfile,
@@ -51,6 +52,31 @@ export default function PatientDashboardPage() {
   const [activeTab, setActiveTab] = useState<DashboardTab>("dashboard");
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  // Load user's collapse preference from localStorage
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("patient_sidebar_collapsed");
+      if (saved !== null) {
+        setSidebarCollapsed(saved === "true");
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  const handleToggleSidebarCollapse = () => {
+    setSidebarCollapsed((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem("patient_sidebar_collapsed", String(next));
+      } catch {
+        // ignore
+      }
+      return next;
+    });
+  };
 
   // Modals state
   const [isBookingOpen, setIsBookingOpen] = useState(false);
@@ -63,9 +89,9 @@ export default function PatientDashboardPage() {
   // If loading from localStorage, display clinical spinner
   if (!isLoaded) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-[#070e1b]">
+      <div className="min-h-screen flex items-center justify-center bg-slate-50/60 dark:bg-slate-950">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-10 h-10 rounded-full border-3 border-teal-500 border-t-transparent animate-spin" />
+          <div className="w-9 h-9 rounded-full border-2 border-sky-500 border-t-transparent animate-spin" />
           <span className="text-xs font-bold text-slate-500 tracking-wider uppercase">
             Loading Patient Health Portal...
           </span>
@@ -77,14 +103,14 @@ export default function PatientDashboardPage() {
   // If no patient is logged in yet, offer authentic sign-in modal or 1-click Demo Account access
   if (!patientUser) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-50 via-teal-50/20 to-slate-100 dark:from-slate-950 dark:via-[#0c1424] dark:to-black text-slate-900 dark:text-white flex flex-col justify-center items-center p-4 sm:p-6 relative overflow-hidden">
-        <div className="w-full max-w-md bg-white dark:bg-[#0c1424] rounded-3xl border border-slate-200 dark:border-slate-800 p-7 sm:p-8 shadow-2xl text-center space-y-6 relative z-10">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-teal-500 to-cyan-500 text-white flex items-center justify-center mx-auto shadow-lg shadow-teal-500/25">
-            <HeartPulse className="w-8 h-8 animate-pulse" />
+      <div className="min-h-screen bg-slate-50/60 dark:bg-slate-950 text-slate-800 dark:text-slate-100 flex flex-col justify-center items-center p-4 sm:p-6 relative overflow-hidden font-body">
+        <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 sm:p-8 shadow-xl text-center space-y-5 relative z-10">
+          <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-sky-600 to-teal-500 text-white flex items-center justify-center mx-auto shadow-md shadow-sky-500/20">
+            <HeartPulse className="w-7 h-7 animate-pulse" />
           </div>
 
           <div>
-            <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+            <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
               Patient Portal Sign In
             </h1>
             <p className="mt-1.5 text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
@@ -92,10 +118,10 @@ export default function PatientDashboardPage() {
             </p>
           </div>
 
-          <div className="space-y-3 pt-2">
+          <div className="space-y-2.5 pt-1">
             <button
               onClick={() => setIsLoginModalOpen(true)}
-              className="w-full py-3 px-4 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-bold text-xs shadow-md shadow-teal-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer"
+              className="w-full py-2.5 px-4 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer"
             >
               <LogIn className="w-4 h-4" />
               <span>Sign In with Phone OTP</span>
@@ -105,15 +131,15 @@ export default function PatientDashboardPage() {
               onClick={() => {
                 loginWithOtp("03001234567", "1234");
               }}
-              className="w-full py-3 px-4 rounded-xl bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs transition-colors flex items-center justify-center gap-2 cursor-pointer border border-slate-200 dark:border-slate-700"
+              className="w-full py-2.5 px-4 rounded-xl bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700/80 text-slate-800 dark:text-slate-200 font-bold text-xs transition-colors flex items-center justify-center gap-2 cursor-pointer border border-slate-200 dark:border-slate-700"
             >
-              <Sparkles className="w-4 h-4 text-teal-500" />
+              <Sparkles className="w-4 h-4 text-sky-600 dark:text-sky-400" />
               <span>Explore with Demo Patient Account</span>
             </button>
           </div>
 
           <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-center gap-2 text-xs text-slate-500">
-            <Link href="/" className="hover:text-teal-600 dark:hover:text-teal-400 font-semibold">
+            <Link href="/" className="hover:text-sky-600 dark:hover:text-sky-400 font-semibold">
               ← Return to Public Website
             </Link>
           </div>
@@ -142,8 +168,8 @@ export default function PatientDashboardPage() {
   const primaryName = patientUser.name || "Muhammad Ahmed";
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#070e1b] text-slate-900 dark:text-slate-100 flex transition-colors selection:bg-teal-500 selection:text-white">
-      {/* 1. Left Sidebar Navigation (Desktop Fixed + Mobile Collapsible Drawer) */}
+    <div className="min-h-screen bg-slate-50/60 dark:bg-slate-950 text-slate-800 dark:text-slate-100 flex transition-colors selection:bg-sky-500 selection:text-white font-body">
+      {/* 1. Left Sidebar Navigation (Desktop Persistent + Mobile Drawer) */}
       <Sidebar
         activeTab={activeTab}
         onTabChange={(tab) => {
@@ -159,11 +185,19 @@ export default function PatientDashboardPage() {
         onLogout={handleLogout}
         appointmentCount={appointments.length}
         unreadNotificationsCount={2}
+        sidebarCollapsed={sidebarCollapsed}
+        onToggleCollapse={handleToggleSidebarCollapse}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
       />
 
-      {/* 2. Main Content Wrapper (Shifted right by 72 (18rem) on lg screens) */}
-      <div className="flex-1 flex flex-col min-w-0 lg:pl-72 transition-all">
-        {/* Top Navbar */}
+      {/* 2. Main Content Wrapper (Shifted right by w-64 or w-20, top padded for fixed navbar) */}
+      <div
+        className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ease-in-out pt-14 sm:pt-16 md:pt-[70px] ${
+          sidebarCollapsed ? "md:pl-20" : "md:pl-64"
+        }`}
+      >
+        {/* Top Navbar (Fixed to top, stays in place even when page scrolls) */}
         <TopNavbar
           onToggleSidebar={() => setMobileSidebarOpen(!mobileSidebarOpen)}
           onOpenBooking={() => handleOpenBooking()}
@@ -174,10 +208,12 @@ export default function PatientDashboardPage() {
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
           unreadCount={2}
+          activeTab={activeTab}
+          sidebarCollapsed={sidebarCollapsed}
         />
 
         {/* Dynamic Content Views based on activeTab */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto">
+        <main className="flex-1 p-3.5 sm:p-5 md:p-6 max-w-7xl w-full mx-auto space-y-4 sm:space-y-6">
           {activeTab === "dashboard" && (
             <DashboardHome
               patientUser={patientUser}
@@ -236,6 +272,10 @@ export default function PatientDashboardPage() {
               onOpenAddFamily={() => setIsAddFamilyOpen(true)}
               onOpenBooking={() => handleOpenBooking()}
               onRemoveFamilyMember={removeFamilyMember}
+              onUpdateFamilyMember={updateFamilyMember}
+              onTabChange={setActiveTab}
+              onViewAppointmentDetail={(apt) => setSelectedAppointmentDetail(apt)}
+              onToggleWhatsApp={(id) => toggleWhatsAppReminder(id)}
             />
           )}
 
