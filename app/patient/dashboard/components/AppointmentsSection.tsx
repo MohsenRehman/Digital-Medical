@@ -21,6 +21,7 @@ import {
   Filter,
 } from "lucide-react";
 import { AppointmentRecord, FamilyMemberRecord } from "@/lib/types/patient";
+import CustomSelect from "./CustomSelect";
 
 interface AppointmentsSectionProps {
   appointments: AppointmentRecord[];
@@ -49,9 +50,9 @@ export default function AppointmentsSection({
   const profileOptions = useMemo(() => {
     return [
       { id: "all", name: "All Family Profiles" },
-      { id: primaryPatientName.toLowerCase(), name: `${primaryPatientName} (Self)` },
+      { id: "self", name: `${primaryPatientName} (Self)` },
       ...familyMembers.map((m) => ({
-        id: m.name.toLowerCase(),
+        id: m.id,
         name: `${m.name} (${m.relation})`,
       })),
     ];
@@ -62,7 +63,9 @@ export default function AppointmentsSection({
     return appointments.filter((apt) => {
       const matchStatus = statusFilter === "all" || apt.status === statusFilter;
       const matchProfile =
-        profileFilter === "all" || apt.patientName.toLowerCase() === profileFilter.toLowerCase();
+        profileFilter === "all" ||
+        (profileFilter === "self" && (!apt.familyMemberId || apt.bookedByRelation === "self")) ||
+        apt.familyMemberId === profileFilter;
       const matchSearch =
         searchQuery === "" ||
         apt.doctorName.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -75,15 +78,15 @@ export default function AppointmentsSection({
   }, [appointments, statusFilter, profileFilter, searchQuery]);
 
   return (
-    <div className="space-y-6 animate-fadeInUp">
+    <div className="space-y-4 sm:space-y-5 animate-fadeInUp">
       {/* Top Banner & Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-200 dark:border-slate-800 gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3.5 border-b border-slate-200 dark:border-slate-800 gap-3">
         <div>
-          <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-teal-50 dark:bg-teal-950/60 text-teal-700 dark:text-teal-300 text-xs font-bold mb-1">
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-sky-50 dark:bg-sky-950/60 text-sky-700 dark:text-sky-300 text-[10px] font-bold uppercase tracking-wider mb-1">
             <CalendarDays className="w-3.5 h-3.5" />
             <span>Consultation Schedule</span>
           </div>
-          <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+          <h1 className="text-lg sm:text-xl md:text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
             My Appointments
           </h1>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
@@ -93,18 +96,18 @@ export default function AppointmentsSection({
 
         <button
           onClick={onOpenBooking}
-          className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-teal-600 to-cyan-500 hover:from-teal-500 hover:to-cyan-400 text-white font-bold text-xs shadow-md shadow-teal-500/20 transition-all cursor-pointer self-start sm:self-auto"
+          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-semibold text-xs shadow-sm shadow-sky-600/20 transition-all cursor-pointer self-start sm:self-auto"
         >
-          <Plus className="w-4 h-4" />
+          <Plus className="w-3.5 h-3.5" />
           <span>Book Appointment</span>
         </button>
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="p-4 rounded-3xl bg-white dark:bg-[#0c1424] border border-slate-200/80 dark:border-slate-800 shadow-xs space-y-3">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+      <div className="p-3 sm:p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xs space-y-2.5">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-2.5">
           {/* Status Tabs */}
-          <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-slate-100 dark:bg-slate-800/80 overflow-x-auto self-start">
+          <div className="flex items-center gap-1 p-1 rounded-xl bg-slate-100 dark:bg-slate-800/80 overflow-x-auto self-start">
             {(
               [
                 { id: "all", label: "All Visits" },
@@ -116,9 +119,9 @@ export default function AppointmentsSection({
               <button
                 key={tab.id}
                 onClick={() => setStatusFilter(tab.id)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
                   statusFilter === tab.id
-                    ? "bg-white dark:bg-[#0B1426] text-teal-600 dark:text-teal-400 shadow-xs"
+                    ? "bg-white dark:bg-slate-900 text-sky-600 dark:text-sky-400 font-bold shadow-2xs"
                     : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                 }`}
               >
@@ -132,49 +135,44 @@ export default function AppointmentsSection({
             <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 whitespace-nowrap">
               Patient:
             </span>
-            <select
+            <CustomSelect
               value={profileFilter}
-              onChange={(e) => setProfileFilter(e.target.value)}
-              className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-teal-500/20"
-            >
-              {profileOptions.map((opt) => (
-                <option key={opt.id} value={opt.id}>
-                  {opt.name}
-                </option>
-              ))}
-            </select>
+              onChange={setProfileFilter}
+              options={profileOptions}
+              className="min-w-[190px]"
+            />
           </div>
         </div>
 
         {/* Search input within appointments */}
         <div className="relative">
-          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search by doctor, specialty, clinic, or reference number..."
-            className="w-full pl-9 pr-3.5 py-2 text-xs rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-hidden focus:border-teal-500"
+            placeholder="Search by doctor, specialty, clinic, or token reference..."
+            className="w-full pl-9 pr-3.5 py-1.5 text-xs rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-sky-500"
           />
         </div>
       </div>
 
       {/* Appointments List */}
-      <div className="space-y-4">
+      <div className="space-y-3">
         {filteredAppointments.length === 0 ? (
-          <div className="p-12 text-center rounded-3xl bg-white dark:bg-[#0c1424] border border-slate-200/80 dark:border-slate-800">
-            <div className="w-12 h-12 rounded-2xl bg-teal-50 dark:bg-teal-950/60 text-teal-600 dark:text-teal-400 flex items-center justify-center mx-auto mb-3">
-              <CalendarDays className="w-6 h-6" />
+          <div className="p-10 text-center rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xs">
+            <div className="w-11 h-11 rounded-xl bg-sky-50 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400 flex items-center justify-center mx-auto mb-2.5">
+              <CalendarDays className="w-5 h-5" />
             </div>
             <h3 className="text-sm font-bold text-slate-900 dark:text-white">
               No appointments found
             </h3>
             <p className="mt-1 text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto">
-              There are no appointments matching your selected filter. Book a visit or clear filters.
+              There are no appointments matching your selected filter. Book a visit or reset filters.
             </p>
             <button
               onClick={onOpenBooking}
-              className="mt-4 px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 text-white text-xs font-bold transition-all shadow-sm cursor-pointer"
+              className="mt-3.5 px-3.5 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-semibold transition-all shadow-sm shadow-sky-600/20 cursor-pointer"
             >
               Book New Appointment
             </button>
@@ -187,11 +185,11 @@ export default function AppointmentsSection({
             return (
               <div
                 key={apt.id}
-                className="p-5 rounded-3xl bg-white dark:bg-[#0c1424] border border-slate-200/80 dark:border-slate-800 shadow-xs hover:border-teal-400/50 transition-all flex flex-col md:flex-row md:items-center justify-between gap-4"
+                className="p-3.5 sm:p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xs hover:border-sky-400/60 dark:hover:border-sky-600/60 transition-all flex flex-col md:flex-row md:items-center justify-between gap-3.5"
               >
                 {/* Left Side: Doctor & Clinic details */}
-                <div className="flex items-start gap-4">
-                  <div className="w-14 h-14 rounded-2xl overflow-hidden bg-slate-200 dark:bg-slate-700 relative flex-shrink-0">
+                <div className="flex items-start gap-3.5 min-w-0">
+                  <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800 relative flex-shrink-0 border border-slate-200 dark:border-slate-700">
                     {apt.doctorImage ? (
                       <Image
                         src={apt.doctorImage}
@@ -201,48 +199,48 @@ export default function AppointmentsSection({
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-slate-400">
-                        <Stethoscope className="w-6 h-6" />
+                        <Stethoscope className="w-5 h-5" />
                       </div>
                     )}
                   </div>
 
-                  <div className="space-y-1">
+                  <div className="space-y-0.5 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
+                      <h3 className="text-sm font-bold text-slate-900 dark:text-white truncate">
                         {apt.doctorName}
                       </h3>
                       <span
-                        className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border ${
                           isConfirmed
-                            ? "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800"
+                            ? "bg-sky-50 dark:bg-sky-950/40 text-sky-700 dark:text-sky-300 border-sky-200 dark:border-sky-800"
                             : isCancelled
-                            ? "bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800"
-                            : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300"
+                            ? "bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800"
+                            : "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800"
                         }`}
                       >
                         {apt.status}
                       </span>
                     </div>
 
-                    <p className="text-xs text-teal-600 dark:text-teal-400 font-semibold">
+                    <p className="text-xs text-sky-600 dark:text-sky-400 font-semibold truncate">
                       {apt.doctorSpecialty}
                     </p>
 
-                    <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
-                      <Building2 className="w-3.5 h-3.5 text-slate-400" />
-                      <span>{apt.clinicName}</span>
+                    <div className="flex items-center gap-1.5 text-[11px] text-slate-500 dark:text-slate-400">
+                      <Building2 className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
+                      <span className="truncate">{apt.clinicName}</span>
                     </div>
                   </div>
                 </div>
 
                 {/* Middle: Timing & Patient Name */}
-                <div className="grid grid-cols-2 sm:grid-cols-2 md:flex md:flex-col gap-2 p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-700/60 md:min-w-[210px]">
+                <div className="grid grid-cols-2 sm:grid-cols-2 md:flex md:flex-col gap-2 p-2.5 sm:p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/70 dark:border-slate-700/60 md:min-w-[200px]">
                   <div>
                     <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
-                      Slot
+                      Time Slot
                     </span>
                     <div className="flex items-center gap-1.5 text-xs font-bold text-slate-900 dark:text-white mt-0.5">
-                      <Calendar className="w-3.5 h-3.5 text-teal-500" />
+                      <Calendar className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400" />
                       <span>{apt.date}</span>
                     </div>
                     <div className="flex items-center gap-1.5 text-xs font-semibold text-sky-600 dark:text-sky-400">
@@ -266,7 +264,7 @@ export default function AppointmentsSection({
                 </div>
 
                 {/* Right Side: Actions & WhatsApp status */}
-                <div className="flex flex-col items-end justify-between gap-3 min-w-[140px]">
+                <div className="flex flex-col items-end justify-between gap-2.5 min-w-[140px]">
                   <div className="text-right">
                     <span className="text-xs font-bold text-slate-900 dark:text-white block">
                       PKR {apt.consultationFee.toLocaleString()}
@@ -276,25 +274,25 @@ export default function AppointmentsSection({
                     </span>
                   </div>
 
-                  <div className="flex items-center gap-2 flex-wrap">
+                  <div className="flex items-center gap-1.5 flex-wrap">
                     {/* WhatsApp Toggle Button */}
                     <button
                       onClick={() => onToggleWhatsApp(apt.id)}
                       title="Toggle WhatsApp alert"
-                      className={`p-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                      className={`p-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                         apt.remindViaWhatsApp
                           ? "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800"
-                          : "bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-slate-600"
+                          : "bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
                       }`}
                     >
-                      <MessageSquare className="w-4 h-4" />
+                      <MessageSquare className="w-3.5 h-3.5" />
                     </button>
 
                     <button
                       onClick={() => onViewDetail(apt)}
-                      className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 text-xs font-bold transition-all cursor-pointer"
+                      className="px-2.5 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-xs font-semibold transition-all cursor-pointer"
                     >
-                      Pass
+                      Pass Details
                     </button>
 
                     {isConfirmed && (
@@ -304,7 +302,7 @@ export default function AppointmentsSection({
                             onCancelAppointment(apt.id);
                           }
                         }}
-                        className="px-2.5 py-1.5 rounded-xl text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 text-xs font-semibold transition-colors cursor-pointer"
+                        className="px-2 py-1.5 rounded-lg text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 text-xs font-semibold transition-colors cursor-pointer"
                       >
                         Cancel
                       </button>

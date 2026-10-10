@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { FamilyMemberRecord, PatientUser } from "@/lib/types/patient";
 import { MedicalRecord } from "./types";
+import CustomSelect from "./CustomSelect";
 
 // ---------------------------------------------------------------------------
 // Props
@@ -63,24 +64,12 @@ interface SelectProps {
 }
 function DashSelect({ value, onChange, options, className = "" }: SelectProps) {
   return (
-    <div className={`relative ${className}`}>
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="w-full appearance-none pl-3 pr-8 py-2 rounded-xl text-xs font-semibold
-          bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700
-          text-slate-900 dark:text-white
-          focus:outline-none focus:ring-2 focus:ring-teal-500/30 focus:border-teal-500
-          cursor-pointer transition-colors"
-      >
-        {options.map((o) => (
-          <option key={o.value} value={o.value}>
-            {o.label}
-          </option>
-        ))}
-      </select>
-      <ChevronDown className="w-3.5 h-3.5 absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
-    </div>
+    <CustomSelect
+      value={value}
+      onChange={onChange}
+      options={options}
+      className={`w-full ${className}`}
+    />
   );
 }
 
@@ -94,12 +83,12 @@ interface ChipProps {
 function FilterChip({ label, onRemove }: ChipProps) {
   return (
     <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold
-      bg-teal-50 dark:bg-teal-950/60 text-teal-700 dark:text-teal-300
-      border border-teal-200 dark:border-teal-800">
+      bg-sky-50 dark:bg-sky-950/60 text-sky-700 dark:text-sky-300
+      border border-sky-200 dark:border-sky-800">
       {label}
       <button
         onClick={onRemove}
-        className="ml-0.5 text-teal-500 hover:text-teal-700 dark:hover:text-teal-200 cursor-pointer"
+        className="ml-0.5 text-sky-500 hover:text-sky-700 dark:hover:text-sky-200 cursor-pointer"
         aria-label={`Remove ${label} filter`}
       >
         <X className="w-3 h-3" />
@@ -119,25 +108,25 @@ function RecordCard({ record }: RecordCardProps) {
   const visitLabel = record.visitDateLabel || formatDate(record.visitDate);
 
   return (
-    <div className="rounded-3xl bg-white dark:bg-[#0c1424] border border-slate-200/80 dark:border-slate-800 shadow-xs hover:border-teal-400/40 transition-all overflow-hidden">
+    <div className="rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xs hover:border-sky-400/60 dark:hover:border-sky-600/60 transition-all overflow-hidden">
       {/* Card header row */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 sm:p-4">
         {/* Left: Doctor + Clinic */}
-        <div className="flex items-start gap-3.5">
-          <div className="w-11 h-11 rounded-2xl bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 flex items-center justify-center flex-shrink-0 shadow-xs">
-            <FileText className="w-5 h-5" />
+        <div className="flex items-start gap-3">
+          <div className="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 flex items-center justify-center flex-shrink-0 shadow-2xs">
+            <FileText className="w-4 h-4" />
           </div>
           <div className="space-y-0.5 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <h3 className="text-sm font-bold text-slate-900 dark:text-white">{record.doctorName}</h3>
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white truncate">{record.doctorName}</h3>
               {record.doctorSpecialty && (
-                <span className="text-[10px] font-bold text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-950/50 px-2 py-0.5 rounded-full">
+                <span className="text-[10px] font-bold text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-950/50 px-2 py-0.5 rounded-full">
                   {record.doctorSpecialty}
                 </span>
               )}
             </div>
             <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
-              <Building2 className="w-3.5 h-3.5 flex-shrink-0" />
+              <Building2 className="w-3.5 h-3.5 flex-shrink-0 text-slate-400" />
               <span className="truncate">{record.clinicName}</span>
             </div>
             <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
@@ -151,24 +140,24 @@ function RecordCard({ record }: RecordCardProps) {
         {/* Right: Date + badges */}
         <div className="flex flex-col items-start sm:items-end gap-1.5 flex-shrink-0">
           <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700 dark:text-slate-200">
-            <Calendar className="w-3.5 h-3.5 text-teal-500" />
+            <Calendar className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400" />
             <span>{visitLabel}</span>
           </div>
           <div className="flex items-center gap-1.5 flex-wrap">
             {record.hasPrescription && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-violet-50 dark:bg-violet-950/50 text-violet-700 dark:text-violet-300 border border-violet-200 dark:border-violet-800">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-violet-50 dark:bg-violet-950/50 text-violet-700 dark:text-violet-300 border border-violet-200 dark:border-violet-800">
                 <Pill className="w-2.5 h-2.5" />
                 Rx
               </span>
             )}
             {record.hasLabReport && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-50 dark:bg-sky-950/50 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-800">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-sky-50 dark:bg-sky-950/50 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-800">
                 <Activity className="w-2.5 h-2.5" />
                 Lab
               </span>
             )}
             {record.followUpAdvised && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
                 <Clock className="w-2.5 h-2.5" />
                 Follow-up
               </span>
@@ -179,7 +168,7 @@ function RecordCard({ record }: RecordCardProps) {
 
       {/* Symptoms / Diagnosis summary strip */}
       {(record.symptoms || record.diagnosis) && (
-        <div className="mx-5 mb-4 p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-700/60 space-y-1.5">
+        <div className="mx-3.5 sm:mx-4 mb-3 p-2.5 sm:p-3 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-700/60 space-y-1">
           {record.symptoms && (
             <div className="flex gap-2 text-xs">
               <span className="font-bold text-slate-500 dark:text-slate-400 w-20 flex-shrink-0">Symptoms</span>
@@ -200,13 +189,13 @@ function RecordCard({ record }: RecordCardProps) {
         <div className="border-t border-slate-100 dark:border-slate-800">
           <button
             onClick={() => setExpanded((p) => !p)}
-            className="w-full flex items-center justify-between px-5 py-2.5 text-[11px] font-semibold text-slate-500 dark:text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 transition-colors cursor-pointer"
+            className="w-full flex items-center justify-between px-4 py-2 text-[11px] font-semibold text-slate-500 dark:text-slate-400 hover:text-sky-600 dark:hover:text-sky-400 transition-colors cursor-pointer"
           >
             <span>Clinical Notes</span>
             <ChevronDown className={`w-3.5 h-3.5 transition-transform ${expanded ? "rotate-180" : ""}`} />
           </button>
           {expanded && (
-            <div className="px-5 pb-4 text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+            <div className="px-4 pb-3.5 text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
               {record.notes}
             </div>
           )}
@@ -214,8 +203,8 @@ function RecordCard({ record }: RecordCardProps) {
       )}
 
       {/* View full record CTA */}
-      <div className="px-5 pb-4 flex justify-end">
-        <button className="text-[11px] font-bold text-teal-600 dark:text-teal-400 hover:underline cursor-pointer">
+      <div className="px-4 pb-3 flex justify-end">
+        <button className="text-[11px] font-bold text-sky-600 dark:text-sky-400 hover:underline cursor-pointer">
           View Full Record →
         </button>
       </div>
@@ -274,15 +263,15 @@ export default function MedicalRecordsSection({
     if (profileFilter === "all") return medicalRecords;
     if (profileFilter === "self") {
       return medicalRecords.filter(
-        (r) => r.relation === "self" || r.patientName.toLowerCase() === primaryName.toLowerCase(),
+        (r) => !r.familyMemberId || r.relation === "self"
       );
     }
     const member = familyMembers.find((m) => m.id === profileFilter);
     if (!member) return medicalRecords;
     return medicalRecords.filter(
-      (r) => r.patientName.toLowerCase() === member.name.toLowerCase(),
+      (r) => r.familyMemberId === member.id
     );
-  }, [medicalRecords, profileFilter, primaryName, familyMembers]);
+  }, [medicalRecords, profileFilter, familyMembers]);
 
   const clinicOptions = useMemo(() => {
     const clinics = Array.from(new Set(profileFilteredRecords.map((r) => r.clinicName))).sort();
@@ -412,16 +401,15 @@ export default function MedicalRecordsSection({
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
-    <div className="space-y-6 animate-fadeInUp">
-
+    <div className="space-y-4 sm:space-y-5 animate-fadeInUp">
       {/* ── Header ── */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-200 dark:border-slate-800 gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3.5 border-b border-slate-200 dark:border-slate-800 gap-3">
         <div>
-          <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 text-xs font-bold mb-1">
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 text-[10px] font-bold uppercase tracking-wider mb-1">
             <FileText className="w-3.5 h-3.5" />
             <span>Clinical History</span>
           </div>
-          <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+          <h1 className="text-lg sm:text-xl md:text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
             Medical Records &amp; Clinical Notes
           </h1>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
@@ -431,18 +419,17 @@ export default function MedicalRecordsSection({
 
         <button
           onClick={onOpenBooking}
-          className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-2xl bg-teal-600 hover:bg-teal-500 text-white font-bold text-xs shadow-md shadow-teal-500/20 transition-all cursor-pointer self-start sm:self-auto"
+          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs shadow-2xs transition-all cursor-pointer self-start sm:self-auto"
         >
-          <Plus className="w-4 h-4" />
+          <Plus className="w-3.5 h-3.5" />
           <span>New Checkup</span>
         </button>
       </div>
 
       {/* ── Filter Panel ── */}
-      <div className="p-4 rounded-3xl bg-white dark:bg-[#0c1424] border border-slate-200/80 dark:border-slate-800 shadow-xs space-y-3">
-
+      <div className="p-3 sm:p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xs space-y-2.5">
         {/* Row 1: Dropdowns */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
           {/* Patient Profile */}
           <div className="space-y-1">
             <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider pl-1">
@@ -508,14 +495,14 @@ export default function MedicalRecordsSection({
                 type="date"
                 value={customFrom}
                 onChange={(e) => setCustomFrom(e.target.value)}
-                className="px-3 py-1.5 rounded-xl text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500/30"
+                className="px-2.5 py-1.5 rounded-xl text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-sky-500"
               />
               <span className="text-xs text-slate-400 font-semibold">to</span>
               <input
                 type="date"
                 value={customTo}
                 onChange={(e) => setCustomTo(e.target.value)}
-                className="px-3 py-1.5 rounded-xl text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500/30"
+                className="px-2.5 py-1.5 rounded-xl text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-sky-500"
               />
             </div>
           </div>
@@ -523,17 +510,17 @@ export default function MedicalRecordsSection({
 
         {/* Row 2: Search */}
         <div className="relative">
-          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+          <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search symptoms, diagnosis, medicines, doctor, clinic..."
-            className="w-full pl-9 pr-3.5 py-2 text-xs rounded-xl
+            className="w-full pl-9 pr-3.5 py-1.5 text-xs rounded-xl
               bg-slate-50 dark:bg-slate-800/50
               border border-slate-200 dark:border-slate-700
               text-slate-900 dark:text-white placeholder:text-slate-400
-              focus:outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20
+              focus:outline-none focus:ring-1 focus:ring-sky-500
               transition-colors"
           />
           {searchQuery && (
@@ -548,14 +535,14 @@ export default function MedicalRecordsSection({
 
         {/* Active filter chips */}
         {hasActiveFilters && (
-          <div className="flex items-center gap-2 flex-wrap pt-0.5">
+          <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
             <SlidersHorizontal className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
             {activeChips.map((chip) => (
               <FilterChip key={chip.key} label={chip.label} onRemove={chip.onRemove} />
             ))}
             <button
               onClick={clearAllFilters}
-              className="text-[11px] font-bold text-rose-500 hover:text-rose-600 dark:hover:text-rose-400 underline underline-offset-2 cursor-pointer"
+              className="text-[11px] font-bold text-rose-500 hover:text-rose-600 dark:hover:text-rose-400 underline underline-offset-2 cursor-pointer ml-1"
             >
               Clear All
             </button>
@@ -566,11 +553,11 @@ export default function MedicalRecordsSection({
       {/* ── Results area ── */}
       {noRecordsAtAll ? (
         /* Empty state A — no records exist yet */
-        <div className="p-12 text-center rounded-3xl bg-white dark:bg-[#0c1424] border border-slate-200/80 dark:border-slate-800 shadow-xs">
-          <div className="w-14 h-14 rounded-2xl bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center mx-auto mb-3 shadow-xs">
-            <FileText className="w-7 h-7" />
+        <div className="p-8 sm:p-12 text-center rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xs">
+          <div className="w-12 h-12 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center mx-auto mb-3 shadow-2xs">
+            <FileText className="w-6 h-6" />
           </div>
-          <h3 className="text-base font-bold text-slate-900 dark:text-white">
+          <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
             No medical records available yet
           </h3>
           <p className="mt-1 text-xs text-slate-500 dark:text-slate-400 max-w-md mx-auto leading-relaxed">
@@ -578,8 +565,8 @@ export default function MedicalRecordsSection({
             real-time as attending doctors complete your clinic visits.
           </p>
 
-          <div className="mt-6 inline-flex items-center gap-2 p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/80 text-[11px] text-slate-600 dark:text-slate-300 text-left max-w-md">
-            <Info className="w-4 h-4 text-teal-500 flex-shrink-0" />
+          <div className="mt-5 inline-flex items-center gap-2 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/80 text-[11px] text-slate-600 dark:text-slate-300 text-left max-w-md">
+            <Info className="w-4 h-4 text-sky-500 flex-shrink-0" />
             <span>
               <strong>Ready for Doctor Module:</strong> After attending appointments at Digital
               Medical clinics, your certified doctor will electronically sign clinical charts
@@ -589,9 +576,9 @@ export default function MedicalRecordsSection({
         </div>
       ) : hasRecordsButNoMatch ? (
         /* Empty state B — records exist but current filters match nothing */
-        <div className="p-10 text-center rounded-3xl bg-white dark:bg-[#0c1424] border border-slate-200/80 dark:border-slate-800 shadow-xs">
-          <div className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center mx-auto mb-3">
-            <Filter className="w-6 h-6" />
+        <div className="p-8 sm:p-10 text-center rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xs">
+          <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center mx-auto mb-2.5">
+            <Filter className="w-5 h-5" />
           </div>
           <h3 className="text-sm font-bold text-slate-900 dark:text-white">
             No records found for these filters
@@ -601,7 +588,7 @@ export default function MedicalRecordsSection({
           </p>
           <button
             onClick={clearAllFilters}
-            className="mt-4 px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 text-white text-xs font-bold transition-all shadow-sm cursor-pointer"
+            className="mt-3.5 px-3.5 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold transition-all shadow-2xs cursor-pointer"
           >
             Clear Filters
           </button>
@@ -619,7 +606,7 @@ export default function MedicalRecordsSection({
           </div>
 
           {/* Record cards */}
-          <div className="space-y-4">
+          <div className="space-y-3">
             {filteredRecords.map((record) => (
               <RecordCard key={record.id} record={record} />
             ))}

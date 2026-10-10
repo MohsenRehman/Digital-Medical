@@ -1,29 +1,48 @@
 "use client";
 
-import React, { useState } from "react";
-import { X, UserPlus, ShieldCheck, Heart, Users } from "lucide-react";
-import { AppointmentRelation, GenderType } from "@/lib/types/patient";
+import React, { useState, useEffect } from "react";
+import { X, Edit3, Users } from "lucide-react";
+import { AppointmentRelation, GenderType, FamilyMemberRecord } from "@/lib/types/patient";
 import CustomSelect from "./CustomSelect";
 
-interface AddFamilyModalProps {
+interface EditFamilyModalProps {
   isOpen: boolean;
+  member: FamilyMemberRecord | null;
   onClose: () => void;
-  onAdd: (data: {
-    relation: AppointmentRelation;
-    name: string;
-    age?: number;
-    gender?: GenderType;
-  }) => void;
+  onSave: (
+    memberId: string,
+    data: {
+      relation: AppointmentRelation;
+      name: string;
+      age?: number;
+      gender?: GenderType;
+    }
+  ) => void;
 }
 
-export default function AddFamilyModal({ isOpen, onClose, onAdd }: AddFamilyModalProps) {
+export default function EditFamilyModal({
+  isOpen,
+  member,
+  onClose,
+  onSave,
+}: EditFamilyModalProps) {
   const [relation, setRelation] = useState<AppointmentRelation>("son");
   const [name, setName] = useState("");
   const [age, setAge] = useState("");
   const [gender, setGender] = useState<GenderType>("male");
   const [error, setError] = useState("");
 
-  if (!isOpen) return null;
+  useEffect(() => {
+    if (member) {
+      setName(member.name || "");
+      setRelation(member.relation || "other");
+      setAge(member.age !== undefined ? String(member.age) : "");
+      setGender(member.gender || "male");
+      setError("");
+    }
+  }, [member]);
+
+  if (!isOpen || !member) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,15 +51,13 @@ export default function AddFamilyModal({ isOpen, onClose, onAdd }: AddFamilyModa
       return;
     }
 
-    onAdd({
+    onSave(member.id, {
       relation,
       name: name.trim(),
       age: age ? parseInt(age, 10) : undefined,
       gender,
     });
 
-    setName("");
-    setAge("");
     setError("");
     onClose();
   };
@@ -61,55 +78,47 @@ export default function AddFamilyModal({ isOpen, onClose, onAdd }: AddFamilyModa
         <div className="flex items-center justify-between pb-3.5 border-b border-slate-100 dark:border-slate-800">
           <div className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-xl bg-sky-50 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400 flex items-center justify-center">
-              <Users className="w-4 h-4" />
+              <Edit3 className="w-4 h-4" />
             </div>
             <div>
               <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white leading-tight">
-                Add Family Member
+                Edit Family Member
               </h3>
               <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                Create a separate medical profile under your account
+                Update dependent identity &amp; relationship info
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer transition-colors"
+            className="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
           >
-            <X className="w-4 h-4" />
+            <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Info Banner */}
-        <div className="mt-3.5 p-3 rounded-xl bg-sky-50/70 dark:bg-sky-950/40 border border-sky-200/80 dark:border-sky-800/60 text-[11px] text-sky-800 dark:text-sky-300 flex items-start gap-2">
-          <ShieldCheck className="w-4 h-4 text-sky-600 dark:text-sky-400 shrink-0 mt-0.5" />
-          <span>
-            <strong className="font-semibold">Isolated Patient Profile:</strong> Appointments, prescriptions, and medical records will be recorded specifically under this profile.
-          </span>
-        </div>
-
         {/* Form */}
-        <form onSubmit={handleSubmit} className="mt-4 space-y-3.5">
+        <form onSubmit={handleSubmit} className="mt-4 space-y-4">
           {error && (
-            <div className="p-2.5 rounded-lg bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-900 text-xs text-rose-600 dark:text-rose-300 font-medium">
+            <div className="p-2.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 text-rose-600 dark:text-rose-400 text-xs">
               {error}
             </div>
           )}
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
-              Relationship to You
+            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+              Relationship to You *
             </label>
-            <div className="grid grid-cols-3 gap-1.5">
+            <div className="grid grid-cols-3 gap-2">
               {relationOptions.map((opt) => (
                 <button
-                  type="button"
                   key={opt.value}
+                  type="button"
                   onClick={() => setRelation(opt.value)}
-                  className={`py-1.5 px-2.5 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${
+                  className={`py-2 px-2.5 rounded-xl text-xs font-semibold border transition-all text-center ${
                     relation === opt.value
-                      ? "bg-sky-600 text-white border-sky-600 shadow-2xs"
-                      : "bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-sky-500"
+                      ? "border-sky-500 bg-sky-50 dark:bg-sky-950/50 text-sky-700 dark:text-sky-300"
+                      : "border-slate-200 dark:border-slate-800 hover:border-slate-300 text-slate-700 dark:text-slate-300"
                   }`}
                 >
                   {opt.label}
@@ -119,36 +128,36 @@ export default function AddFamilyModal({ isOpen, onClose, onAdd }: AddFamilyModa
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
               Full Name *
             </label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="e.g. Ali Ahmed"
-              className="w-full px-3 py-2 rounded-lg text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-hidden focus:border-sky-500 transition-colors"
+              placeholder="e.g. Muhammad Ismail"
+              className="w-full px-3.5 py-2.5 rounded-xl text-xs bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500/30 focus:border-sky-500"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
-                Age (Years)
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                Age
               </label>
               <input
                 type="number"
                 min="0"
-                max="120"
+                max="125"
                 value={age}
                 onChange={(e) => setAge(e.target.value)}
-                placeholder="e.g. 8"
-                className="w-full px-3 py-2 rounded-lg text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-hidden focus:border-sky-500 transition-colors"
+                placeholder="e.g. 62"
+                className="w-full px-3.5 py-2.5 rounded-xl text-xs bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500/30 focus:border-sky-500"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                 Gender
               </label>
               <CustomSelect
@@ -164,19 +173,19 @@ export default function AddFamilyModal({ isOpen, onClose, onAdd }: AddFamilyModa
             </div>
           </div>
 
-          <div className="pt-2 flex items-center justify-end gap-2">
+          <div className="pt-2 flex items-center justify-end gap-2.5">
             <button
               type="button"
               onClick={onClose}
-              className="px-3.5 py-2 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+              className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-4 py-2 rounded-lg text-xs font-semibold text-white bg-sky-600 hover:bg-sky-500 shadow-2xs transition-all cursor-pointer"
+              className="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-semibold shadow-2xs transition-colors cursor-pointer"
             >
-              Create Profile
+              Save Changes
             </button>
           </div>
         </form>

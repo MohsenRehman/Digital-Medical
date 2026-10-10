@@ -27,6 +27,7 @@ export interface ActivityItem {
  */
 export interface MedicalRecord {
   id: string;
+  familyMemberId?: string;
   /** ISO date string, e.g. "2025-03-14" */
   visitDate: string;
   /** Display label derived from visitDate, e.g. "14 Mar 2025" */

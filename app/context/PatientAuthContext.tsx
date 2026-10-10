@@ -28,6 +28,15 @@ interface PatientAuthContextType {
     age?: number;
     gender?: GenderType;
   }) => void;
+  updateFamilyMember?: (
+    memberId: string,
+    data: {
+      relation?: AppointmentRelation;
+      name?: string;
+      age?: number;
+      gender?: GenderType;
+    }
+  ) => void;
   removeFamilyMember?: (memberId: string) => void;
   cancelAppointment?: (appointmentId: string) => void;
   updateProfile?: (data: {
@@ -120,6 +129,30 @@ export function PatientAuthProvider({ children }: { children: React.ReactNode })
       saveUser(currentUser);
     }
 
+    // If booked for someone else, find or create the unique family member
+    let targetFamilyMemberId: string | undefined = draft.familyMemberId;
+    if (draft.relation !== "self" && draft.patientName) {
+      const existing = familyMembers.find(
+        (f) =>
+          (targetFamilyMemberId && f.id === targetFamilyMemberId) ||
+          f.id === draft.familyMemberId
+      );
+      if (existing) {
+        targetFamilyMemberId = existing.id;
+      } else {
+        const newMember: FamilyMemberRecord = {
+          id: `fam_${Date.now()}`,
+          relation: draft.relation,
+          name: draft.patientName,
+          age: draft.patientAge,
+          gender: draft.patientGender,
+          addedAt: nowIso,
+        };
+        targetFamilyMemberId = newMember.id;
+        saveFamily([...familyMembers, newMember]);
+      }
+    }
+
     // Create Appointment Record
     const newAppointment: AppointmentRecord = {
       id: `apt_${Date.now()}`,
@@ -127,6 +160,7 @@ export function PatientAuthProvider({ children }: { children: React.ReactNode })
       patientUserId: currentUser.id,
       patientPhone: cleanPhone,
       bookedByRelation: draft.relation,
+      familyMemberId: targetFamilyMemberId,
       patientName: draft.patientName,
       patientAge: draft.patientAge,
       patientGender: draft.patientGender,
@@ -149,24 +183,6 @@ export function PatientAuthProvider({ children }: { children: React.ReactNode })
     saveAppointments(updatedList);
     setActiveAppointment(newAppointment);
     localStorage.setItem(STORAGE_KEYS.LATEST_BOOKING, JSON.stringify(newAppointment));
-
-    // If booked for someone else, add to family roster
-    if (draft.relation !== "self" && draft.patientName) {
-      const exists = familyMembers.some(
-        (f) => f.name.toLowerCase() === draft.patientName.toLowerCase() && f.relation === draft.relation
-      );
-      if (!exists) {
-        const newMember: FamilyMemberRecord = {
-          id: `fam_${Date.now()}`,
-          relation: draft.relation,
-          name: draft.patientName,
-          age: draft.patientAge,
-          gender: draft.patientGender,
-          addedAt: nowIso,
-        };
-        saveFamily([...familyMembers, newMember]);
-      }
-    }
 
     return newAppointment;
   };
@@ -274,13 +290,49 @@ export function PatientAuthProvider({ children }: { children: React.ReactNode })
     saveFamily(updated);
   };
 
-  // 8. Remove Family Member
-  const removeFamilyMember = (memberId: string) => {
-    const updated = familyMembers.filter((m) => m.id !== memberId);
+  // 8. Update Family Member
+  const updateFamilyMember = (
+    memberId: string,
+    data: {
+      relation?: AppointmentRelation;
+      name?: string;
+      age?: number;
+      gender?: GenderType;
+    }
+  ) => {
+    const updated = familyMembers.map((m) =>
+      m.id === memberId
+        ? {
+            ...m,
+            name: data.name ?? m.name,
+            relation: data.relation ?? m.relation,
+            age: data.age !== undefined ? data.age : m.age,
+            gender: data.gender ?? m.gender,
+          }
+        : m
+    );
     saveFamily(updated);
   };
 
-  // 9. Cancel Appointment
+  // 9. Remove Family Member
+  const removeFamilyMember = (memberId: string) => {
+    const updated = familyMembers.filter((m) => m.id !== memberId);
+    saveFamily(updated);
+    try {
+      localStorage.removeItem(`family_member_profile_image_${memberId}`);
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(
+          new CustomEvent("family-member-profile-image-updated", {
+            detail: { memberId },
+          })
+        );
+      }
+    } catch {
+      // ignore
+    }
+  };
+
+  // 10. Cancel Appointment
   const cancelAppointment = (appointmentId: string) => {
     const updated = appointments.map((apt) =>
       apt.id === appointmentId ? { ...apt, status: "cancelled" as const } : apt
@@ -293,7 +345,7 @@ export function PatientAuthProvider({ children }: { children: React.ReactNode })
     }
   };
 
-  // 10. Update Patient Profile
+  // 11. Update Patient Profile
   const updateProfile = (data: {
     name?: string;
     gender?: GenderType;
@@ -326,6 +378,7 @@ export function PatientAuthProvider({ children }: { children: React.ReactNode })
         logout,
         toggleWhatsAppReminder,
         addFamilyMember,
+        updateFamilyMember,
         removeFamilyMember,
         cancelAppointment,
         updateProfile,
