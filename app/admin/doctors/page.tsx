@@ -23,7 +23,7 @@ const itemVariants = {
 };
 
 export default function DoctorsPage() {
-  const { searchTerm } = useSearch();
+  const { searchTerm, setSearchTerm } = useSearch();
   const [statusFilter, setStatusFilter] = useState("All");
 
   const filteredDoctors = doctors.filter(d => {

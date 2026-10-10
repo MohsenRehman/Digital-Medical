@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { SubscriptionEngine } from "@/lib/doctor/subscription/subscriptionEngine";
 
+export const dynamic = "force-dynamic";
+
 function getAuthenticatedDoctorId(req: NextRequest): string {
   const headerDoctorId = req.headers.get("x-doctor-id");
   if (headerDoctorId) return headerDoctorId;

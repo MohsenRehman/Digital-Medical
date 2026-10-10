@@ -23,7 +23,7 @@ const item = {
 };
 
 export default function PatientsPage() {
-  const { searchTerm } = useSearch();
+  const { searchTerm, setSearchTerm } = useSearch();
   const [statusFilter, setStatusFilter] = useState("All");
 
   const filteredPatients = patients.filter(p => {

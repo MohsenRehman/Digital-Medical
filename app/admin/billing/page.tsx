@@ -9,7 +9,7 @@ import { motion } from "framer-motion";
 import { useSearch } from "../components/SearchContext";
 
 export default function BillingPage() {
-  const { searchTerm } = useSearch();
+  const { searchTerm, setSearchTerm } = useSearch();
   const [statusFilter, setStatusFilter] = useState("All");
 
   const filteredPayments = payments.filter(p => {

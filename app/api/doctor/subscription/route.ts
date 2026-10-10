@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { SubscriptionEngine } from "@/lib/doctor/subscription/subscriptionEngine";
 import { DOCTOR_PLANS, PLAN_COMPARISON_MATRIX } from "@/lib/doctor/subscription/planDefinitions";
 
+export const dynamic = "force-dynamic";
+
 function getAuthenticatedDoctorId(req: NextRequest): string {
   // 1. Check custom header (from authenticated doctor client or test)
   const headerDoctorId = req.headers.get("x-doctor-id");
